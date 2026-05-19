@@ -665,3 +665,11 @@ export function prepareYdbCreateQueryColumns(columns: ColumnField[]): Column[] {
         autoincrement: column.autoincrement,
     }));
 }
+
+export function buildResetQuery(table: string, value: string) {
+    return `ALTER TABLE \`${table}\` RESET (${value});`;
+}
+
+export function buildRenameQuery(table: string, value: string) {
+    return `ALTER TABLE \`${table}\` RENAME TO \`${value}\`;`;
+}
