@@ -248,20 +248,21 @@ export const selectTopicFormData = createSelector(
             topicData.partition_write_speed_bytes_per_second ?? '1048576',
             10,
         );
+        const writeQuotaKb = Math.round(writeQuotaBytes / 1024);
         const retentionHours = parseDurationToHours(topicData.retention_period);
 
         return {
             path: undefined,
             name: topicData.self?.name,
             shards: minActivePartitions,
-            writeQuota: writeQuotaBytes,
+            writeQuota: writeQuotaKb,
             retentionHours: retentionHours || 4,
-            storageLimitMb: retentionStorageMb,
+            storageLimitMb: retentionStorageMb || 50 * 1024,
             meterMode: mapApiMeteringModeToFormMode(topicData.metering_mode),
             retentionType: retentionStorageMb > 0 ? 'size' : 'time',
             autoPartitioning: {
                 enabled: false,
-                mode: AutoPartitioningStrategy.Paused,
+                mode: AutoPartitioningStrategy.ScaleUp,
                 minPartitions: minActivePartitions,
                 maxPartitions: partitionCountLimit > 0 ? partitionCountLimit : undefined,
                 stabilizationWindow: undefined,

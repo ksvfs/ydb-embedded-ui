@@ -1,5 +1,8 @@
 import React from 'react';
 
+import {CirclePlus} from '@gravity-ui/icons';
+import {Button, Icon} from '@gravity-ui/uikit';
+
 import {cancelQueryApi} from '../../../../store/reducers/cancelQuery';
 import {selectActiveTabId, selectUserInput} from '../../../../store/reducers/query/query';
 import type {QueryAction} from '../../../../types/store/query';
@@ -7,6 +10,8 @@ import {cn} from '../../../../utils/cn';
 import createToast from '../../../../utils/createToast';
 import {useTypedSelector} from '../../../../utils/hooks';
 import {reachMetricaGoal} from '../../../../utils/yaMetrica';
+import {useDispatchTreeKey} from '../../ObjectSummary/UpdateTreeContext';
+import {openTopicFormDialog} from '../../TopicFormDialog/TopicFormDialog';
 import {NewSQL} from '../NewSQL/NewSQL';
 import {queryExecutionManagerInstance} from '../QueryEditor/utils/queryExecutionManager';
 import {SaveQuery} from '../SaveQuery/SaveQuery';
@@ -25,6 +30,7 @@ interface QueryEditorControlsProps {
     highlightedAction: QueryAction;
     queryId?: string;
     database: string;
+    databaseFullPath: string;
     isStreamingEnabled?: boolean;
 
     handleGetExplainQueryClick: (text: string) => void;
@@ -78,12 +84,14 @@ export const QueryEditorControls = ({
     highlightedAction,
     queryId,
     database,
+    databaseFullPath,
     isStreamingEnabled,
 
     handleSendExecuteClick,
     onSettingsButtonClick,
     handleGetExplainQueryClick,
 }: QueryEditorControlsProps) => {
+    const updateTreeKey = useDispatchTreeKey();
     const input = useTypedSelector(selectUserInput);
     const activeTabId = useTypedSelector(selectActiveTabId);
     const [sendCancelQuery, cancelQueryResponse] = cancelQueryApi.useCancelQueryMutation();
@@ -132,6 +140,17 @@ export const QueryEditorControls = ({
         handleGetExplainQueryClick(input);
     }, [handleGetExplainQueryClick, input]);
 
+    const onCreateTopicClick = React.useCallback(() => {
+        openTopicFormDialog({
+            mode: 'create',
+            database,
+            databaseFullPath,
+            onSuccess: (path) => {
+                updateTreeKey(path);
+            },
+        });
+    }, [database, databaseFullPath, updateTreeKey]);
+
     React.useEffect(() => {
         return () => {
             if (cancelErrorAnimationRef.current) {
@@ -175,6 +194,10 @@ export const QueryEditorControls = ({
                 <EditorButton.Settings onClick={onSettingsButtonClick} isLoading={isLoading} />
             </div>
             <div className={b('right')}>
+                <Button onClick={onCreateTopicClick} disabled={disabled} view="outlined">
+                    <Icon data={CirclePlus} />
+                    {i18n('action.create-topic')}
+                </Button>
                 <NewSQL />
                 <SaveQuery buttonProps={{disabled}} />
             </div>

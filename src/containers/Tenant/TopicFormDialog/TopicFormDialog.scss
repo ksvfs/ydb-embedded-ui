@@ -1,0 +1,143 @@
+.ydb-topic-form-dialog {
+    &__body {
+        overflow: auto;
+
+        max-height: min(70vh, 760px);
+        padding-top: var(--g-spacing-5);
+    }
+
+    &__form {
+        width: 100%;
+    }
+
+    &__section + &__section {
+        margin-top: var(--g-spacing-6);
+    }
+
+    &__section-title {
+        margin-bottom: var(--g-spacing-4);
+    }
+
+    &__row {
+        display: grid;
+        align-items: start;
+        grid-template-columns: 190px minmax(0, 1fr);
+        gap: var(--g-spacing-3);
+
+        & + & {
+            margin-top: var(--g-spacing-4);
+        }
+    }
+
+    &__label {
+        display: flex;
+        align-items: center;
+        gap: var(--g-spacing-1);
+
+        padding-top: 7px;
+
+        font-weight: 500;
+    }
+
+    &__label-title {
+        min-width: 0;
+    }
+
+    &__help-mark {
+        flex-shrink: 0;
+    }
+
+    &__required {
+        color: var(--g-color-text-danger);
+    }
+
+    &__fixed-value {
+        min-height: 28px;
+        padding-top: 5px;
+    }
+
+    &__control-stack {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--g-spacing-1);
+    }
+
+    &__input-s,
+    &__select-s {
+        width: 120px;
+    }
+
+    &__dual-inputs {
+        display: flex;
+        gap: var(--g-spacing-4);
+    }
+
+    &__input-details {
+        margin-right: var(--g-spacing-2);
+
+        text-transform: capitalize;
+
+        color: var(--g-color-text-secondary);
+    }
+
+    &__divider {
+        margin: var(--g-spacing-6) 0;
+    }
+
+    &__settings-content {
+        padding-top: var(--g-spacing-3);
+    }
+
+    &__storage-control {
+        width: 100%;
+        max-width: 360px;
+    }
+
+    &__storage-input-row {
+        display: flex;
+        align-items: center;
+        gap: var(--g-spacing-3);
+
+        width: 100%;
+    }
+
+    &__storage-slider {
+        flex: 1;
+
+        min-width: 160px;
+    }
+
+    &__warning-icon {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    &__error {
+        max-width: 100%;
+    }
+
+    &__loader {
+        display: flex;
+        justify-content: center;
+
+        padding: var(--g-spacing-8) 0;
+    }
+
+    @media (max-width: 640px) {
+        &__row {
+            grid-template-columns: 1fr;
+            gap: var(--g-spacing-1);
+        }
+
+        &__label {
+            padding-top: 0;
+        }
+
+        &__dual-inputs,
+        &__storage-input-row {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+}

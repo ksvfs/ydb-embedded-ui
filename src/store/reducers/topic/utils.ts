@@ -98,7 +98,7 @@ function buildTopicSettings(formData: StreamFormData): string[] {
     const effectiveStorageMb = retentionType === 'time' ? 0 : storageLimitMb;
     settings.push(`retention_storage_mb = ${effectiveStorageMb}`);
 
-    settings.push(`partition_write_speed_bytes_per_second = ${writeQuota}`);
+    settings.push(`partition_write_speed_bytes_per_second = ${writeQuota * 1024}`);
 
     settings.push(`metering_mode = '${METERING_MODE_TO_YQL[meterMode]}'`);
 

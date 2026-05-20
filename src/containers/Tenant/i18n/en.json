@@ -53,6 +53,7 @@
   "actions.createCdcStream": "Create changefeed...",
   "actions.showCreateTable": "Show Create SQL...",
   "actions.alterTopic": "Alter topic...",
+  "actions.updateTopic": "Update topic...",
   "actions.selectQuery": "Select query...",
   "actions.upsertQuery": "Upsert query...",
   "actions.alterReplication": "Alter async replicaton...",

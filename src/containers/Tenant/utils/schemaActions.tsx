@@ -70,6 +70,7 @@ interface ActionsAdditionalParams {
     setTenantPage: (page: TenantPage) => void;
     isMultiTabEnabled?: boolean;
     showCreateDirectoryDialog?: (path: string) => void;
+    showUpdateTopicDialog?: (path: string) => void;
     getConfirmation?: () => Promise<boolean>;
     getConnectToDBDialog?: (params: SnippetParams) => Promise<boolean>;
     schemaData?: SchemaData[];
@@ -99,6 +100,7 @@ const bindActions = (
         setTenantPage,
         isMultiTabEnabled,
         showCreateDirectoryDialog,
+        showUpdateTopicDialog,
         getConfirmation,
         getConnectToDBDialog,
         schemaData,
@@ -212,6 +214,7 @@ const bindActions = (
             stripEllipsis(i18n('actions.selectQuery')),
         ),
         createTopic: inputQuery(createTopicTemplate, stripEllipsis(i18n('actions.createTopic'))),
+        updateTopic: () => showUpdateTopicDialog?.(params.path),
         alterTopic: inputQuery(alterTopicTemplate, stripEllipsis(i18n('actions.alterTopic'))),
         dropTopic: inputQuery(dropTopicTemplate, stripEllipsis(i18n('actions.dropTopic'))),
         createView: inputQuery(createViewTemplate, stripEllipsis(i18n('actions.createView'))),
@@ -425,6 +428,7 @@ export const getActions =
         const TOPIC_SET: ActionsSet = [
             [copyItem],
             [
+                {text: i18n('actions.updateTopic'), action: actions.updateTopic},
                 {text: i18n('actions.alterTopic'), action: actions.alterTopic},
                 {text: i18n('actions.dropTopic'), action: actions.dropTopic},
             ],

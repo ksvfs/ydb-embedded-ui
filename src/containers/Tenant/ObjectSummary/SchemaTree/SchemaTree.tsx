@@ -25,6 +25,7 @@ import {useTypedDispatch, useTypedSelector} from '../../../../utils/hooks';
 import {getConfirmation} from '../../../../utils/hooks/withConfirmation/useChangeInputWithConfirmation';
 import {canShowTenantMonitoringTab} from '../../../../utils/monitoringVisibility';
 import {useTenantPage} from '../../TenantNavigation/useTenantNavigation';
+import {openTopicFormDialog} from '../../TopicFormDialog/TopicFormDialog';
 import {getSchemaControls} from '../../utils/controls';
 import {
     isChildlessPathType,
@@ -154,6 +155,22 @@ export function SchemaTree(props: SchemaTreeProps) {
         setCreateDirectoryOpen(true);
     };
 
+    const handleOpenUpdateTopicDialog = React.useCallback(
+        (topicPath: string) => {
+            openTopicFormDialog({
+                mode: 'update',
+                database,
+                databaseFullPath,
+                topicPath,
+                onSuccess: (updatedPath) => {
+                    onActivePathUpdate(updatedPath);
+                    setSchemaTreeKey(updatedPath);
+                },
+            });
+        },
+        [database, databaseFullPath, onActivePathUpdate, setSchemaTreeKey],
+    );
+
     const {monitoring: clusterMonitoring} = useClusterBaseInfo();
     const {controlPlane} = useTenantBaseInfo(database);
     const getTreeNodeActions = React.useMemo(() => {
@@ -166,6 +183,7 @@ export function SchemaTree(props: SchemaTreeProps) {
                 showCreateDirectoryDialog: createDirectoryFeatureAvailable
                     ? handleOpenCreateDirectoryDialog
                     : undefined,
+                showUpdateTopicDialog: handleOpenUpdateTopicDialog,
                 isMultiTabEnabled,
                 getConfirmation:
                     input && isDirty && !isMultiTabEnabled ? getConfirmation : undefined,
@@ -188,6 +206,7 @@ export function SchemaTree(props: SchemaTreeProps) {
         onActivePathUpdate,
         handleTenantPageChange,
         createDirectoryFeatureAvailable,
+        handleOpenUpdateTopicDialog,
         input,
         isDirty,
         isMultiTabEnabled,
