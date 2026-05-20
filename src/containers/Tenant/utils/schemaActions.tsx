@@ -70,6 +70,7 @@ interface ActionsAdditionalParams {
     setTenantPage: (page: TenantPage) => void;
     isMultiTabEnabled?: boolean;
     showCreateDirectoryDialog?: (path: string) => void;
+    showUpdateTableDialog?: (path: string) => void;
     showUpdateTopicDialog?: (path: string) => void;
     getConfirmation?: () => Promise<boolean>;
     getConnectToDBDialog?: (params: SnippetParams) => Promise<boolean>;
@@ -100,6 +101,7 @@ const bindActions = (
         setTenantPage,
         isMultiTabEnabled,
         showCreateDirectoryDialog,
+        showUpdateTableDialog,
         showUpdateTopicDialog,
         getConfirmation,
         getConnectToDBDialog,
@@ -159,6 +161,7 @@ const bindActions = (
             setActivePath(params.path);
         },
         createTable: inputQuery(createTableTemplate, stripEllipsis(i18n('actions.createTable'))),
+        updateTable: () => showUpdateTableDialog?.(params.path),
         createColumnTable: inputQuery(
             createColumnTableTemplate,
             stripEllipsis(i18n('actions.createColumnTable')),
@@ -395,6 +398,7 @@ export const getActions =
         const ROW_TABLE_SET: ActionsSet = [
             [copyItem],
             [
+                {text: i18n('actions.updateTable'), action: actions.updateTable},
                 alterRowTableGroupItem,
                 {text: i18n('actions.dropTable'), action: actions.dropTable},
                 getActionWithLoader({
@@ -417,6 +421,7 @@ export const getActions =
         const COLUMN_TABLE_SET: ActionsSet = [
             [copyItem],
             [
+                {text: i18n('actions.updateTable'), action: actions.updateTable},
                 alterColumnTableGroupItem,
                 {text: i18n('actions.dropTable'), action: actions.dropTable},
                 {text: i18n('actions.selectQuery'), action: actions.selectQuery},

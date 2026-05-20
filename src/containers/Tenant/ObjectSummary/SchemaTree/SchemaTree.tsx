@@ -24,6 +24,7 @@ import {getStringifiedData} from '../../../../utils/dataFormatters/dataFormatter
 import {useTypedDispatch, useTypedSelector} from '../../../../utils/hooks';
 import {getConfirmation} from '../../../../utils/hooks/withConfirmation/useChangeInputWithConfirmation';
 import {canShowTenantMonitoringTab} from '../../../../utils/monitoringVisibility';
+import {openTableFormDialog} from '../../TableFormDialog/TableFormDialog';
 import {useTenantPage} from '../../TenantNavigation/useTenantNavigation';
 import {openTopicFormDialog} from '../../TopicFormDialog/TopicFormDialog';
 import {getSchemaControls} from '../../utils/controls';
@@ -171,6 +172,22 @@ export function SchemaTree(props: SchemaTreeProps) {
         [database, databaseFullPath, onActivePathUpdate, setSchemaTreeKey],
     );
 
+    const handleOpenUpdateTableDialog = React.useCallback(
+        (tablePath: string) => {
+            openTableFormDialog({
+                mode: 'update',
+                database,
+                databaseFullPath,
+                path: tablePath,
+                onSuccess: (updatedPath) => {
+                    onActivePathUpdate(updatedPath);
+                    setSchemaTreeKey(updatedPath);
+                },
+            });
+        },
+        [database, databaseFullPath, onActivePathUpdate, setSchemaTreeKey],
+    );
+
     const {monitoring: clusterMonitoring} = useClusterBaseInfo();
     const {controlPlane} = useTenantBaseInfo(database);
     const getTreeNodeActions = React.useMemo(() => {
@@ -183,6 +200,7 @@ export function SchemaTree(props: SchemaTreeProps) {
                 showCreateDirectoryDialog: createDirectoryFeatureAvailable
                     ? handleOpenCreateDirectoryDialog
                     : undefined,
+                showUpdateTableDialog: handleOpenUpdateTableDialog,
                 showUpdateTopicDialog: handleOpenUpdateTopicDialog,
                 isMultiTabEnabled,
                 getConfirmation:
@@ -206,6 +224,7 @@ export function SchemaTree(props: SchemaTreeProps) {
         onActivePathUpdate,
         handleTenantPageChange,
         createDirectoryFeatureAvailable,
+        handleOpenUpdateTableDialog,
         handleOpenUpdateTopicDialog,
         input,
         isDirty,

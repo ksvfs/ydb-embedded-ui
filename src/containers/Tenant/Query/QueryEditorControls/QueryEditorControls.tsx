@@ -11,6 +11,7 @@ import createToast from '../../../../utils/createToast';
 import {useTypedSelector} from '../../../../utils/hooks';
 import {reachMetricaGoal} from '../../../../utils/yaMetrica';
 import {useDispatchTreeKey} from '../../ObjectSummary/UpdateTreeContext';
+import {openTableFormDialog} from '../../TableFormDialog/TableFormDialog';
 import {openTopicFormDialog} from '../../TopicFormDialog/TopicFormDialog';
 import {NewSQL} from '../NewSQL/NewSQL';
 import {queryExecutionManagerInstance} from '../QueryEditor/utils/queryExecutionManager';
@@ -151,6 +152,17 @@ export const QueryEditorControls = ({
         });
     }, [database, databaseFullPath, updateTreeKey]);
 
+    const onCreateTableClick = React.useCallback(() => {
+        openTableFormDialog({
+            mode: 'create',
+            database,
+            databaseFullPath,
+            onSuccess: (path) => {
+                updateTreeKey(path);
+            },
+        });
+    }, [database, databaseFullPath, updateTreeKey]);
+
     React.useEffect(() => {
         return () => {
             if (cancelErrorAnimationRef.current) {
@@ -194,6 +206,10 @@ export const QueryEditorControls = ({
                 <EditorButton.Settings onClick={onSettingsButtonClick} isLoading={isLoading} />
             </div>
             <div className={b('right')}>
+                <Button onClick={onCreateTableClick} disabled={disabled} view="outlined">
+                    <Icon data={CirclePlus} />
+                    {i18n('action.create-table')}
+                </Button>
                 <Button onClick={onCreateTopicClick} disabled={disabled} view="outlined">
                     <Icon data={CirclePlus} />
                     {i18n('action.create-topic')}

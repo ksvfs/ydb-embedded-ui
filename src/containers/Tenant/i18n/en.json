@@ -42,6 +42,7 @@
   "actions.dropTable": "Drop table...",
   "actions.dropTopic": "Drop topic...",
   "actions.dropView": "Drop view...",
+  "actions.updateTable": "Update table...",
   "actions.alterTable": "Alter table...",
   "actions.manageColumns": "Manage columns...",
   "actions.manageAutoPartitioning": "Manage auto partitioning...",

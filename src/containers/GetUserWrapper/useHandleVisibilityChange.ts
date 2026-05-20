@@ -9,7 +9,6 @@ const INACTIVE_DEFAULT_TIMEOUT = 5 * 60 * 1000;
  * Used to re-validate the auth token when the user returns to the tab. If the token
  * is no longer valid, the backend responds with NEED_RESET, triggering a reload and
  * redirect to the auth form.
- *
  * @param onVisible - Callback invoked when the tab becomes visible after the inactivity threshold (e.g. whoami / token check)
  */
 export function useHandleVisibilityChange(onVisible: () => void) {

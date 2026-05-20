@@ -503,7 +503,7 @@ function rawColumnToColumnField(
         key: keyOrder >= 0,
         keyOrder: keyOrder >= 0 ? keyOrder : undefined,
         family: col.FamilyName,
-        autoincrement: !!col.DefaultFromSequence,
+        autoincrement: Boolean(col.DefaultFromSequence),
         defaultValue,
         withDefaultValue: defaultValue !== undefined,
         isDeletable: true,
@@ -542,7 +542,7 @@ function prepareTTLSettings(enabled?: {
 function prepareRowTableSettings(table: TTableDescription): TableSettings {
     const partitioningPolicy = table.PartitionConfig?.PartitioningPolicy;
     const sizeToSplit = partitioningPolicy?.SizeToSplit;
-    const autoPartitionBySize = !!sizeToSplit && sizeToSplit !== '0';
+    const autoPartitionBySize = Boolean(sizeToSplit) && sizeToSplit !== '0';
 
     let partitionsType: PartitionsType = PartitionsType.None;
     if (table.UniformPartitionsCount) {
