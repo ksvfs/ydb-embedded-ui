@@ -6,6 +6,7 @@
   "action_update": "Update",
   "action_cancel": "Cancel",
   "action_delete": "Delete",
+  "action_apply": "Apply",
   "action_undo": "Undo",
 
   "alert_create-success": "Table created",
@@ -67,6 +68,7 @@
   "label_section-general": "General",
   "label_section-partition-policy": "Partition policy",
   "label_section-ttl": "TTL Settings",
+  "label_select-columns": "Select columns",
   "label_ttl-remove-column-text": "Your table will stop clearing.",
   "label_ttl-remove-column-warning": "This is a TTL-column. Do you really want to delete it?",
   "label_ttl-warning": "You don't have columns with the right type",

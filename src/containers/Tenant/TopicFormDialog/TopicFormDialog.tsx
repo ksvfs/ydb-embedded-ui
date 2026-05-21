@@ -185,7 +185,10 @@ function FormRow({
                 {note ? (
                     <HelpMark
                         className={b('help-mark')}
-                        popoverProps={{placement: ['right', 'bottom']}}
+                        popoverProps={{
+                            placement: ['right', 'bottom'],
+                            className: b('help-mark-popup'),
+                        }}
                     >
                         <MarkdownNote text={note} />
                     </HelpMark>

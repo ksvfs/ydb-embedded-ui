@@ -1,0 +1,121 @@
+.ydb-table-form-column-selector {
+    position: relative;
+
+    width: 100%;
+
+    &__control {
+        position: relative;
+
+        display: flex;
+        overflow: hidden;
+        align-items: center;
+        gap: 4px;
+
+        box-sizing: border-box;
+        width: 100%;
+        height: 28px;
+        padding: 6px 9px;
+
+        font-family: var(--g-text-body-font-family);
+        font-size: var(--g-text-body-short-font-size);
+        font-weight: var(--g-text-body-font-weight);
+        line-height: var(--g-text-body-short-line-height);
+        cursor: pointer;
+        text-align: left;
+
+        color: var(--g-color-text-primary);
+        border: none;
+        border-radius: var(--g-border-radius-m);
+        outline: none;
+        background: none;
+
+        &::before {
+            position: absolute;
+            inset: 0;
+
+            content: '';
+            pointer-events: none;
+
+            border: 1px solid var(--g-color-line-generic);
+            border-radius: var(--g-border-radius-m);
+        }
+
+        &:hover::before {
+            border-color: var(--g-color-line-generic-hover);
+            background-color: var(--g-color-base-simple-hover);
+        }
+
+        &_open::before,
+        &:focus-visible::before {
+            border-color: var(--g-color-line-generic-active);
+        }
+
+        &_invalid::before {
+            border-color: var(--g-color-line-danger);
+        }
+    }
+
+    &__value {
+        overflow: hidden;
+        flex: 1;
+
+        min-width: 0;
+
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    &__placeholder {
+        overflow: hidden;
+        flex: 1;
+
+        min-width: 0;
+
+        white-space: nowrap;
+        text-overflow: ellipsis;
+
+        color: var(--g-color-text-hint);
+    }
+
+    &__badge {
+        flex-shrink: 0;
+
+        padding: 0 4px;
+
+        font-size: var(--g-text-caption-1-font-size);
+        line-height: 18px;
+
+        color: var(--g-color-text-misc);
+        border-radius: var(--g-border-radius-s);
+        background-color: var(--g-color-base-misc-medium);
+    }
+
+    &__chevron {
+        flex: 0 0 16px;
+        flex-shrink: 0;
+
+        margin-inline-start: auto;
+
+        color: var(--g-color-text-secondary);
+
+        transition: transform 0.15s ease;
+
+        &_open {
+            transform: rotate(180deg);
+        }
+    }
+
+    &__type {
+        color: var(--g-color-text-secondary);
+    }
+
+    &__popup-controls {
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--g-spacing-2);
+
+        padding: 16px;
+
+        border-top: 1px solid var(--g-color-line-generic);
+    }
+}

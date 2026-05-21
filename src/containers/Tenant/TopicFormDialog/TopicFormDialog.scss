@@ -47,6 +47,10 @@
         flex-shrink: 0;
     }
 
+    &__help-mark-popup {
+        max-width: 300px;
+    }
+
     &__required {
         color: var(--g-color-text-danger);
     }

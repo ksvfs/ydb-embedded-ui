@@ -33,8 +33,8 @@ export function parseNumberInput(value: string): number | undefined {
     return value ? Number.parseInt(value, 10) : undefined;
 }
 
-export function formatNumberInput(value: number | undefined): string {
-    return typeof value === 'number' ? value.toString() : '';
+export function formatNumberInput(value: number | undefined): string | undefined {
+    return typeof value === 'number' ? value.toString() : undefined;
 }
 
 export function fromMbToGb(value: number) {

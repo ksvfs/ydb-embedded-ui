@@ -3,7 +3,7 @@ import React from 'react';
 import {TextInput} from '@gravity-ui/uikit';
 import {Controller, useFormContext, useWatch} from 'react-hook-form';
 
-import {SecondaryKeyField} from '../components/SecondaryKeyField';
+import {ColumnSelectorField} from '../components/ColumnSelectorField';
 import {FormFieldError, FormRow, FormSection} from '../components/layout';
 import i18n from '../i18n';
 import type {FormValues} from '../types';
@@ -33,7 +33,7 @@ export function PartitioningSection({pkTypes}: PartitioningSectionProps) {
                     name="partitionKey"
                     render={({field}) => (
                         <React.Fragment>
-                            <SecondaryKeyField
+                            <ColumnSelectorField
                                 value={field.value ?? []}
                                 onChange={field.onChange}
                                 columns={pkColumns}
