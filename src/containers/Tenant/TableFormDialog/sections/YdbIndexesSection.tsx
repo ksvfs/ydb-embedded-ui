@@ -5,7 +5,7 @@ import {Button, HelpMark, Icon, Text, TextInput} from '@gravity-ui/uikit';
 import {Controller, useFieldArray, useFormContext, useWatch} from 'react-hook-form';
 
 import {cn} from '../../../../utils/cn';
-import {SecondaryKeyField} from '../components/SecondaryKeyField';
+import {ColumnSelectorField} from '../components/ColumnSelectorField';
 import {FormSection} from '../components/layout';
 import {YDB_PK_TYPES} from '../constants';
 import i18n from '../i18n';
@@ -128,7 +128,7 @@ export function YdbIndexesSection({mode, originalInfo}: YdbIndexesSectionProps) 
                                     name={`secondaryIndexes.${index}.key`}
                                     render={({field: keyField}) => (
                                         <React.Fragment>
-                                            <SecondaryKeyField
+                                            <ColumnSelectorField
                                                 value={keyField.value ?? []}
                                                 onChange={keyField.onChange}
                                                 columns={availableColumns}

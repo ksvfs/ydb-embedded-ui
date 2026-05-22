@@ -105,8 +105,66 @@
         }
     }
 
-    &__type {
-        color: var(--g-color-text-secondary);
+    &__panels {
+        --g-list-item-padding: 4px 8px;
+        display: flex;
+
+        min-height: 200px;
+    }
+
+    &__panel {
+        overflow: hidden;
+        flex: 0 0 50%;
+
+        padding-block-start: 8px;
+
+        &:not(:last-child) {
+            border-inline-end: 1px solid var(--g-color-line-generic);
+        }
+    }
+
+    &__panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        min-height: 24px;
+        margin-block-end: 8px;
+        padding: var(--g-list-item-padding, 4px 8px);
+    }
+
+    &__panel-title {
+        font-weight: var(--g-text-accent-font-weight);
+    }
+
+    &__selector-item {
+        display: flex;
+        overflow: hidden;
+        align-items: center;
+        gap: 4px;
+
+        width: 100%;
+
+        &-text {
+            overflow: hidden;
+            flex: 1;
+
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        &-type {
+            color: var(--g-color-text-secondary);
+        }
+
+        &-action {
+            visibility: hidden;
+            flex-shrink: 0;
+
+            &_visible {
+                visibility: visible;
+            }
+        }
     }
 
     &__popup-controls {

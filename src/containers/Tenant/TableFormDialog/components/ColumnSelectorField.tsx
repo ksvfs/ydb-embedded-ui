@@ -1,8 +1,7 @@
 import React from 'react';
 
-import {ItemSelector} from '@gravity-ui/components';
-import {ChevronDown} from '@gravity-ui/icons';
-import {Button, Icon, Popup} from '@gravity-ui/uikit';
+import {ChevronDown, Xmark} from '@gravity-ui/icons';
+import {Button, Icon, List, Popup} from '@gravity-ui/uikit';
 
 import {cn} from '../../../../utils/cn';
 import i18n from '../i18n';
@@ -21,19 +20,143 @@ const b = cn('ydb-table-form-column-selector');
 
 const getColumnId = (item: Column) => item.name;
 
-function renderColumnLabel(item: Column) {
-    return (
-        <span>
-            {item.name}
-            <span className={b('type')}> ({item.type})</span>
-        </span>
-    );
-}
-
 const filterColumnItem = (filter: string) => (item: Column) => {
     const lower = filter.toLowerCase();
     return item.name.toLowerCase().includes(lower) || item.type.toLowerCase().includes(lower);
 };
+
+interface ItemSelectorProps {
+    items: Column[];
+    value: string[];
+    onUpdate: (value: string[]) => void;
+}
+
+function ItemSelector({items, value, onUpdate}: ItemSelectorProps) {
+    const valueSet = React.useMemo(() => new Set(value), [value]);
+    const availableItems = React.useMemo(
+        () => items.filter((item) => !valueSet.has(getColumnId(item))),
+        [items, valueSet],
+    );
+    const selectedItems = React.useMemo(
+        () =>
+            value
+                .map((id) => items.find((item) => getColumnId(item) === id))
+                .filter(Boolean) as Column[],
+        [value, items],
+    );
+
+    const handleSelect = React.useCallback(
+        (item: Column) => {
+            const id = getColumnId(item);
+            if (!valueSet.has(id)) {
+                onUpdate([...value, id]);
+            }
+        },
+        [onUpdate, value, valueSet],
+    );
+
+    const handleRemove = React.useCallback(
+        (item: Column) => {
+            onUpdate(value.filter((v) => v !== getColumnId(item)));
+        },
+        [onUpdate, value],
+    );
+
+    const handleSelectAll = React.useCallback(() => {
+        onUpdate(items.map(getColumnId));
+    }, [items, onUpdate]);
+
+    const handleClear = React.useCallback(() => {
+        onUpdate([]);
+    }, [onUpdate]);
+
+    const renderAvailableItem = React.useCallback(
+        (item: Column, isActive: boolean) => (
+            <div className={b('selector-item')}>
+                <span className={b('selector-item-text')}>
+                    {item.name}
+                    {item.type ? (
+                        <span className={b('selector-item-type')}> ({item.type})</span>
+                    ) : null}
+                </span>
+                <Button
+                    view="flat-secondary"
+                    size="s"
+                    className={b('selector-item-action', {visible: isActive})}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelect(item);
+                    }}
+                >
+                    Select
+                </Button>
+            </div>
+        ),
+        [handleSelect],
+    );
+
+    const renderSelectedItem = React.useCallback(
+        (item: Column, isActive: boolean) => (
+            <div className={b('selector-item')}>
+                <span className={b('selector-item-text')}>
+                    {item.name}
+                    {item.type ? (
+                        <span className={b('selector-item-type')}> ({item.type})</span>
+                    ) : null}
+                </span>
+                <Button
+                    view="flat-secondary"
+                    size="s"
+                    className={b('selector-item-action', {visible: isActive})}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemove(item);
+                    }}
+                >
+                    <Icon data={Xmark} size={14} />
+                </Button>
+            </div>
+        ),
+        [handleRemove],
+    );
+
+    return (
+        <div className={b('panels')}>
+            <div className={b('panel')}>
+                <div className={b('panel-header')}>
+                    <span className={b('panel-title')}>Items</span>
+                    <Button view="flat-secondary" size="s" onClick={handleSelectAll}>
+                        Select all
+                    </Button>
+                </div>
+                <List<Column>
+                    items={availableItems}
+                    filterItem={filterColumnItem}
+                    filterPlaceholder="Search"
+                    itemsHeight={196}
+                    onItemClick={handleSelect}
+                    renderItem={renderAvailableItem}
+                />
+            </div>
+            <div className={b('panel')}>
+                <div className={b('panel-header')}>
+                    <span className={b('panel-title')}>Selected</span>
+                    <Button view="flat-secondary" size="s" onClick={handleClear}>
+                        Clear
+                    </Button>
+                </div>
+                <List<Column>
+                    items={selectedItems}
+                    filterItem={filterColumnItem}
+                    filterPlaceholder="Search"
+                    itemsHeight={196}
+                    onItemClick={handleRemove}
+                    renderItem={renderSelectedItem}
+                />
+            </div>
+        </div>
+    );
+}
 
 export function ColumnSelectorField({value, onChange, columns, invalid}: ColumnSelectorFieldProps) {
     const [open, setOpen] = React.useState(false);
@@ -45,6 +168,17 @@ export function ColumnSelectorField({value, onChange, columns, invalid}: ColumnS
     React.useEffect(() => {
         setCurrentValue(undefined);
     }, [value, columns]);
+
+    React.useEffect(() => {
+        if (!value.length) {
+            return;
+        }
+        const available = new Set(items.map(getColumnId));
+        const allPresent = value.every((id) => available.has(id));
+        if (!allPresent) {
+            onChange(value.filter((id) => available.has(id)));
+        }
+    }, [items, value, onChange]);
 
     const handleToggle = React.useCallback(() => {
         setOpen((prev) => !prev);
@@ -95,12 +229,6 @@ export function ColumnSelectorField({value, onChange, columns, invalid}: ColumnS
                     items={items}
                     value={currentValue ?? value}
                     onUpdate={setCurrentValue}
-                    getItemId={getColumnId}
-                    renderItem={renderColumnLabel}
-                    renderItemValue={renderColumnLabel}
-                    filterItem={filterColumnItem}
-                    hideSelected
-                    hideSelectAllButton
                 />
                 <div className={b('popup-controls')}>
                     <Button view="flat" onClick={handleCancel}>
