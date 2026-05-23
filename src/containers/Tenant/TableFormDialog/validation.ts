@@ -5,8 +5,10 @@ import {
     ENTITY_NAME_REG_EXP,
     MAX_COLUMN_PARTITION_COUNT,
     MAX_PARTITIONS_COUNT,
+    MAX_PARTITION_SIZE_MB,
     MIN_COLUMN_PARTITION_COUNT,
     MIN_PARTITIONS_COUNT,
+    MIN_PARTITION_SIZE_MB,
 } from './constants';
 import i18n from './i18n';
 import type {FormMode, FormValues, OriginalTableInfo} from './types';
@@ -186,6 +188,15 @@ function validateSettings(
             addIssue(ctx, ['settings', 'uniformPartitions'], i18n('error_required'));
         } else if (value < MIN_PARTITIONS_COUNT || value > MAX_PARTITIONS_COUNT) {
             addIssue(ctx, ['settings', 'uniformPartitions'], i18n('error_partitions-count'));
+        }
+    }
+
+    if (settings.autoPartitionBySize && settings.autoPartitionBySizeMb !== undefined) {
+        const value = Number(settings.autoPartitionBySizeMb);
+        if (Number.isNaN(value)) {
+            addIssue(ctx, ['settings', 'autoPartitionBySizeMb'], i18n('error_required'));
+        } else if (value < MIN_PARTITION_SIZE_MB || value > MAX_PARTITION_SIZE_MB) {
+            addIssue(ctx, ['settings', 'autoPartitionBySizeMb'], i18n('error_partition-size'));
         }
     }
 

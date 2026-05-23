@@ -59,7 +59,7 @@ export function PartitioningSection({pkTypes}: PartitioningSectionProps) {
                                 if (!acceptIntegerInput(value)) {
                                     return;
                                 }
-                                field.onChange(value === '' ? undefined : Number(value));
+                                field.onChange(value === '' ? NaN : Number(value));
                             }}
                             validationState={partitionCountError ? 'invalid' : undefined}
                             errorMessage={partitionCountError}

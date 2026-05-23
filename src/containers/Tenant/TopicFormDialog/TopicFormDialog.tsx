@@ -234,7 +234,7 @@ function NumericTextInput({
 }: {
     id?: string;
     value?: number;
-    onChange: (value: number | undefined) => void;
+    onChange: (value: number) => void;
     errorMessage?: string;
     endContent?: React.ReactNode;
     className?: string;
@@ -300,14 +300,17 @@ function SelectNumberField({
 }
 
 function StorageSizeNote({size = 0, shards = 0}: {size?: number; shards?: number}) {
-    const key = shards === 1 ? 'context_data-storage-note-one' : 'context_data-storage-note-many';
+    const validSize = Number.isNaN(size) ? 0 : size;
+    const validShards = Number.isNaN(shards) ? 0 : shards;
+    const key =
+        validShards === 1 ? 'context_data-storage-note-one' : 'context_data-storage-note-many';
 
     return (
         <Text color="secondary">
             {i18n(key, {
-                total: fromMbToGb(size * shards),
-                size: fromMbToGb(size),
-                count: shards,
+                total: fromMbToGb(validSize * validShards),
+                size: fromMbToGb(validSize),
+                count: validShards,
             })}
         </Text>
     );
@@ -797,7 +800,10 @@ function TopicForm({
                                     name="storageLimitMb"
                                     control={control}
                                     render={({field}) => {
-                                        const value = field.value ?? 50 * 1024;
+                                        const isNan = Number.isNaN(field.value);
+                                        const value = isNan
+                                            ? 50 * 1024
+                                            : (field.value ?? 50 * 1024);
                                         return (
                                             <div className={b('storage-control')}>
                                                 <div className={b('storage-input-row')}>
@@ -811,14 +817,16 @@ function TopicForm({
                                                         disabled={isSubmitting}
                                                     />
                                                     <TextInput
-                                                        value={String(fromMbToGb(value))}
+                                                        value={
+                                                            isNan ? '' : String(fromMbToGb(value))
+                                                        }
                                                         onUpdate={(nextValue) => {
                                                             if (acceptNumber(nextValue)) {
                                                                 const parsed =
                                                                     parseNumberInput(nextValue);
                                                                 field.onChange(
-                                                                    parsed === undefined
-                                                                        ? undefined
+                                                                    Number.isNaN(parsed)
+                                                                        ? NaN
                                                                         : parsed * 1024,
                                                                 );
                                                             }
@@ -830,9 +838,20 @@ function TopicForm({
                                                                 {i18n('value_gigabyte')}
                                                             </span>
                                                         }
+                                                        validationState={
+                                                            errors.storageLimitMb
+                                                                ? 'invalid'
+                                                                : undefined
+                                                        }
+                                                        errorMessage={
+                                                            errors.storageLimitMb?.message
+                                                        }
                                                     />
                                                 </div>
-                                                <StorageSizeNote size={value} shards={shards} />
+                                                <StorageSizeNote
+                                                    size={isNan ? 0 : value}
+                                                    shards={shards}
+                                                />
                                             </div>
                                         );
                                     }}

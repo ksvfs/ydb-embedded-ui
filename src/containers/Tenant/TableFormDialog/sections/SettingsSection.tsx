@@ -44,6 +44,7 @@ export function SettingsSection({mode}: SettingsSectionProps) {
     const minPartitionsError = formState.errors.settings?.autoPartitionMinPartitions?.message;
     const maxPartitionsError = formState.errors.settings?.autoPartitionMaxPartitions?.message;
     const partitionsAtKeysError = formState.errors.settings?.partitionsAtKeys?.message;
+    const autoPartitionBySizeMbError = formState.errors.settings?.autoPartitionBySizeMb?.message;
 
     const [splitDialogState, setSplitDialogState] = React.useState<SplitPointDialogState>({
         open: false,
@@ -258,7 +259,8 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                     <div className={b('size-slider-row')}>
                                         <Slider
                                             value={
-                                                typeof field.value === 'number'
+                                                typeof field.value === 'number' &&
+                                                !Number.isNaN(field.value)
                                                     ? field.value
                                                     : MIN_PARTITION_SIZE_MB
                                             }
@@ -276,7 +278,8 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                         <TextInput
                                             className={b('size-input')}
                                             value={
-                                                field.value === undefined
+                                                field.value === undefined ||
+                                                Number.isNaN(field.value)
                                                     ? undefined
                                                     : String(field.value)
                                             }
@@ -284,11 +287,13 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                                 if (!acceptIntegerInput(value)) {
                                                     return;
                                                 }
-                                                field.onChange(
-                                                    value === '' ? undefined : Number(value),
-                                                );
+                                                field.onChange(value === '' ? NaN : Number(value));
                                             }}
                                             disabled={!autoPartitionBySize}
+                                            validationState={
+                                                autoPartitionBySizeMbError ? 'invalid' : undefined
+                                            }
+                                            errorMessage={autoPartitionBySizeMbError}
                                             endContent={
                                                 <span className={b('input-suffix')}>
                                                     {i18n('value_megabyte')}

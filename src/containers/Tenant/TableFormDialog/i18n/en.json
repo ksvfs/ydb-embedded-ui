@@ -16,6 +16,7 @@
   "error_required": "This field is required",
   "error_name-pattern": "Only letters, digits, dots, underscores and dashes are allowed",
   "error_column-name-pattern": "Only word characters, underscores and dashes are allowed",
+  "error_partition-size": "Value must be between 20 and 5120 MB",
   "error_partitions-count": "Value must be between 1 and 35000",
   "error_partition-count-range": "Value must be between 1 and 1000",
   "error_columns-empty": "Columns are empty",

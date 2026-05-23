@@ -19,16 +19,22 @@ const addIssue = (ctx: z.RefinementCtx, path: Array<string | number>, message: s
 };
 
 const requiredNumber = () =>
-    z.number({
-        required_error: i18n('error_required'),
-        invalid_type_error: i18n('error_number'),
-    });
+    z.preprocess(
+        (val) => (typeof val === 'number' && Number.isNaN(val) ? undefined : val),
+        z.number({
+            required_error: i18n('error_required'),
+            invalid_type_error: i18n('error_number'),
+        }),
+    );
 
-const optionalNumber = z
-    .number({
-        invalid_type_error: i18n('error_number'),
-    })
-    .optional();
+const optionalNumber = z.preprocess(
+    (val) => (typeof val === 'number' && Number.isNaN(val) ? undefined : val),
+    z
+        .number({
+            invalid_type_error: i18n('error_number'),
+        })
+        .optional(),
+);
 
 const topicNameSchema = z
     .string({required_error: i18n('error_required'), invalid_type_error: i18n('error_required')})
@@ -101,6 +107,12 @@ export function getTopicFormValidationSchema(minPartitions: number) {
                             speed: formatBandwidthBytes(128 * 1024),
                         }),
                     );
+                }
+
+                if (data.retentionType === 'time') {
+                    validateRequiredNumber(ctx, ['retentionHours'], data.retentionHours);
+                } else if (data.retentionType === 'size') {
+                    validateRequiredNumber(ctx, ['storageLimitMb'], data.storageLimitMb);
                 }
 
                 const {autoPartitioning} = data;

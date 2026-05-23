@@ -29,12 +29,12 @@ export function acceptNumber(value: string) {
     return !value || (/^[0-9]+$/.test(value) && Number(value) <= Number.MAX_SAFE_INTEGER);
 }
 
-export function parseNumberInput(value: string): number | undefined {
-    return value ? Number.parseInt(value, 10) : undefined;
+export function parseNumberInput(value: string): number {
+    return value ? Number.parseInt(value, 10) : NaN;
 }
 
 export function formatNumberInput(value: number | undefined): string | undefined {
-    return typeof value === 'number' ? value.toString() : undefined;
+    return typeof value === 'number' && !Number.isNaN(value) ? value.toString() : undefined;
 }
 
 export function fromMbToGb(value: number) {
