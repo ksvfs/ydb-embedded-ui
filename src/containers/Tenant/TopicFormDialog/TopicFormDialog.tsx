@@ -84,6 +84,10 @@ const retentionHoursOptions: SelectOption[] = [
     {content: `1 ${i18n('value_day')}`, value: '24'},
 ];
 
+const STORAGE_LIMIT_MIN_MB = 50 * 1024;
+const STORAGE_LIMIT_MAX_MB = 400 * 1024;
+const STORAGE_LIMIT_STEP_MB = 1024;
+
 const meterModeOptions = [
     {
         value: MeteringMode.Provisioned,
@@ -314,6 +318,10 @@ function StorageSizeNote({size = 0, shards = 0}: {size?: number; shards?: number
             })}
         </Text>
     );
+}
+
+function formatStorageLimitMark(value: number) {
+    return `${fromMbToGb(value)} ${i18n('value_gigabyte')}`;
 }
 
 function TopicForm({
@@ -797,22 +805,34 @@ function TopicForm({
                             </Flex>
                             {retentionType === 'size' ? (
                                 <Controller
+                                    key="storage-limit"
                                     name="storageLimitMb"
                                     control={control}
                                     render={({field}) => {
                                         const isNan = Number.isNaN(field.value);
                                         const value = isNan
-                                            ? 50 * 1024
-                                            : (field.value ?? 50 * 1024);
+                                            ? STORAGE_LIMIT_MIN_MB
+                                            : (field.value ?? STORAGE_LIMIT_MIN_MB);
                                         return (
                                             <div className={b('storage-control')}>
                                                 <div className={b('storage-input-row')}>
                                                     <Slider
                                                         value={value}
-                                                        min={50 * 1024}
-                                                        max={400 * 1024}
-                                                        step={1024}
-                                                        onUpdate={field.onChange}
+                                                        min={STORAGE_LIMIT_MIN_MB}
+                                                        max={STORAGE_LIMIT_MAX_MB}
+                                                        step={STORAGE_LIMIT_STEP_MB}
+                                                        marks={[
+                                                            STORAGE_LIMIT_MIN_MB,
+                                                            STORAGE_LIMIT_MAX_MB,
+                                                        ]}
+                                                        markFormat={formatStorageLimitMark}
+                                                        onUpdate={(nextValue) => {
+                                                            field.onChange(
+                                                                Array.isArray(nextValue)
+                                                                    ? nextValue[0]
+                                                                    : nextValue,
+                                                            );
+                                                        }}
                                                         className={b('storage-slider')}
                                                         disabled={isSubmitting}
                                                     />
@@ -858,6 +878,7 @@ function TopicForm({
                                 />
                             ) : (
                                 <Controller
+                                    key="retention-hours"
                                     name="retentionHours"
                                     control={control}
                                     render={({field}) => (
