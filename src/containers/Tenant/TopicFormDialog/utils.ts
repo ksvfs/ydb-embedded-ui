@@ -26,15 +26,15 @@ export const DEFAULT_TOPIC_FORM_VALUES: StreamFormData = {
 };
 
 export function acceptNumber(value: string) {
-    return !value || (/^[0-9]+$/.test(value) && Number(value) <= Number.MAX_SAFE_INTEGER);
+    return value === '' || (/^[0-9]+$/.test(value) && Number(value) <= Number.MAX_SAFE_INTEGER);
 }
 
 export function parseNumberInput(value: string): number {
     return value ? Number.parseInt(value, 10) : NaN;
 }
 
-export function formatNumberInput(value: number | undefined): string | undefined {
-    return typeof value === 'number' && !Number.isNaN(value) ? value.toString() : undefined;
+export function formatNumberInput(value: number | undefined): string {
+    return typeof value === 'number' && !Number.isNaN(value) ? value.toString() : '';
 }
 
 export function fromMbToGb(value: number) {

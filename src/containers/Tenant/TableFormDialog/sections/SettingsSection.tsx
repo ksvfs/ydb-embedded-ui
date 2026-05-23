@@ -141,11 +141,7 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                 name="settings.uniformPartitions"
                                 render={({field}) => (
                                     <TextInput
-                                        value={
-                                            field.value === undefined
-                                                ? undefined
-                                                : String(field.value)
-                                        }
+                                        value={field.value === undefined ? '' : String(field.value)}
                                         onUpdate={(value) => {
                                             if (!acceptIntegerInput(value)) {
                                                 return;
@@ -280,7 +276,7 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                             value={
                                                 field.value === undefined ||
                                                 Number.isNaN(field.value)
-                                                    ? undefined
+                                                    ? ''
                                                     : String(field.value)
                                             }
                                             onUpdate={(value) => {
@@ -313,11 +309,7 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                 name="settings.autoPartitionMinPartitions"
                                 render={({field}) => (
                                     <TextInput
-                                        value={
-                                            field.value === undefined
-                                                ? undefined
-                                                : String(field.value)
-                                        }
+                                        value={field.value === undefined ? '' : String(field.value)}
                                         onUpdate={(value) => {
                                             if (!acceptIntegerInput(value)) {
                                                 return;
@@ -340,11 +332,7 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                 name="settings.autoPartitionMaxPartitions"
                                 render={({field}) => (
                                     <TextInput
-                                        value={
-                                            field.value === undefined
-                                                ? undefined
-                                                : String(field.value)
-                                        }
+                                        value={field.value === undefined ? '' : String(field.value)}
                                         onUpdate={(value) => {
                                             if (!acceptIntegerInput(value)) {
                                                 return;
