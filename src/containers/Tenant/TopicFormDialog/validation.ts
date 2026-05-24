@@ -9,6 +9,8 @@ import {formatBandwidthBytes} from './utils';
 const NAME_MIN_LENGTH = 2;
 const NAME_MAX_LENGTH = 63;
 const NAME_REGEX = /^[a-z][a-z\-0-9]*[a-z0-9]$/;
+const MIN_ONE_MESSAGE = i18n('error_min-number', {count: 1});
+const MAX_HUNDRED_MESSAGE = i18n('error_max-number', {count: 100});
 
 const addIssue = (ctx: z.RefinementCtx, path: Array<string | number>, message: string) => {
     ctx.addIssue({
@@ -18,23 +20,26 @@ const addIssue = (ctx: z.RefinementCtx, path: Array<string | number>, message: s
     });
 };
 
-const requiredNumber = () =>
+const requiredNumber = (schema?: z.ZodNumber) =>
     z.preprocess(
         (val) => (typeof val === 'number' && Number.isNaN(val) ? undefined : val),
-        z.number({
-            required_error: i18n('error_required'),
-            invalid_type_error: i18n('error_number'),
-        }),
+        schema ??
+            z.number({
+                required_error: i18n('error_required'),
+                invalid_type_error: i18n('error_number'),
+            }),
     );
 
-const optionalNumber = z.preprocess(
-    (val) => (typeof val === 'number' && Number.isNaN(val) ? undefined : val),
-    z
-        .number({
-            invalid_type_error: i18n('error_number'),
-        })
-        .optional(),
-);
+const optionalNumber = (schema?: z.ZodNumber) =>
+    z.preprocess(
+        (val) => (typeof val === 'number' && Number.isNaN(val) ? undefined : val),
+        (
+            schema ??
+            z.number({
+                invalid_type_error: i18n('error_number'),
+            })
+        ).optional(),
+    );
 
 const topicNameSchema = z
     .string({required_error: i18n('error_required'), invalid_type_error: i18n('error_required')})
@@ -72,10 +77,17 @@ export function getTopicFormValidationSchema(minPartitions: number) {
                 databaseId: z.string().min(1, i18n('error_required')),
                 path: z.string().optional(),
                 name: topicNameSchema,
-                shards: requiredNumber(),
+                shards: requiredNumber(
+                    z
+                        .number({
+                            required_error: i18n('error_required'),
+                            invalid_type_error: i18n('error_number'),
+                        })
+                        .min(1, MIN_ONE_MESSAGE),
+                ),
                 writeQuota: requiredNumber(),
-                retentionHours: optionalNumber,
-                storageLimitMb: optionalNumber,
+                retentionHours: optionalNumber(),
+                storageLimitMb: optionalNumber(),
                 meterMode: z.nativeEnum(MeteringMode).optional(),
                 retentionType: z.enum(['size', 'time']),
                 autoPartitioning: z.object({
@@ -85,11 +97,23 @@ export function getTopicFormValidationSchema(minPartitions: number) {
                         z.literal(AutoPartitioningStrategy.ScaleUpAndDown),
                         z.literal(AutoPartitioningStrategy.Paused),
                     ]),
-                    minPartitions: optionalNumber,
-                    maxPartitions: optionalNumber,
-                    stabilizationWindow: optionalNumber,
-                    downUtilization: optionalNumber,
-                    upUtilization: optionalNumber,
+                    minPartitions: optionalNumber(
+                        z
+                            .number({invalid_type_error: i18n('error_number')})
+                            .min(1, MIN_ONE_MESSAGE),
+                    ),
+                    maxPartitions: optionalNumber(
+                        z
+                            .number({invalid_type_error: i18n('error_number')})
+                            .min(1, MIN_ONE_MESSAGE),
+                    ),
+                    stabilizationWindow: optionalNumber(),
+                    downUtilization: optionalNumber(),
+                    upUtilization: optionalNumber(
+                        z
+                            .number({invalid_type_error: i18n('error_number')})
+                            .max(100, MAX_HUNDRED_MESSAGE),
+                    ),
                 }),
             })
             // The form mirrors Cloud Console cross-field validation rules in one place.
@@ -146,17 +170,11 @@ export function getTopicFormValidationSchema(minPartitions: number) {
                     }
                 }
 
-                if (
-                    validateRequiredNumber(
-                        ctx,
-                        stabilizationPath,
-                        autoPartitioning.stabilizationWindow,
-                    ) &&
-                    autoPartitioning.stabilizationWindow !== undefined &&
-                    autoPartitioning.stabilizationWindow < 1
-                ) {
-                    addIssue(ctx, stabilizationPath, i18n('error_min-number', {count: 1}));
-                }
+                validateRequiredNumber(
+                    ctx,
+                    stabilizationPath,
+                    autoPartitioning.stabilizationWindow,
+                );
 
                 if (
                     autoPartitioning.mode !== AutoPartitioningStrategy.ScaleUp &&
@@ -191,22 +209,7 @@ export function getTopicFormValidationSchema(minPartitions: number) {
                     }
                 }
 
-                if (
-                    validateRequiredNumber(ctx, upUtilizationPath, autoPartitioning.upUtilization)
-                ) {
-                    if (
-                        autoPartitioning.upUtilization !== undefined &&
-                        autoPartitioning.upUtilization < 1
-                    ) {
-                        addIssue(ctx, upUtilizationPath, i18n('error_min-number', {count: 1}));
-                    }
-                    if (
-                        autoPartitioning.upUtilization !== undefined &&
-                        autoPartitioning.upUtilization > 100
-                    ) {
-                        addIssue(ctx, upUtilizationPath, i18n('error_max-number', {count: 100}));
-                    }
-                }
+                validateRequiredNumber(ctx, upUtilizationPath, autoPartitioning.upUtilization);
             }) as z.ZodType<StreamFormData>
     );
 }

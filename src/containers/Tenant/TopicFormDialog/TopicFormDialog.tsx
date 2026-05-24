@@ -232,6 +232,7 @@ function NumericTextInput({
     value,
     onChange,
     errorMessage,
+    invalid,
     endContent,
     className,
     disabled,
@@ -240,6 +241,7 @@ function NumericTextInput({
     value?: number;
     onChange: (value: number) => void;
     errorMessage?: string;
+    invalid?: boolean;
     endContent?: React.ReactNode;
     className?: string;
     disabled?: boolean;
@@ -258,7 +260,7 @@ function NumericTextInput({
             id={id}
             value={formatNumberInput(value)}
             onUpdate={handleUpdate}
-            validationState={errorMessage ? 'invalid' : undefined}
+            validationState={errorMessage || invalid ? 'invalid' : undefined}
             errorMessage={errorMessage}
             endContent={endContent}
             className={className}
@@ -369,6 +371,16 @@ function TopicForm({
     const writeQuota = watch('writeQuota');
     const minPartitions = watch('autoPartitioning.minPartitions');
     const maxPartitions = watch('autoPartitioning.maxPartitions');
+    const minPartitionsError = errors.autoPartitioning?.minPartitions?.message;
+    const maxPartitionsError = errors.autoPartitioning?.maxPartitions?.message;
+    const autoPartitioningRangeError = minPartitionsError ?? maxPartitionsError;
+
+    React.useEffect(() => {
+        if (!autoPartitioningEnabled) {
+            return;
+        }
+        trigger(['autoPartitioning.minPartitions', 'autoPartitioning.maxPartitions']);
+    }, [autoPartitioningEnabled, minPartitions, maxPartitions, trigger]);
 
     const retentionTypeOptions = React.useMemo(
         () => [
@@ -621,54 +633,53 @@ function TopicForm({
                     ) : (
                         <React.Fragment>
                             <FormRow title={i18n('field_shards')} note={i18n('context_shards')}>
-                                <div className={b('dual-inputs')}>
-                                    <Controller
-                                        name="autoPartitioning.minPartitions"
-                                        control={control}
-                                        render={({field}) => (
-                                            <NumericTextInput
-                                                value={field.value}
-                                                onChange={(value) => {
-                                                    field.onChange(value);
-                                                    setValue('shards', value || 0);
-                                                    trigger('autoPartitioning.maxPartitions');
-                                                }}
-                                                errorMessage={
-                                                    errors.autoPartitioning?.minPartitions?.message
-                                                }
-                                                className={b('input-s')}
-                                                disabled={isSubmitting}
-                                                endContent={
-                                                    <span className={b('input-details')}>
-                                                        {i18n('value_min')}
-                                                    </span>
-                                                }
-                                            />
-                                        )}
-                                    />
-                                    <Controller
-                                        name="autoPartitioning.maxPartitions"
-                                        control={control}
-                                        render={({field}) => (
-                                            <NumericTextInput
-                                                value={field.value}
-                                                onChange={(value) => {
-                                                    field.onChange(value);
-                                                    trigger('autoPartitioning.minPartitions');
-                                                }}
-                                                errorMessage={
-                                                    errors.autoPartitioning?.maxPartitions?.message
-                                                }
-                                                className={b('input-s')}
-                                                disabled={isSubmitting}
-                                                endContent={
-                                                    <span className={b('input-details')}>
-                                                        {i18n('value_max')}
-                                                    </span>
-                                                }
-                                            />
-                                        )}
-                                    />
+                                <div className={b('control-stack')}>
+                                    <div className={b('dual-inputs')}>
+                                        <Controller
+                                            name="autoPartitioning.minPartitions"
+                                            control={control}
+                                            render={({field}) => (
+                                                <NumericTextInput
+                                                    value={field.value}
+                                                    onChange={(value) => {
+                                                        field.onChange(value);
+                                                        setValue('shards', value || 0);
+                                                    }}
+                                                    invalid={Boolean(minPartitionsError)}
+                                                    className={b('input-s')}
+                                                    disabled={isSubmitting}
+                                                    endContent={
+                                                        <span className={b('input-details')}>
+                                                            {i18n('value_min')}
+                                                        </span>
+                                                    }
+                                                />
+                                            )}
+                                        />
+                                        <Controller
+                                            name="autoPartitioning.maxPartitions"
+                                            control={control}
+                                            render={({field}) => (
+                                                <NumericTextInput
+                                                    value={field.value}
+                                                    onChange={field.onChange}
+                                                    invalid={Boolean(maxPartitionsError)}
+                                                    className={b('input-s')}
+                                                    disabled={isSubmitting}
+                                                    endContent={
+                                                        <span className={b('input-details')}>
+                                                            {i18n('value_max')}
+                                                        </span>
+                                                    }
+                                                />
+                                            )}
+                                        />
+                                    </div>
+                                    {autoPartitioningRangeError ? (
+                                        <Text color="danger" variant="body-1">
+                                            {autoPartitioningRangeError}
+                                        </Text>
+                                    ) : null}
                                 </div>
                             </FormRow>
                             <Disclosure
