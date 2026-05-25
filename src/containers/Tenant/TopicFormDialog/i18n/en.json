@@ -59,7 +59,9 @@
   "value_rows": "rows",
 
   "alert_create-success": "Stream created",
+  "alert_create-error": "Failed to create stream",
   "alert_update-success": "Stream updated",
+  "alert_update-error": "Failed to update stream",
 
   "error_load-topic": "Unable to load topic settings",
   "error_topic-path-required": "Topic path is not specified",

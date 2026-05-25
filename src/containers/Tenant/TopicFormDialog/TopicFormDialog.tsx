@@ -13,7 +13,6 @@ import {
     Link,
     SegmentedRadioGroup,
     Select,
-    Slider,
     Switch,
     Text,
     TextInput,
@@ -25,6 +24,7 @@ import {Controller, useForm} from 'react-hook-form';
 import {CONFIRMATION_DIALOG} from '../../../components/ConfirmationDialog/ConfirmationDialog';
 import {ResponseError} from '../../../components/Errors/ResponseError';
 import {Loader} from '../../../components/Loader';
+import {RangeInputPicker} from '../../../components/RangeInputPicker';
 import {useClusterWithProxy} from '../../../store/reducers/cluster/cluster';
 import {selectTopicFormData, topicApi} from '../../../store/reducers/topic/topic';
 import type {StreamFormData} from '../../../store/reducers/topic/utils';
@@ -345,7 +345,6 @@ function TopicForm({
         () => getTopicFormValidationSchema(initialValues.shards),
         [initialValues.shards],
     );
-    const [apiError, setApiError] = React.useState<string | null>(null);
     const [createTopic, createTopicResponse] = topicApi.useCreateTopicMutation();
     const [updateTopic, updateTopicResponse] = topicApi.useUpdateTopicMutation();
 
@@ -424,7 +423,6 @@ function TopicForm({
     }, [autoPartitioningEnabled, maxPartitions, minPartitions, shards, writeQuota]);
 
     const handleTopicSubmit = handleSubmit(async (data) => {
-        setApiError(null);
         const formData = {
             ...data,
             meterMode: data.meterMode ?? MeteringMode.OnDemand,
@@ -442,10 +440,17 @@ function TopicForm({
                 title:
                     mode === 'create' ? i18n('alert_create-success') : i18n('alert_update-success'),
                 theme: 'success',
+                autoHiding: 5000,
             });
             onSuccess?.(buildFullTopicPath(formData, databaseFullPath));
         } catch (error) {
-            setApiError(prepareCommonErrorMessage(error));
+            createToast({
+                name: `topic-${mode}-error`,
+                title: mode === 'create' ? i18n('alert_create-error') : i18n('alert_update-error'),
+                content: prepareCommonErrorMessage(error),
+                theme: 'danger',
+                autoHiding: 5000,
+            });
         }
     });
 
@@ -826,59 +831,38 @@ function TopicForm({
                                             : (field.value ?? STORAGE_LIMIT_MIN_MB);
                                         return (
                                             <div className={b('storage-control')}>
-                                                <div className={b('storage-input-row')}>
-                                                    <Slider
-                                                        value={value}
-                                                        min={STORAGE_LIMIT_MIN_MB}
-                                                        max={STORAGE_LIMIT_MAX_MB}
-                                                        step={STORAGE_LIMIT_STEP_MB}
-                                                        marks={[
-                                                            STORAGE_LIMIT_MIN_MB,
-                                                            STORAGE_LIMIT_MAX_MB,
-                                                        ]}
-                                                        markFormat={formatStorageLimitMark}
-                                                        onUpdate={(nextValue) => {
-                                                            field.onChange(
-                                                                Array.isArray(nextValue)
-                                                                    ? nextValue[0]
-                                                                    : nextValue,
-                                                            );
-                                                        }}
-                                                        className={b('storage-slider')}
-                                                        disabled={isSubmitting}
-                                                    />
-                                                    <TextInput
-                                                        value={
-                                                            isNan ? '' : String(fromMbToGb(value))
-                                                        }
-                                                        onUpdate={(nextValue) => {
-                                                            if (acceptNumber(nextValue)) {
-                                                                const parsed =
-                                                                    parseNumberInput(nextValue);
-                                                                field.onChange(
-                                                                    Number.isNaN(parsed)
-                                                                        ? NaN
-                                                                        : parsed * 1024,
-                                                                );
-                                                            }
-                                                        }}
-                                                        className={b('input-s')}
-                                                        disabled={isSubmitting}
-                                                        endContent={
-                                                            <span className={b('input-details')}>
-                                                                {i18n('value_gigabyte')}
-                                                            </span>
-                                                        }
-                                                        validationState={
-                                                            errors.storageLimitMb
-                                                                ? 'invalid'
-                                                                : undefined
-                                                        }
-                                                        errorMessage={
-                                                            errors.storageLimitMb?.message
-                                                        }
-                                                    />
-                                                </div>
+                                                <RangeInputPicker
+                                                    value={isNan ? NaN : value}
+                                                    min={STORAGE_LIMIT_MIN_MB}
+                                                    max={STORAGE_LIMIT_MAX_MB}
+                                                    step={STORAGE_LIMIT_STEP_MB}
+                                                    marks={[
+                                                        STORAGE_LIMIT_MIN_MB,
+                                                        STORAGE_LIMIT_MAX_MB,
+                                                    ]}
+                                                    markFormat={formatStorageLimitMark}
+                                                    onUpdate={field.onChange}
+                                                    acceptInputValue={acceptNumber}
+                                                    parseInputValue={(nextValue) => {
+                                                        const parsed = parseNumberInput(nextValue);
+                                                        return Number.isNaN(parsed)
+                                                            ? Number.NaN
+                                                            : parsed * 1024;
+                                                    }}
+                                                    formatInputValue={(nextValue) =>
+                                                        String(fromMbToGb(nextValue))
+                                                    }
+                                                    emptyValue={Number.NaN}
+                                                    disabled={isSubmitting}
+                                                    errorMessage={errors.storageLimitMb?.message}
+                                                    endContent={
+                                                        <span className={b('input-details')}>
+                                                            {i18n('value_gigabyte')}
+                                                        </span>
+                                                    }
+                                                    inputWidth={120}
+                                                    sliderMinWidth={160}
+                                                />
                                                 <StorageSizeNote
                                                     size={isNan ? 0 : value}
                                                     shards={shards}
@@ -904,11 +888,6 @@ function TopicForm({
                             )}
                         </div>
                     </FormRow>
-                    {apiError ? (
-                        <Text as="div" color="danger" className={b('error')}>
-                            {apiError}
-                        </Text>
-                    ) : null}
                 </FormSection>
             </Dialog.Body>
             <Dialog.Footer

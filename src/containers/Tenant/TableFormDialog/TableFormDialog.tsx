@@ -96,7 +96,6 @@ function TableForm({
     onClose,
     onSuccess,
 }: TableFormProps) {
-    const [apiError, setApiError] = React.useState<string | null>(null);
     const [createTable, createState] = tableApi.useCreateTableMutation();
     const [updateTable, updateState] = tableApi.useUpdateTableMutation();
 
@@ -144,7 +143,6 @@ function TableForm({
     );
 
     const handleFormSubmit = handleSubmit(async (formValues) => {
-        setApiError(null);
         try {
             if (mode === 'create') {
                 const fullName = buildTablePath(databaseFullPath, formValues.name);
@@ -156,6 +154,7 @@ function TableForm({
                     name: 'table-create-success',
                     title: i18n('alert_create-success'),
                     theme: 'success',
+                    autoHiding: 5000,
                 });
                 onSuccess?.(fullName);
             } else {
@@ -171,16 +170,23 @@ function TableForm({
                     name: 'table-update-success',
                     title: i18n('alert_update-success'),
                     theme: 'success',
+                    autoHiding: 5000,
                 });
                 onSuccess?.(path);
             }
             onClose();
         } catch (error) {
-            setApiError(prepareCommonErrorMessage(error));
+            createToast({
+                name: `table-${mode}-error`,
+                title: mode === 'create' ? i18n('alert_create-error') : i18n('alert_update-error'),
+                content: prepareCommonErrorMessage(error),
+                theme: 'danger',
+                autoHiding: 5000,
+            });
         }
     });
 
-    const showIndexes = type === 'row';
+    const showIndexes = type === 'row' && mode === 'create';
     const showSettings = type === 'row';
     const showPartitioning = type === 'column' && mode === 'create';
 
@@ -207,11 +213,6 @@ function TableForm({
                     <TTLSection originalInfo={originalInfo} />
                     {showSettings ? <SettingsSection mode={mode} /> : null}
                     {showPartitioning ? <PartitioningSection pkTypes={pkTypes} /> : null}
-                    {apiError ? (
-                        <Text as="div" color="danger" className={b('api-error')}>
-                            {apiError}
-                        </Text>
-                    ) : null}
                 </Dialog.Body>
                 <Dialog.Footer
                     textButtonApply={

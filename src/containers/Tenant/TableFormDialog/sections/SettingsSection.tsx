@@ -7,12 +7,12 @@ import {
     Disclosure,
     Icon,
     SegmentedRadioGroup,
-    Slider,
     Text,
     TextInput,
 } from '@gravity-ui/uikit';
 import {Controller, useFormContext, useWatch} from 'react-hook-form';
 
+import {RangeInputPicker} from '../../../../components/RangeInputPicker';
 import type {ColumnValueField} from '../../../../store/reducers/table/types';
 import {cn} from '../../../../utils/cn';
 import {FormFieldError, FormRow, FormSection} from '../components/layout';
@@ -252,51 +252,25 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                 control={control}
                                 name="settings.autoPartitionBySizeMb"
                                 render={({field}) => (
-                                    <div className={b('size-slider-row')}>
-                                        <Slider
-                                            value={
-                                                typeof field.value === 'number' &&
-                                                !Number.isNaN(field.value)
-                                                    ? field.value
-                                                    : MIN_PARTITION_SIZE_MB
-                                            }
-                                            min={MIN_PARTITION_SIZE_MB}
-                                            max={MAX_PARTITION_SIZE_MB}
-                                            step={1}
-                                            onUpdate={(value) =>
-                                                field.onChange(
-                                                    Array.isArray(value) ? value[0] : value,
-                                                )
-                                            }
-                                            disabled={!autoPartitionBySize}
-                                            className={b('size-slider')}
-                                        />
-                                        <TextInput
-                                            className={b('size-input')}
-                                            value={
-                                                field.value === undefined ||
-                                                Number.isNaN(field.value)
-                                                    ? ''
-                                                    : String(field.value)
-                                            }
-                                            onUpdate={(value) => {
-                                                if (!acceptIntegerInput(value)) {
-                                                    return;
-                                                }
-                                                field.onChange(value === '' ? NaN : Number(value));
-                                            }}
-                                            disabled={!autoPartitionBySize}
-                                            validationState={
-                                                autoPartitionBySizeMbError ? 'invalid' : undefined
-                                            }
-                                            errorMessage={autoPartitionBySizeMbError}
-                                            endContent={
-                                                <span className={b('input-suffix')}>
-                                                    {i18n('value_megabyte')}
-                                                </span>
-                                            }
-                                        />
-                                    </div>
+                                    <RangeInputPicker
+                                        value={field.value}
+                                        min={MIN_PARTITION_SIZE_MB}
+                                        max={MAX_PARTITION_SIZE_MB}
+                                        step={1}
+                                        onUpdate={field.onChange}
+                                        acceptInputValue={acceptIntegerInput}
+                                        parseInputValue={Number}
+                                        emptyValue={Number.NaN}
+                                        disabled={!autoPartitionBySize}
+                                        errorMessage={autoPartitionBySizeMbError}
+                                        endContent={
+                                            <span className={b('input-suffix')}>
+                                                {i18n('value_megabyte')}
+                                            </span>
+                                        }
+                                        inputWidth={140}
+                                        sliderMinWidth={200}
+                                    />
                                 )}
                             />
                         </FormRow>

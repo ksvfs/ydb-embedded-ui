@@ -10,7 +10,9 @@
   "action_undo": "Undo",
 
   "alert_create-success": "Table created",
+  "alert_create-error": "Failed to create table",
   "alert_update-success": "Table updated",
+  "alert_update-error": "Failed to update table",
 
   "error_load-table": "Failed to load table",
   "error_required": "Empty field",

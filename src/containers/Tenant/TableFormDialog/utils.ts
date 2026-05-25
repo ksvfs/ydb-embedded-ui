@@ -113,16 +113,12 @@ export function getCreateInitialValues(initialType: TableType = 'row'): FormValu
 
 export function getUpdateInitialValues(table: TEvDescribeSchemeResult): FormValues {
     const values = prepareFormValues(table);
-    const updatedSecondaryIndexes = values.secondaryIndexes.map(({name}) => ({
-        name,
-        newName: name,
-        isDeleted: false,
-    }));
 
     return {
         ...values,
+        columns: [],
         secondaryIndexes: [],
-        updatedSecondaryIndexes,
+        updatedSecondaryIndexes: [],
     };
 }
 

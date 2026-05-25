@@ -270,22 +270,6 @@
         margin-top: var(--g-spacing-2);
     }
 
-    &__size-slider-row {
-        display: flex;
-        align-items: center;
-        gap: var(--g-spacing-3);
-    }
-
-    &__size-slider {
-        flex: 1;
-
-        min-width: 200px;
-    }
-
-    &__size-input {
-        max-width: 140px;
-    }
-
     &__input-suffix {
         margin-right: var(--g-spacing-1);
 
