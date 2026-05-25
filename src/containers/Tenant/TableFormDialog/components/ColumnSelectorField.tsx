@@ -88,7 +88,7 @@ function ItemSelector({items, value, onUpdate}: ItemSelectorProps) {
                         handleSelect(item);
                     }}
                 >
-                    Select
+                    {i18n('action_select')}
                 </Button>
             </div>
         ),
@@ -124,15 +124,15 @@ function ItemSelector({items, value, onUpdate}: ItemSelectorProps) {
         <div className={b('panels')}>
             <div className={b('panel')}>
                 <div className={b('panel-header')}>
-                    <span className={b('panel-title')}>Items</span>
+                    <span className={b('panel-title')}>{i18n('label_items')}</span>
                     <Button view="flat-secondary" size="s" onClick={handleSelectAll}>
-                        Select all
+                        {i18n('action_select-all')}
                     </Button>
                 </div>
                 <List<Column>
                     items={availableItems}
                     filterItem={filterColumnItem}
-                    filterPlaceholder="Search"
+                    filterPlaceholder={i18n('label_search')}
                     itemsHeight={196}
                     onItemClick={handleSelect}
                     renderItem={renderAvailableItem}
@@ -140,15 +140,15 @@ function ItemSelector({items, value, onUpdate}: ItemSelectorProps) {
             </div>
             <div className={b('panel')}>
                 <div className={b('panel-header')}>
-                    <span className={b('panel-title')}>Selected</span>
+                    <span className={b('panel-title')}>{i18n('label_selected')}</span>
                     <Button view="flat-secondary" size="s" onClick={handleClear}>
-                        Clear
+                        {i18n('action_clear')}
                     </Button>
                 </div>
                 <List<Column>
                     items={selectedItems}
                     filterItem={filterColumnItem}
-                    filterPlaceholder="Search"
+                    filterPlaceholder={i18n('label_search')}
                     itemsHeight={196}
                     onItemClick={handleRemove}
                     renderItem={renderSelectedItem}

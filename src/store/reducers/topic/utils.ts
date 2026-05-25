@@ -40,29 +40,26 @@ const METERING_MODE_TO_YQL: Record<MeteringMode, string> = {
 };
 
 const AUTO_PARTITIONING_STRATEGY_TO_YQL: Record<AutoPartitioningStrategy, string> = {
-    [AutoPartitioningStrategy.Disabled]: 'DISABLED',
-    [AutoPartitioningStrategy.Paused]: 'PAUSED',
-    [AutoPartitioningStrategy.ScaleUp]: 'SCALE_UP',
-    [AutoPartitioningStrategy.ScaleUpAndDown]: 'SCALE_UP_AND_DOWN',
+    [AutoPartitioningStrategy.Disabled]: 'disabled',
+    [AutoPartitioningStrategy.Paused]: 'paused',
+    [AutoPartitioningStrategy.ScaleUp]: 'scale_up',
+    [AutoPartitioningStrategy.ScaleUpAndDown]: 'scale_up_and_down',
 };
+
+const SIZE_RETENTION_PERIOD_HOURS = 24 * 7;
 
 const NAME_REGEX = /^[a-z_][a-z0-9_]*$/i;
 
-function prepareTopicEntityName(segment: string) {
-    return NAME_REGEX.test(segment)
-        ? segment
-        : `\`${segment.replaceAll('\\', '\\\\').replaceAll('`', '\\`')}\``;
+function prepareTopicEntityName(path: string) {
+    return NAME_REGEX.test(path)
+        ? path
+        : `\`${path.replaceAll('\\', '\\\\').replaceAll('`', '\\`')}\``;
 }
 
 function buildTopicPath(path: string | undefined, name: string | undefined) {
-    if (path && name) {
-        return `${prepareTopicEntityName(path)}/${prepareTopicEntityName(name)}`;
-    }
-    if (path) {
-        return prepareTopicEntityName(path);
-    }
-    if (name) {
-        return prepareTopicEntityName(name);
+    const topicPath = [path, name].filter(Boolean).join('/');
+    if (topicPath) {
+        return prepareTopicEntityName(topicPath);
     }
     throw new Error('Topic name or path is required');
 }
@@ -93,7 +90,9 @@ function buildTopicSettings(formData: StreamFormData): string[] {
         settings.push(`PARTITION_COUNT_LIMIT = ${shards}`);
     }
 
-    settings.push(`RETENTION_PERIOD = Interval('PT${retentionHours}H')`);
+    const effectiveRetentionHours =
+        retentionType === 'time' ? retentionHours : SIZE_RETENTION_PERIOD_HOURS;
+    settings.push(`RETENTION_PERIOD = Interval('PT${effectiveRetentionHours}H')`);
 
     const effectiveStorageMb = retentionType === 'time' ? 0 : storageLimitMb;
     settings.push(`RETENTION_STORAGE_MB = ${effectiveStorageMb}`);

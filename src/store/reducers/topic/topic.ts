@@ -209,6 +209,22 @@ function parseDurationToHours(duration?: string | IProtobufTimeObject): number {
     return 0;
 }
 
+function parseDurationToSeconds(duration?: string | IProtobufTimeObject): number | undefined {
+    if (!duration) {
+        return undefined;
+    }
+    if (typeof duration === 'string') {
+        const match = duration.match(/^(\d+)s$/);
+        return match ? parseInt(match[1], 10) : undefined;
+    }
+    if (typeof duration === 'object' && duration.seconds) {
+        return typeof duration.seconds === 'string'
+            ? parseInt(duration.seconds, 10)
+            : duration.seconds;
+    }
+    return undefined;
+}
+
 function mapApiMeteringModeToFormMode(apiMode?: string): MeteringMode {
     switch (apiMode) {
         case 'METERING_MODE_REQUEST_UNITS':
@@ -217,6 +233,21 @@ function mapApiMeteringModeToFormMode(apiMode?: string): MeteringMode {
         case 'METERING_MODE_UNSPECIFIED':
         default:
             return MeteringMode.Provisioned;
+    }
+}
+
+function mapApiAutoPartitioningStrategy(apiStrategy?: string): AutoPartitioningStrategy {
+    switch (apiStrategy) {
+        case 'AUTO_PARTITIONING_STRATEGY_PAUSED':
+            return AutoPartitioningStrategy.Paused;
+        case 'AUTO_PARTITIONING_STRATEGY_SCALE_UP_AND_DOWN':
+            return AutoPartitioningStrategy.ScaleUpAndDown;
+        case 'AUTO_PARTITIONING_STRATEGY_SCALE_UP':
+            return AutoPartitioningStrategy.ScaleUp;
+        case 'AUTO_PARTITIONING_STRATEGY_DISABLED':
+        case 'AUTO_PARTITIONING_STRATEGY_UNSPECIFIED':
+        default:
+            return AutoPartitioningStrategy.Disabled;
     }
 }
 
@@ -239,8 +270,10 @@ export const selectTopicFormData = createSelector(
             topicData.partitioning_settings?.min_active_partitions ?? '1',
             10,
         );
-        const partitionCountLimit = parseInt(
-            topicData.partitioning_settings?.partition_count_limit ?? '0',
+        const maxActivePartitions = parseInt(
+            topicData.partitioning_settings?.max_active_partitions ??
+                topicData.partitioning_settings?.partition_count_limit ??
+                '0',
             10,
         );
         const retentionStorageMb = parseInt(topicData.retention_storage_mb ?? '0', 10);
@@ -250,6 +283,14 @@ export const selectTopicFormData = createSelector(
         );
         const writeQuotaKb = Math.round(writeQuotaBytes / 1024);
         const retentionHours = parseDurationToHours(topicData.retention_period);
+        const autoPartitioningSettings =
+            topicData.partitioning_settings?.auto_partitioning_settings;
+        const autoPartitioningStrategy = mapApiAutoPartitioningStrategy(
+            autoPartitioningSettings?.strategy,
+        );
+        const autoPartitioningEnabled =
+            autoPartitioningStrategy !== AutoPartitioningStrategy.Disabled;
+        const partitionWriteSpeed = autoPartitioningSettings?.partition_write_speed;
 
         return {
             path: undefined,
@@ -261,13 +302,17 @@ export const selectTopicFormData = createSelector(
             meterMode: mapApiMeteringModeToFormMode(topicData.metering_mode),
             retentionType: retentionStorageMb > 0 ? 'size' : 'time',
             autoPartitioning: {
-                enabled: false,
-                mode: AutoPartitioningStrategy.ScaleUp,
+                enabled: autoPartitioningEnabled,
+                mode: autoPartitioningEnabled
+                    ? autoPartitioningStrategy
+                    : AutoPartitioningStrategy.ScaleUp,
                 minPartitions: minActivePartitions,
-                maxPartitions: partitionCountLimit > 0 ? partitionCountLimit : undefined,
-                stabilizationWindow: undefined,
-                downUtilization: undefined,
-                upUtilization: undefined,
+                maxPartitions: maxActivePartitions > 0 ? maxActivePartitions : undefined,
+                stabilizationWindow: parseDurationToSeconds(
+                    partitionWriteSpeed?.stabilization_window,
+                ),
+                downUtilization: partitionWriteSpeed?.down_utilization_percent,
+                upUtilization: partitionWriteSpeed?.up_utilization_percent,
             },
         } as StreamFormData;
     },

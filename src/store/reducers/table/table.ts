@@ -40,15 +40,28 @@ export const tableApi = api.injectEndpoints({
         createTable: build.mutation({
             queryFn: async ({database, formValues}: {database: string; formValues: FormValues}) => {
                 try {
-                    const {type, name, columns, settings, secondaryIndexes, partitionKey} =
-                        formValues;
+                    const {
+                        type,
+                        name,
+                        columns,
+                        settings,
+                        secondaryIndexes,
+                        partitionKey,
+                        partitionCount,
+                    } = formValues;
 
                     const options: BuildTemplateOptions = {
                         tableName: name,
                         columns: prepareYdbCreateQueryColumns(columns),
-                        settings: settings,
                         ...(type === 'row' && {secondaryIndexes}),
                         ...(type === 'column' && {columnsHash: partitionKey}),
+                        settings:
+                            type === 'column'
+                                ? {
+                                      ttl: settings.ttl,
+                                      autoPartitionMinPartitions: String(partitionCount),
+                                  }
+                                : settings,
                     };
 
                     const query =
@@ -96,7 +109,11 @@ export const tableApi = api.injectEndpoints({
 
                     const pathDesc = originalTable.PathDescription;
                     const originalName = pathDesc?.Self?.Name;
-                    const tableName = originalName ?? name;
+                    const tableName = originalTable.Path ?? originalName ?? name;
+                    const newTableName =
+                        originalName && tableName.endsWith(originalName)
+                            ? `${tableName.slice(0, -originalName.length)}${name}`
+                            : name;
                     const originalHadTtl = Boolean(
                         pathDesc?.Table?.TTLSettings?.Enabled ??
                             pathDesc?.ColumnTableDescription?.TtlSettings?.Enabled,
@@ -123,7 +140,7 @@ export const tableApi = api.injectEndpoints({
                     }
 
                     if (originalName && name !== originalName) {
-                        queries.push(buildRenameQuery(tableName, name));
+                        queries.push(buildRenameQuery(tableName, newTableName));
                     }
 
                     if (queries.length === 0) {

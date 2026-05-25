@@ -143,11 +143,42 @@ interface PartitioningSettings {
     /**
      * int64
      *
+     * Maximum partition count auto split would stop working at.
+     *
+     * Zero value means default - 1.
+     */
+    max_active_partitions?: string;
+
+    /**
+     * int64
+     *
      * Limit for total partition count, including active (open for write) and read-only partitions.
      *
      * Zero value means default - 100.
      */
     partition_count_limit?: string;
+
+    /** Settings for the partitions count auto partitioning. */
+    auto_partitioning_settings?: AutoPartitioningSettings;
+}
+
+interface AutoPartitioningSettings {
+    strategy?: AutoPartitioningStrategy;
+    partition_write_speed?: AutoPartitioningWriteSpeedStrategy;
+}
+
+interface AutoPartitioningWriteSpeedStrategy {
+    stabilization_window?: string | IProtobufTimeObject;
+    up_utilization_percent?: number;
+    down_utilization_percent?: number;
+}
+
+enum AutoPartitioningStrategy {
+    AUTO_PARTITIONING_STRATEGY_UNSPECIFIED = 'AUTO_PARTITIONING_STRATEGY_UNSPECIFIED',
+    AUTO_PARTITIONING_STRATEGY_DISABLED = 'AUTO_PARTITIONING_STRATEGY_DISABLED',
+    AUTO_PARTITIONING_STRATEGY_SCALE_UP = 'AUTO_PARTITIONING_STRATEGY_SCALE_UP',
+    AUTO_PARTITIONING_STRATEGY_SCALE_UP_AND_DOWN = 'AUTO_PARTITIONING_STRATEGY_SCALE_UP_AND_DOWN',
+    AUTO_PARTITIONING_STRATEGY_PAUSED = 'AUTO_PARTITIONING_STRATEGY_PAUSED',
 }
 
 enum MeteringMode {

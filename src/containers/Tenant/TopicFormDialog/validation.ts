@@ -177,7 +177,7 @@ export function getTopicFormValidationSchema(minPartitions: number) {
                 );
 
                 if (
-                    autoPartitioning.mode !== AutoPartitioningStrategy.ScaleUp &&
+                    autoPartitioning.mode === AutoPartitioningStrategy.ScaleUpAndDown &&
                     validateRequiredNumber(
                         ctx,
                         downUtilizationPath,

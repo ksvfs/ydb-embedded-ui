@@ -667,9 +667,9 @@ export function prepareYdbCreateQueryColumns(columns: ColumnField[]): Column[] {
 }
 
 export function buildResetQuery(table: string, value: string) {
-    return `ALTER TABLE \`${table}\` RESET (${value});`;
+    return `ALTER TABLE ${prepareEntityName(table)} RESET (${value});`;
 }
 
 export function buildRenameQuery(table: string, value: string) {
-    return `ALTER TABLE \`${table}\` RENAME TO \`${value}\`;`;
+    return `ALTER TABLE ${prepareEntityName(table)} RENAME TO ${prepareEntityName(value)};`;
 }
