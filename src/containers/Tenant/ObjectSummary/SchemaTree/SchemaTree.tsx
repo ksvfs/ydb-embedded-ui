@@ -156,6 +156,38 @@ export function SchemaTree(props: SchemaTreeProps) {
         setCreateDirectoryOpen(true);
     };
 
+    const handleOpenCreateTopicDialog = React.useCallback(
+        (nextParentPath: string) => {
+            openTopicFormDialog({
+                mode: 'create',
+                database,
+                databaseFullPath,
+                parentPath: nextParentPath,
+                onSuccess: (createdPath) => {
+                    onActivePathUpdate(createdPath);
+                    setSchemaTreeKey(createdPath);
+                },
+            });
+        },
+        [database, databaseFullPath, onActivePathUpdate, setSchemaTreeKey],
+    );
+
+    const handleOpenCreateTableDialog = React.useCallback(
+        (nextParentPath: string) => {
+            openTableFormDialog({
+                mode: 'create',
+                database,
+                databaseFullPath,
+                parentPath: nextParentPath,
+                onSuccess: (createdPath) => {
+                    onActivePathUpdate(createdPath);
+                    setSchemaTreeKey(createdPath);
+                },
+            });
+        },
+        [database, databaseFullPath, onActivePathUpdate, setSchemaTreeKey],
+    );
+
     const handleOpenUpdateTopicDialog = React.useCallback(
         (topicPath: string) => {
             openTopicFormDialog({
@@ -200,6 +232,8 @@ export function SchemaTree(props: SchemaTreeProps) {
                 showCreateDirectoryDialog: createDirectoryFeatureAvailable
                     ? handleOpenCreateDirectoryDialog
                     : undefined,
+                showCreateTableDialog: handleOpenCreateTableDialog,
+                showCreateTopicDialog: handleOpenCreateTopicDialog,
                 showUpdateTableDialog: handleOpenUpdateTableDialog,
                 showUpdateTopicDialog: handleOpenUpdateTopicDialog,
                 isMultiTabEnabled,
@@ -224,6 +258,8 @@ export function SchemaTree(props: SchemaTreeProps) {
         onActivePathUpdate,
         handleTenantPageChange,
         createDirectoryFeatureAvailable,
+        handleOpenCreateTableDialog,
+        handleOpenCreateTopicDialog,
         handleOpenUpdateTableDialog,
         handleOpenUpdateTopicDialog,
         input,

@@ -10,7 +10,7 @@
   "title_stream-parameters": "Stream parameters",
   "title_auto-partitioning-settings": "Advanced settings",
 
-  "field_database": "Database",
+  "field_inside": "Inside",
   "field_name": "Name",
   "field_meter-mode": "Pricing Mode",
   "field_shard-write-quota": "Shard throughput",
@@ -21,8 +21,7 @@
   "field_auto-partitioning-up-utilization": "Upper utilization limit",
   "field_data-storage-options": "Data storage mode",
 
-  "context_database-select-info": "Stream will be placed at the database root",
-  "context_field-name": "May contain lowercase Latin letters, numbers, and dashes, and be from {{min}} to 63 characters in length. The first character must be a letter and the last cannot be a dash.",
+  "context_field-name": "May contain slash-separated path segments with lowercase Latin letters, numbers, and dashes. Each segment must be from {{min}} to 63 characters in length, start with a letter, and not end with a dash.",
   "context_meter-mode": "Choice of pricing mode for the data stream. [Read more](https://yandex.cloud/en/docs/data-streams/pricing) about the pricing rules",
   "context_shards-write-quota": "The maximum allowed write speed per segment. [Read more]( https://yandex.cloud/en/docs/data-streams/concepts/glossary#shard-thoughput) about segment throughput",
   "context_throughput-info": "Total throughput: up to {{speed}} (calculated using the formula: segment throughput * number of segments)",
@@ -69,7 +68,7 @@
   "error_number": "Value must be a number",
   "error_int": "Value must be an integer",
   "error_lowercase": "Value must be lowercase",
-  "error_name-regex": "Can contain lowercase Latin letters, numbers, and dashes. The first character must be a letter, and the last character cannot be a dash.",
+  "error_name-regex": "Can contain slash-separated path segments with lowercase Latin letters, numbers, and dashes. Each segment must start with a letter and not end with a dash.",
   "error_min-length": "Value can't be shorter than {{count}} characters",
   "error_max-length": "Value can't be longer than {{count}} characters",
   "error_min-number": "Value must be an integer no less than {{count}}",

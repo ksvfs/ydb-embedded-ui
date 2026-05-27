@@ -12,6 +12,7 @@ const b = cn('ydb-table-form-dialog');
 
 interface GeneralSectionProps {
     mode: FormMode;
+    insidePath?: string;
 }
 
 const tableTypeInfo: Record<TableType, string> = {
@@ -20,7 +21,7 @@ const tableTypeInfo: Record<TableType, string> = {
     document: '',
 };
 
-export function GeneralSection({mode}: GeneralSectionProps) {
+export function GeneralSection({mode, insidePath}: GeneralSectionProps) {
     const {control, formState} = useFormContext<FormValues>();
     const type = useWatch({control, name: 'type'});
 
@@ -38,6 +39,13 @@ export function GeneralSection({mode}: GeneralSectionProps) {
 
     return (
         <FormSection title={i18n('label_section-general')}>
+            {insidePath ? (
+                <FormRow title={i18n('field_inside')}>
+                    <Text as="div" className={b('readonly-text')}>
+                        {`${insidePath}/`}
+                    </Text>
+                </FormRow>
+            ) : null}
             <FormRow title={i18n('field_name')} required htmlFor="table-form-name">
                 <Controller
                     control={control}

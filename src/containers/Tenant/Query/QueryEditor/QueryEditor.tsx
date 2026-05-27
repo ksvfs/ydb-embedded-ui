@@ -544,7 +544,6 @@ export default function QueryEditor({
                 handleGetExplainQueryClick={handleGetExplainQueryClick}
                 highlightedAction={lastUsedQueryAction}
                 database={database}
-                databaseFullPath={databaseFullPath}
                 queryId={result?.queryId}
                 isStreamingEnabled={isStreamingEnabled}
             />

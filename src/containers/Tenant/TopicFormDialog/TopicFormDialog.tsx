@@ -33,6 +33,7 @@ import {cn} from '../../../utils/cn';
 import createToast from '../../../utils/createToast';
 import {prepareCommonErrorMessage} from '../../../utils/errors';
 import {useTypedSelector} from '../../../utils/hooks';
+import {transformPath} from '../ObjectSummary/transformPath';
 
 import i18n from './i18n';
 import {
@@ -330,6 +331,7 @@ function TopicForm({
     mode,
     database,
     databaseFullPath,
+    parentPath,
     initialValues,
     onClose,
     onSuccess,
@@ -337,6 +339,7 @@ function TopicForm({
     mode: TopicFormMode;
     database: string;
     databaseFullPath: string;
+    parentPath?: string;
     initialValues: StreamFormData;
     onClose: () => void;
     onSuccess?: (path: string) => void;
@@ -457,21 +460,20 @@ function TopicForm({
     const autoPartitioningCanBeDisabled =
         mode === 'create' || !initialValues.autoPartitioning.enabled;
     const autoPartitioningRestricted = retentionType === 'size';
+    const insidePath =
+        mode === 'create'
+            ? transformPath(parentPath ?? databaseFullPath, databaseFullPath)
+            : undefined;
 
     return (
         <form onSubmit={handleTopicSubmit} className={b('form')}>
             <Dialog.Body className={b('body')}>
                 <FormSection title={i18n('title_general-parameters')}>
-                    <FormRow title={i18n('field_database')} required={mode === 'create'}>
-                        <div className={b('control-stack')}>
-                            <FixedValue value={database} />
-                            {mode === 'create' ? (
-                                <Text color="secondary">
-                                    {i18n('context_database-select-info')}
-                                </Text>
-                            ) : null}
-                        </div>
-                    </FormRow>
+                    {insidePath ? (
+                        <FormRow title={i18n('field_inside')}>
+                            <FixedValue value={`${insidePath}/`} />
+                        </FormRow>
+                    ) : null}
                     {mode === 'create' ? (
                         <FormRow
                             title={i18n('field_name')}
@@ -977,6 +979,7 @@ function TopicFormDialog({
                 mode={mode}
                 database={database}
                 databaseFullPath={databaseFullPath}
+                parentPath={parentPath}
                 initialValues={initialValues}
                 onClose={onClose}
                 onSuccess={onSuccess}

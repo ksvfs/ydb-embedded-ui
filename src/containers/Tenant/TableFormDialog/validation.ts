@@ -3,6 +3,7 @@ import {z} from 'zod';
 import {
     COLUMN_NAME_REG_EXP,
     ENTITY_NAME_REG_EXP,
+    ENTITY_PATH_REG_EXP,
     MAX_COLUMN_PARTITION_COUNT,
     MAX_PARTITIONS_COUNT,
     MAX_PARTITION_SIZE_MB,
@@ -43,13 +44,18 @@ interface SchemaContext {
     originalInfo?: OriginalTableInfo;
 }
 
-function validateName(data: FormValues, ctx: z.RefinementCtx) {
+function validateName(data: FormValues, ctx: z.RefinementCtx, mode: FormMode) {
     if (!data.name) {
         addIssue(ctx, ['name'], i18n('error_required'));
         return;
     }
-    if (!ENTITY_NAME_REG_EXP.test(data.name)) {
-        addIssue(ctx, ['name'], i18n('error_name-pattern'));
+    const namePattern = mode === 'create' ? ENTITY_PATH_REG_EXP : ENTITY_NAME_REG_EXP;
+    if (!namePattern.test(data.name)) {
+        addIssue(
+            ctx,
+            ['name'],
+            mode === 'create' ? i18n('error_name-path-pattern') : i18n('error_name-pattern'),
+        );
     }
 }
 
@@ -256,7 +262,7 @@ export function buildTableValidationSchema({
 }: SchemaContext): z.ZodType<FormValues> {
     return baseSchema.superRefine((raw, ctx) => {
         const data = raw as FormValues;
-        validateName(data, ctx);
+        validateName(data, ctx, mode);
         validateColumns(data, ctx, mode);
         validateSecondaryIndexes(data, ctx, originalInfo);
         validatePartitioning(data, ctx, mode);

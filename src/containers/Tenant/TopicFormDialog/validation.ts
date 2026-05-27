@@ -44,16 +44,31 @@ const optionalNumber = (schema?: z.ZodNumber) =>
 const topicNameSchema = z
     .string({required_error: i18n('error_required'), invalid_type_error: i18n('error_required')})
     .min(1, i18n('error_required'))
-    .min(NAME_MIN_LENGTH, i18n('error_min-length', {count: NAME_MIN_LENGTH}))
-    .max(NAME_MAX_LENGTH, i18n('error_max-length', {count: NAME_MAX_LENGTH}))
     .superRefine((value, ctx) => {
         if (value !== value.toLowerCase()) {
             addIssue(ctx, [], i18n('error_lowercase'));
             return;
         }
 
-        if (!NAME_REGEX.test(value)) {
+        const segments = value.split('/');
+        if (segments.some((segment) => !segment)) {
             addIssue(ctx, [], i18n('error_name-regex'));
+            return;
+        }
+
+        for (const segment of segments) {
+            if (segment.length < NAME_MIN_LENGTH) {
+                addIssue(ctx, [], i18n('error_min-length', {count: NAME_MIN_LENGTH}));
+                return;
+            }
+            if (segment.length > NAME_MAX_LENGTH) {
+                addIssue(ctx, [], i18n('error_max-length', {count: NAME_MAX_LENGTH}));
+                return;
+            }
+            if (!NAME_REGEX.test(segment)) {
+                addIssue(ctx, [], i18n('error_name-regex'));
+                return;
+            }
         }
     });
 

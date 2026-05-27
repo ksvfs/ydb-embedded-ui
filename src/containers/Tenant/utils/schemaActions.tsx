@@ -1,4 +1,4 @@
-import {CirclePlus, Code, Copy, PlugConnection} from '@gravity-ui/icons';
+import {CirclePlus, Code, Copy, PencilToLine, PlugConnection} from '@gravity-ui/icons';
 import {Flex, Icon, Spin} from '@gravity-ui/uikit';
 import copy from 'copy-to-clipboard';
 import {v4 as uuidv4} from 'uuid';
@@ -70,6 +70,8 @@ interface ActionsAdditionalParams {
     setTenantPage: (page: TenantPage) => void;
     isMultiTabEnabled?: boolean;
     showCreateDirectoryDialog?: (path: string) => void;
+    showCreateTableDialog?: (path: string) => void;
+    showCreateTopicDialog?: (path: string) => void;
     showUpdateTableDialog?: (path: string) => void;
     showUpdateTopicDialog?: (path: string) => void;
     getConfirmation?: () => Promise<boolean>;
@@ -101,6 +103,8 @@ const bindActions = (
         setTenantPage,
         isMultiTabEnabled,
         showCreateDirectoryDialog,
+        showCreateTableDialog,
+        showCreateTopicDialog,
         showUpdateTableDialog,
         showUpdateTopicDialog,
         getConfirmation,
@@ -152,6 +156,16 @@ const bindActions = (
         createDirectory: showCreateDirectoryDialog
             ? () => {
                   showCreateDirectoryDialog(params.path);
+              }
+            : undefined,
+        createTableDialog: showCreateTableDialog
+            ? () => {
+                  showCreateTableDialog(params.path);
+              }
+            : undefined,
+        createTopicDialog: showCreateTopicDialog
+            ? () => {
+                  showCreateTopicDialog(params.path);
               }
             : undefined,
         getConnectToDBDialog: () => getConnectToDBDialog?.({database: params.database}),
@@ -377,15 +391,41 @@ export const getActions =
             DB_SET = [[copyItem, connectToDBItem, monitoringItem], createEntitiesSet];
         }
 
-        if (actions.createDirectory) {
-            const createDirectoryItem = {
-                text: i18n('actions.createDirectory'),
-                action: actions.createDirectory,
-                iconStart: <CirclePlus />,
-            };
+        const createDirectoryItem = actions.createDirectory
+            ? {
+                  text: i18n('actions.createDirectory'),
+                  action: actions.createDirectory,
+                  iconStart: <CirclePlus />,
+              }
+            : undefined;
+        const createTableItem = actions.createTableDialog
+            ? {
+                  text: stripEllipsis(i18n('actions.createTable')),
+                  action: actions.createTableDialog,
+                  iconStart: <CirclePlus />,
+              }
+            : undefined;
+        const createTopicItem = actions.createTopicDialog
+            ? {
+                  text: stripEllipsis(i18n('actions.createTopic')),
+                  action: actions.createTopicDialog,
+                  iconStart: <CirclePlus />,
+              }
+            : undefined;
+        const createDialogItems: typeof createEntitiesSet = [];
+        if (createDirectoryItem) {
+            createDialogItems.push(createDirectoryItem);
+        }
+        if (createTableItem) {
+            createDialogItems.push(createTableItem);
+        }
+        if (createTopicItem) {
+            createDialogItems.push(createTopicItem);
+        }
 
-            DB_SET.splice(1, 0, [createDirectoryItem]);
-            DIR_SET.splice(1, 0, [createDirectoryItem]);
+        if (createDialogItems.length) {
+            DB_SET.splice(1, 0, createDialogItems);
+            DIR_SET.splice(1, 0, createDialogItems);
         }
 
         const showCreateTableItem = getActionWithLoader({
@@ -394,11 +434,21 @@ export const getActions =
             isLoading: additionalEffects.isShowCreateTableLoading,
             iconStart: <Code />,
         });
+        const updateTableItem = {
+            text: i18n('actions.updateTable'),
+            action: actions.updateTable,
+            iconStart: <PencilToLine />,
+        };
+        const updateTopicItem = {
+            text: i18n('actions.updateTopic'),
+            action: actions.updateTopic,
+            iconStart: <PencilToLine />,
+        };
 
         const ROW_TABLE_SET: ActionsSet = [
             [copyItem],
+            [updateTableItem],
             [
-                {text: i18n('actions.updateTable'), action: actions.updateTable},
                 alterRowTableGroupItem,
                 {text: i18n('actions.dropTable'), action: actions.dropTable},
                 getActionWithLoader({
@@ -420,8 +470,8 @@ export const getActions =
         ];
         const COLUMN_TABLE_SET: ActionsSet = [
             [copyItem],
+            [updateTableItem],
             [
-                {text: i18n('actions.updateTable'), action: actions.updateTable},
                 alterColumnTableGroupItem,
                 {text: i18n('actions.dropTable'), action: actions.dropTable},
                 {text: i18n('actions.selectQuery'), action: actions.selectQuery},
@@ -432,8 +482,8 @@ export const getActions =
 
         const TOPIC_SET: ActionsSet = [
             [copyItem],
+            [updateTopicItem],
             [
-                {text: i18n('actions.updateTopic'), action: actions.updateTopic},
                 {text: i18n('actions.alterTopic'), action: actions.alterTopic},
                 {text: i18n('actions.dropTopic'), action: actions.dropTopic},
             ],

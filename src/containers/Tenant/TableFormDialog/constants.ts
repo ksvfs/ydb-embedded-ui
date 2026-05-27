@@ -1,6 +1,7 @@
 export const TABLE_FORM_DIALOG = 'table-form-dialog';
 
 export const ENTITY_NAME_REG_EXP = /^[a-zA-Z0-9._-]+$/;
+export const ENTITY_PATH_REG_EXP = /^[a-zA-Z0-9._-]+(\/[a-zA-Z0-9._-]+)*$/;
 export const COLUMN_NAME_REG_EXP = /^\w[\w_-]*$/;
 
 export const MIN_PARTITION_SIZE_MB = 20;

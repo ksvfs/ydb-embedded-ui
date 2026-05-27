@@ -13,6 +13,7 @@ import type {TEvDescribeSchemeResult} from '../../../types/api/schema/schema';
 import {cn} from '../../../utils/cn';
 import createToast from '../../../utils/createToast';
 import {prepareCommonErrorMessage} from '../../../utils/errors';
+import {transformPath} from '../ObjectSummary/transformPath';
 
 import {
     TABLE_FORM_DIALOG,
@@ -45,6 +46,7 @@ interface CommonDialogProps {
     mode: FormMode;
     database: string;
     databaseFullPath: string;
+    parentPath?: string;
     path?: string;
     onSuccess?: (path: string) => void;
 }
@@ -62,6 +64,7 @@ interface TableFormProps {
     mode: FormMode;
     database: string;
     databaseFullPath: string;
+    parentPath?: string;
     path?: string;
     initialValues: FormValues;
     originalInfo?: OriginalTableInfo;
@@ -70,9 +73,10 @@ interface TableFormProps {
     onSuccess?: (path: string) => void;
 }
 
-function buildTablePath(databaseFullPath: string, name: string) {
-    const trimmedDb = databaseFullPath.replace(/\/+$/, '');
-    return `${trimmedDb}/${name}`;
+function buildTablePath(parentPath: string, name: string) {
+    const trimmedParentPath = parentPath.replace(/\/+$/, '');
+    const trimmedName = name.replace(/^\/+|\/+$/g, '');
+    return `${trimmedParentPath}/${trimmedName}`;
 }
 
 function confirmTtlColumnDeletion() {
@@ -89,6 +93,7 @@ function TableForm({
     mode,
     database,
     databaseFullPath,
+    parentPath,
     path,
     initialValues,
     originalInfo,
@@ -145,7 +150,7 @@ function TableForm({
     const handleFormSubmit = handleSubmit(async (formValues) => {
         try {
             if (mode === 'create') {
-                const fullName = buildTablePath(databaseFullPath, formValues.name);
+                const fullName = buildTablePath(parentPath ?? databaseFullPath, formValues.name);
                 await createTable({
                     database,
                     formValues: {...formValues, name: fullName},
@@ -198,7 +203,14 @@ function TableForm({
         <FormProvider {...methods}>
             <form onSubmit={handleFormSubmit} className={b('form')}>
                 <Dialog.Body className={b('body')}>
-                    <GeneralSection mode={mode} />
+                    <GeneralSection
+                        mode={mode}
+                        insidePath={
+                            mode === 'create'
+                                ? transformPath(parentPath ?? databaseFullPath, databaseFullPath)
+                                : undefined
+                        }
+                    />
                     <YdbColumnsSection
                         mode={mode}
                         types={columnTypes}
@@ -237,6 +249,7 @@ function TableFormDialog({
     mode,
     database,
     databaseFullPath,
+    parentPath,
     path,
     onClose,
     onSuccess,
@@ -292,6 +305,7 @@ function TableFormDialog({
                 mode={mode}
                 database={database}
                 databaseFullPath={databaseFullPath}
+                parentPath={parentPath}
                 path={path}
                 initialValues={initialValues}
                 originalInfo={originalInfo}
