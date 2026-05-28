@@ -44,8 +44,6 @@ export function SettingsSection({mode}: SettingsSectionProps) {
     const minPartitionsError = formState.errors.settings?.autoPartitionMinPartitions?.message;
     const maxPartitionsError = formState.errors.settings?.autoPartitionMaxPartitions?.message;
     const partitionsAtKeysError = formState.errors.settings?.partitionsAtKeys?.message;
-    const autoPartitionBySizeMbError = formState.errors.settings?.autoPartitionBySizeMb?.message;
-
     const [splitDialogState, setSplitDialogState] = React.useState<SplitPointDialogState>({
         open: false,
         index: 0,
@@ -260,16 +258,12 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                         onUpdate={field.onChange}
                                         acceptInputValue={acceptIntegerInput}
                                         parseInputValue={Number}
-                                        emptyValue={Number.NaN}
                                         disabled={!autoPartitionBySize}
-                                        errorMessage={autoPartitionBySizeMbError}
                                         endContent={
                                             <span className={b('input-suffix')}>
                                                 {i18n('value_megabyte')}
                                             </span>
                                         }
-                                        inputWidth={140}
-                                        sliderMinWidth={200}
                                     />
                                 )}
                             />

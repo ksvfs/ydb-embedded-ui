@@ -827,14 +827,14 @@ function TopicForm({
                                     name="storageLimitMb"
                                     control={control}
                                     render={({field}) => {
-                                        const isNan = Number.isNaN(field.value);
-                                        const value = isNan
+                                        const value = Number.isNaN(field.value)
                                             ? STORAGE_LIMIT_MIN_MB
                                             : (field.value ?? STORAGE_LIMIT_MIN_MB);
+
                                         return (
                                             <div className={b('storage-control')}>
                                                 <RangeInputPicker
-                                                    value={isNan ? NaN : value}
+                                                    value={value}
                                                     min={STORAGE_LIMIT_MIN_MB}
                                                     max={STORAGE_LIMIT_MAX_MB}
                                                     step={STORAGE_LIMIT_STEP_MB}
@@ -854,21 +854,14 @@ function TopicForm({
                                                     formatInputValue={(nextValue) =>
                                                         String(fromMbToGb(nextValue))
                                                     }
-                                                    emptyValue={Number.NaN}
                                                     disabled={isSubmitting}
-                                                    errorMessage={errors.storageLimitMb?.message}
                                                     endContent={
                                                         <span className={b('input-details')}>
                                                             {i18n('value_gigabyte')}
                                                         </span>
                                                     }
-                                                    inputWidth={120}
-                                                    sliderMinWidth={160}
                                                 />
-                                                <StorageSizeNote
-                                                    size={isNan ? 0 : value}
-                                                    shards={shards}
-                                                />
+                                                <StorageSizeNote size={value} shards={shards} />
                                             </div>
                                         );
                                     }}

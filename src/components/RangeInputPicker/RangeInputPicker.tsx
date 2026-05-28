@@ -8,11 +8,6 @@ import './RangeInputPicker.scss';
 
 const b = cn('ydb-range-input-picker');
 
-type RangeInputPickerStyle = React.CSSProperties & {
-    '--ydb-range-input-picker-input-width'?: string;
-    '--ydb-range-input-picker-slider-min-width'?: string;
-};
-
 export interface RangeInputPickerProps {
     value?: number;
     min: number;
@@ -20,25 +15,13 @@ export interface RangeInputPickerProps {
     step?: number;
     marks?: number[];
     markFormat?: (value: number) => string;
-    onUpdate: (value: number | undefined) => void;
+    onUpdate: (value: number) => void;
     acceptInputValue?: (value: string) => boolean;
     parseInputValue?: (value: string) => number | undefined;
     formatInputValue?: (value: number) => string;
-    emptyValue?: number | undefined;
     disabled?: boolean;
-    errorMessage?: string;
     endContent?: React.ReactNode;
     className?: string;
-    inputWidth?: number | string;
-    sliderMinWidth?: number | string;
-}
-
-function toDimensionValue(value: number | string | undefined) {
-    if (typeof value === 'number') {
-        return `${value}px`;
-    }
-
-    return value;
 }
 
 function defaultAcceptInputValue(value: string) {
@@ -64,29 +47,56 @@ export function RangeInputPicker({
     acceptInputValue = defaultAcceptInputValue,
     parseInputValue = defaultParseInputValue,
     formatInputValue = defaultFormatInputValue,
-    emptyValue,
     disabled,
-    errorMessage,
     endContent,
     className,
-    inputWidth,
-    sliderMinWidth,
 }: RangeInputPickerProps) {
-    const hasNumericValue = typeof value === 'number' && !Number.isNaN(value);
+    const hasNumericValue = typeof value === 'number' && Number.isFinite(value);
+    const displayValue = hasNumericValue ? formatInputValue(value) : '';
+    const [inputValue, setInputValue] = React.useState(displayValue);
+    const [isInputFocused, setIsInputFocused] = React.useState(false);
 
-    const rootStyle = React.useMemo<RangeInputPickerStyle>(
-        () => ({
-            '--ydb-range-input-picker-input-width': toDimensionValue(inputWidth),
-            '--ydb-range-input-picker-slider-min-width': toDimensionValue(sliderMinWidth),
-        }),
-        [inputWidth, sliderMinWidth],
+    const sliderValue = hasNumericValue ? value : min;
+
+    React.useEffect(() => {
+        if (!isInputFocused) {
+            setInputValue(displayValue);
+        }
+    }, [displayValue, isInputFocused]);
+
+    const normalizeInputValue = React.useCallback(
+        (nextValue: string) => {
+            if (nextValue === '') {
+                return hasNumericValue ? Math.min(Math.max(value, min), max) : min;
+            }
+
+            const parsedValue = parseInputValue(nextValue);
+
+            if (typeof parsedValue !== 'number' || Number.isNaN(parsedValue)) {
+                return hasNumericValue ? Math.min(Math.max(value, min), max) : min;
+            }
+
+            if (parsedValue < min) {
+                return min;
+            }
+
+            if (parsedValue > max) {
+                return max;
+            }
+
+            return parsedValue;
+        },
+        [hasNumericValue, max, min, parseInputValue, value],
     );
 
     const handleSliderUpdate = React.useCallback(
         (nextValue: number | number[]) => {
-            onUpdate(Array.isArray(nextValue) ? nextValue[0] : nextValue);
+            const normalizedValue = Array.isArray(nextValue) ? nextValue[0] : nextValue;
+
+            setInputValue(formatInputValue(normalizedValue));
+            onUpdate(normalizedValue);
         },
-        [onUpdate],
+        [formatInputValue, onUpdate],
     );
 
     const handleInputUpdate = React.useCallback(
@@ -95,15 +105,46 @@ export function RangeInputPicker({
                 return;
             }
 
-            onUpdate(nextValue === '' ? emptyValue : parseInputValue(nextValue));
+            setInputValue(nextValue);
+
+            const parsedValue = parseInputValue(nextValue);
+            if (
+                typeof parsedValue === 'number' &&
+                !Number.isNaN(parsedValue) &&
+                parsedValue >= min &&
+                parsedValue <= max
+            ) {
+                onUpdate(parsedValue);
+            }
         },
-        [acceptInputValue, emptyValue, onUpdate, parseInputValue],
+        [acceptInputValue, max, min, onUpdate, parseInputValue],
     );
 
+    const handleInputFocus = React.useCallback(() => {
+        setIsInputFocused(true);
+    }, []);
+
+    const handleInputBlur = React.useCallback(() => {
+        const normalizedValue = normalizeInputValue(inputValue);
+
+        setIsInputFocused(false);
+        setInputValue(formatInputValue(normalizedValue));
+        onUpdate(normalizedValue);
+    }, [formatInputValue, inputValue, normalizeInputValue, onUpdate]);
+
     return (
-        <div className={b(null, className)} style={rootStyle}>
+        <div className={b(null, className)}>
+            <TextInput
+                value={inputValue}
+                onUpdate={handleInputUpdate}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
+                disabled={disabled}
+                endContent={endContent}
+                className={b('input')}
+            />
             <Slider
-                value={hasNumericValue ? value : min}
+                value={sliderValue}
                 min={min}
                 max={max}
                 step={step}
@@ -112,15 +153,6 @@ export function RangeInputPicker({
                 onUpdate={handleSliderUpdate}
                 disabled={disabled}
                 className={b('slider')}
-            />
-            <TextInput
-                value={hasNumericValue ? formatInputValue(value) : ''}
-                onUpdate={handleInputUpdate}
-                disabled={disabled}
-                validationState={errorMessage ? 'invalid' : undefined}
-                errorMessage={errorMessage}
-                endContent={endContent}
-                className={b('input')}
             />
         </div>
     );
