@@ -86,9 +86,9 @@
         display: grid;
         align-items: center;
         grid-template-columns:
-            minmax(160px, 1.2fr) minmax(140px, 0.8fr) minmax(120px, 0.7fr) minmax(160px, 0.9fr)
-            minmax(200px, 1.2fr) 40px;
-        gap: var(--g-spacing-2);
+            minmax(160px, 1.2fr) minmax(140px, 0.8fr) minmax(115px, 0.5fr) minmax(150px, 0.5fr)
+            minmax(160px, 1.2fr) 40px;
+        gap: var(--g-spacing-3);
 
         font-weight: 500;
 
@@ -106,7 +106,7 @@
     &__columns-table_update &__columns-head,
     &__columns-table_update &__columns-row {
         grid-template-columns:
-            minmax(160px, 1.2fr) minmax(140px, 0.8fr) minmax(160px, 0.9fr) minmax(200px, 1.2fr)
+            minmax(160px, 1.2fr) minmax(140px, 0.8fr) minmax(150px, 0.5fr) minmax(160px, 1.2fr)
             40px;
     }
 
@@ -114,9 +114,9 @@
         display: grid;
         align-items: center;
         grid-template-columns:
-            minmax(160px, 1.2fr) minmax(140px, 0.8fr) minmax(120px, 0.7fr) minmax(160px, 0.9fr)
-            minmax(200px, 1.2fr) 40px;
-        gap: var(--g-spacing-2);
+            minmax(160px, 1.2fr) minmax(140px, 0.8fr) minmax(115px, 0.5fr) minmax(150px, 0.5fr)
+            minmax(160px, 1.2fr) 40px;
+        gap: var(--g-spacing-3);
     }
 
     &__columns-row_readonly {
