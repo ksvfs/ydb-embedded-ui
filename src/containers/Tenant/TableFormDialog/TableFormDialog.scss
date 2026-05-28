@@ -69,7 +69,11 @@
         min-width: 0;
     }
 
-    &__control {
+    &__control,
+    &__control.g-text-input,
+    &__control.g-select,
+    &__control.ydb-table-form-column-selector,
+    &__control.ydb-range-input-picker {
         width: 320px;
         max-width: 100%;
     }
@@ -175,10 +179,8 @@
 
     &__indexes-head {
         display: grid;
-        grid-template-columns: minmax(160px, 1fr) minmax(280px, 2fr) 40px;
+        grid-template-columns: minmax(0, 320px) minmax(0, 320px) auto;
         gap: var(--g-spacing-2);
-
-        padding: 0 var(--g-spacing-1);
 
         font-weight: 500;
 
@@ -188,10 +190,10 @@
     &__indexes-row {
         display: grid;
         align-items: center;
-        grid-template-columns: minmax(160px, 1fr) minmax(280px, 2fr) 40px;
+        grid-template-columns: minmax(0, 320px) minmax(0, 320px) auto;
         gap: var(--g-spacing-2);
 
-        padding: var(--g-spacing-1);
+        padding: var(--g-spacing-1) 0;
     }
 
     &__indexes-row_deleting {
@@ -225,14 +227,19 @@
         display: flex;
         align-items: flex-start;
         gap: var(--g-spacing-2);
+
+        width: 320px;
+        max-width: 100%;
     }
 
     &__ttl-lifetime-input {
-        max-width: 160px;
+        flex: 1;
+
+        min-width: 0;
     }
 
     &__ttl-lifetime-select {
-        max-width: 160px;
+        flex: 0 0 120px;
     }
 
     &__split-points {
@@ -282,10 +289,6 @@
             align-items: center;
             gap: var(--g-spacing-1);
         }
-    }
-
-    &__disclosure-summary {
-        margin-bottom: var(--g-spacing-1);
     }
 
     &__checkbox-control {

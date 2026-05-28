@@ -251,7 +251,7 @@ export function SettingsSection({mode}: SettingsSectionProps) {
             <FormSection>
                 <Disclosure
                     summary={
-                        <Text as="div" variant="subheader-2" className={b('disclosure-summary')}>
+                        <Text as="span" variant="subheader-2">
                             {i18n('label_section-advanced')}
                         </Text>
                     }

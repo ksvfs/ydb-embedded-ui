@@ -67,7 +67,9 @@
         gap: var(--g-spacing-1);
     }
 
-    &__control {
+    &__control,
+    &__control.g-text-input,
+    &__control.g-select {
         width: 320px;
         max-width: 100%;
     }
