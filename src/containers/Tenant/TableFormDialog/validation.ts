@@ -26,11 +26,9 @@ const addIssue = (ctx: z.RefinementCtx, path: Array<string | number>, message: s
 const baseSchema = z
     .object({
         name: z.string(),
-        type: z.union([z.literal('row'), z.literal('column'), z.literal('document')]),
+        type: z.union([z.literal('row'), z.literal('column')]),
         columns: z.array(z.any()),
-        documentColumns: z.array(z.any()),
         secondaryIndexes: z.array(z.any()),
-        documentSecondaryIndexes: z.array(z.any()),
         deletedColumns: z.array(z.any()),
         updatedSecondaryIndexes: z.array(z.any()),
         partitionKey: z.array(z.string()),

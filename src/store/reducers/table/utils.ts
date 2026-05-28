@@ -608,9 +608,7 @@ export function prepareFormValues(response: TEvDescribeSchemeResult): FormValues
             columns: (desc.Schema?.Columns ?? []).map((col, i) =>
                 rawColumnToColumnField(col as TColumnDescription, keyColumnNames, i),
             ),
-            documentColumns: [],
             secondaryIndexes: [],
-            documentSecondaryIndexes: [],
             deletedColumns: [],
             updatedSecondaryIndexes: [],
             partitionKey: desc.Sharding?.HashSharding?.Columns ?? [],
@@ -628,13 +626,11 @@ export function prepareFormValues(response: TEvDescribeSchemeResult): FormValues
         columns: (desc?.Columns ?? []).map((col, i) =>
             rawColumnToColumnField(col, keyColumnNames, i),
         ),
-        documentColumns: [],
         secondaryIndexes: (desc?.TableIndexes ?? []).map((idx) => ({
             name: idx.Name ?? '',
             key: idx.KeyColumnNames ?? [],
             cover: idx.DataColumnNames,
         })),
-        documentSecondaryIndexes: [],
         deletedColumns: [],
         updatedSecondaryIndexes: [],
         partitionKey: [],

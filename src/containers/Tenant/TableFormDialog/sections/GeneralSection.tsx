@@ -18,7 +18,6 @@ interface GeneralSectionProps {
 const tableTypeInfo: Record<TableType, string> = {
     row: i18n('label_info-table-type_row'),
     column: i18n('label_info-table-type_column'),
-    document: '',
 };
 
 export function GeneralSection({mode, insidePath}: GeneralSectionProps) {

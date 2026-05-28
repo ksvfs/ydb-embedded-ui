@@ -1,10 +1,4 @@
-type TableType = 'row' | 'column' | 'document';
-
-interface DocumentSecondaryIndex {
-    name: string;
-    shardColumn: string;
-    sortColumn?: string;
-}
+type TableType = 'row' | 'column';
 
 interface EntitySchemeEntry {
     type: string;
@@ -146,8 +140,6 @@ export interface Column {
     autoincrement?: boolean; // column table
     key?: boolean; // column table
     keyOrder?: number; // column table
-    shardKey?: boolean; // document table
-    sortKey?: boolean; // document table
 
     isDeletable?: boolean;
     isDisabled?: boolean; // to block a change, for example, if the type is unknown
@@ -220,9 +212,7 @@ export interface FormValues {
     name: string;
     type: TableType;
     columns: ColumnField[];
-    documentColumns: ColumnField[];
     secondaryIndexes: SecondaryIndex[];
-    documentSecondaryIndexes: (DocumentSecondaryIndex & {_id: string})[];
     deletedColumns: Column[];
     updatedSecondaryIndexes: UpdatedSecondaryIndex[];
     partitionKey: string[];
