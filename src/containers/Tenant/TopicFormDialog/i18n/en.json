@@ -12,7 +12,6 @@
 
   "field_inside": "Inside",
   "field_name": "Name",
-  "field_meter-mode": "Pricing Mode",
   "field_shard-write-quota": "Shard throughput",
   "field_auto-partitioning": "Autopartitioning",
   "field_shards": "Shards",
@@ -22,7 +21,6 @@
   "field_data-storage-options": "Data storage mode",
 
   "context_field-name": "May contain slash-separated path segments with lowercase Latin letters, numbers, and dashes. Each segment must be from {{min}} to 63 characters in length, start with a letter, and not end with a dash.",
-  "context_meter-mode": "Choice of pricing mode for the data stream. [Read more](https://yandex.cloud/en/docs/data-streams/pricing) about the pricing rules",
   "context_shards-write-quota": "The maximum allowed write speed per segment. [Read more]( https://yandex.cloud/en/docs/data-streams/concepts/glossary#shard-thoughput) about segment throughput",
   "context_throughput-info": "Total throughput: up to {{speed}} (calculated using the formula: segment throughput * number of segments)",
   "context_throughput-info-range": "Total throughput: from {{from}} to {{to}} (calculated using the formula: segment throughput * number of segments)",
@@ -42,8 +40,6 @@
   "confirm_auto-partitioning-title": "Enable autopartitioning?",
   "confirm_auto-partitioning-message": "The Kafka protocol does not support topic auto-partitioning. If you enable auto-partitioning, you will not be able to work with the topics you create using the Kafka protocol. You can not disabling auto-partitioning for a specific topic.",
 
-  "value_reserved-capacity": "Reserved capacity",
-  "value_request-units": "Actual usage",
   "value_auto-partitioning-scale-up": "Scale up",
   "value_auto-partitioning-paused": "Paused",
   "value_min": "Minimum",

@@ -28,7 +28,7 @@ import {RangeInputPicker} from '../../../components/RangeInputPicker';
 import {useClusterWithProxy} from '../../../store/reducers/cluster/cluster';
 import {selectTopicFormData, topicApi} from '../../../store/reducers/topic/topic';
 import type {StreamFormData} from '../../../store/reducers/topic/utils';
-import {AutoPartitioningStrategy, MeteringMode} from '../../../store/reducers/topic/utils';
+import {AutoPartitioningStrategy} from '../../../store/reducers/topic/utils';
 import {cn} from '../../../utils/cn';
 import createToast from '../../../utils/createToast';
 import {prepareCommonErrorMessage} from '../../../utils/errors';
@@ -88,14 +88,6 @@ const retentionHoursOptions: SelectOption[] = [
 const STORAGE_LIMIT_MIN_MB = 50 * 1024;
 const STORAGE_LIMIT_MAX_MB = 400 * 1024;
 const STORAGE_LIMIT_STEP_MB = 1024;
-
-const meterModeOptions = [
-    {
-        value: MeteringMode.Provisioned,
-        content: i18n('value_reserved-capacity'),
-    },
-    {value: MeteringMode.OnDemand, content: i18n('value_request-units')},
-];
 
 function showAutoPartitioningConfirmation() {
     return NiceModal.show(CONFIRMATION_DIALOG, {
@@ -426,16 +418,11 @@ function TopicForm({
     }, [autoPartitioningEnabled, maxPartitions, minPartitions, shards, writeQuota]);
 
     const handleTopicSubmit = handleSubmit(async (data) => {
-        const formData = {
-            ...data,
-            meterMode: data.meterMode ?? MeteringMode.OnDemand,
-        };
-
         try {
             if (mode === 'create') {
-                await createTopic({database, formData}).unwrap();
+                await createTopic({database, formData: data}).unwrap();
             } else {
-                await updateTopic({database, formData}).unwrap();
+                await updateTopic({database, formData: data}).unwrap();
             }
 
             createToast({
@@ -445,7 +432,7 @@ function TopicForm({
                 theme: 'success',
                 autoHiding: 5000,
             });
-            onSuccess?.(buildFullTopicPath(formData, databaseFullPath));
+            onSuccess?.(buildFullTopicPath(data, databaseFullPath));
         } catch (error) {
             createToast({
                 name: `topic-${mode}-error`,
@@ -502,28 +489,6 @@ function TopicForm({
                             <FixedValue value={initialValues.name} />
                         </FormRow>
                     )}
-                    <FormRow title={i18n('field_meter-mode')} note={i18n('context_meter-mode')}>
-                        <Controller
-                            name="meterMode"
-                            control={control}
-                            render={({field}) => (
-                                <SegmentedRadioGroup
-                                    value={field.value}
-                                    onUpdate={field.onChange}
-                                    disabled={isSubmitting}
-                                >
-                                    {meterModeOptions.map((option) => (
-                                        <SegmentedRadioGroup.Option
-                                            key={option.value}
-                                            value={option.value}
-                                        >
-                                            {option.content}
-                                        </SegmentedRadioGroup.Option>
-                                    ))}
-                                </SegmentedRadioGroup>
-                            )}
-                        />
-                    </FormRow>
                 </FormSection>
                 <FormSection title={i18n('title_stream-parameters')}>
                     <FormRow

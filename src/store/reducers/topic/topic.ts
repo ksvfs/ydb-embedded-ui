@@ -10,12 +10,7 @@ import type {RootState} from '../../defaultStore';
 import {api} from '../api';
 
 import type {StreamFormData} from './utils';
-import {
-    AutoPartitioningStrategy,
-    MeteringMode,
-    buildAlterTopicQuery,
-    buildCreateTopicQuery,
-} from './utils';
+import {AutoPartitioningStrategy, buildAlterTopicQuery, buildCreateTopicQuery} from './utils';
 
 export const TOPIC_MESSAGE_SIZE_LIMIT = 100;
 
@@ -225,23 +220,10 @@ function parseDurationToSeconds(duration?: string | IProtobufTimeObject): number
     return undefined;
 }
 
-function mapApiMeteringModeToFormMode(apiMode?: string): MeteringMode {
-    switch (apiMode) {
-        case 'METERING_MODE_REQUEST_UNITS':
-            return MeteringMode.OnDemand;
-        case 'METERING_MODE_RESERVED_CAPACITY':
-        case 'METERING_MODE_UNSPECIFIED':
-        default:
-            return MeteringMode.Provisioned;
-    }
-}
-
 function mapApiAutoPartitioningStrategy(apiStrategy?: string): AutoPartitioningStrategy {
     switch (apiStrategy) {
         case 'AUTO_PARTITIONING_STRATEGY_PAUSED':
             return AutoPartitioningStrategy.Paused;
-        case 'AUTO_PARTITIONING_STRATEGY_SCALE_UP_AND_DOWN':
-            return AutoPartitioningStrategy.ScaleUpAndDown;
         case 'AUTO_PARTITIONING_STRATEGY_SCALE_UP':
             return AutoPartitioningStrategy.ScaleUp;
         case 'AUTO_PARTITIONING_STRATEGY_DISABLED':
@@ -299,7 +281,6 @@ export const selectTopicFormData = createSelector(
             writeQuota: writeQuotaKb,
             retentionHours: retentionHours || 4,
             storageLimitMb: retentionStorageMb || 50 * 1024,
-            meterMode: mapApiMeteringModeToFormMode(topicData.metering_mode),
             retentionType: retentionStorageMb > 0 ? 'size' : 'time',
             autoPartitioning: {
                 enabled: autoPartitioningEnabled,
@@ -311,7 +292,6 @@ export const selectTopicFormData = createSelector(
                 stabilizationWindow: parseDurationToSeconds(
                     partitionWriteSpeed?.stabilization_window,
                 ),
-                downUtilization: partitionWriteSpeed?.down_utilization_percent,
                 upUtilization: partitionWriteSpeed?.up_utilization_percent,
             },
         } as StreamFormData;

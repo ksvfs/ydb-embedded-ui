@@ -1,5 +1,5 @@
 import type {StreamFormData} from '../../../store/reducers/topic/utils';
-import {AutoPartitioningStrategy, MeteringMode} from '../../../store/reducers/topic/utils';
+import {AutoPartitioningStrategy} from '../../../store/reducers/topic/utils';
 import {UNBREAKABLE_GAP} from '../../../utils/constants';
 
 export const TOPIC_FORM_DIALOG = 'topic-form-dialog';
@@ -13,14 +13,12 @@ export const DEFAULT_TOPIC_FORM_VALUES: StreamFormData = {
     retentionHours: 4,
     storageLimitMb: 50 * 1024,
     retentionType: 'time',
-    meterMode: MeteringMode.OnDemand,
     autoPartitioning: {
         enabled: false,
         mode: AutoPartitioningStrategy.ScaleUp,
         minPartitions: 1,
         maxPartitions: 2,
         stabilizationWindow: 300,
-        downUtilization: 30,
         upUtilization: 90,
     },
 };

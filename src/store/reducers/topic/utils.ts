@@ -1,13 +1,7 @@
-export enum MeteringMode {
-    Provisioned = 'reserved_capacity',
-    OnDemand = 'request_units',
-}
-
 export enum AutoPartitioningStrategy {
     Disabled = 'AUTO_PARTITIONING_STRATEGY_DISABLED',
     Paused = 'AUTO_PARTITIONING_STRATEGY_PAUSED',
     ScaleUp = 'AUTO_PARTITIONING_STRATEGY_SCALE_UP',
-    ScaleUpAndDown = 'AUTO_PARTITIONING_STRATEGY_SCALE_UP_AND_DOWN',
 }
 
 export interface StreamFormData {
@@ -18,32 +12,21 @@ export interface StreamFormData {
     writeQuota: number;
     retentionHours: number;
     storageLimitMb: number;
-    meterMode: MeteringMode;
     retentionType: 'size' | 'time';
     autoPartitioning: {
         enabled: boolean;
-        mode:
-            | AutoPartitioningStrategy.ScaleUp
-            | AutoPartitioningStrategy.ScaleUpAndDown
-            | AutoPartitioningStrategy.Paused;
+        mode: AutoPartitioningStrategy.ScaleUp | AutoPartitioningStrategy.Paused;
         minPartitions?: number;
         maxPartitions?: number;
         stabilizationWindow?: number;
-        downUtilization?: number;
         upUtilization?: number;
     };
 }
-
-const METERING_MODE_TO_YQL: Record<MeteringMode, string> = {
-    [MeteringMode.Provisioned]: 'RESERVED_CAPACITY',
-    [MeteringMode.OnDemand]: 'REQUEST_UNITS',
-};
 
 const AUTO_PARTITIONING_STRATEGY_TO_YQL: Record<AutoPartitioningStrategy, string> = {
     [AutoPartitioningStrategy.Disabled]: 'disabled',
     [AutoPartitioningStrategy.Paused]: 'paused',
     [AutoPartitioningStrategy.ScaleUp]: 'scale_up',
-    [AutoPartitioningStrategy.ScaleUpAndDown]: 'scale_up_and_down',
 };
 
 const SIZE_RETENTION_PERIOD_HOURS = 24 * 7;
@@ -65,15 +48,8 @@ function buildTopicPath(path: string | undefined, name: string | undefined) {
 }
 
 function buildTopicSettings(formData: StreamFormData): string[] {
-    const {
-        shards,
-        writeQuota,
-        retentionHours,
-        storageLimitMb,
-        meterMode,
-        retentionType,
-        autoPartitioning,
-    } = formData;
+    const {shards, writeQuota, retentionHours, storageLimitMb, retentionType, autoPartitioning} =
+        formData;
 
     const settings: string[] = [];
 
@@ -99,8 +75,6 @@ function buildTopicSettings(formData: StreamFormData): string[] {
 
     settings.push(`PARTITION_WRITE_SPEED_BYTES_PER_SECOND = ${writeQuota * 1024}`);
 
-    settings.push(`METERING_MODE = '${METERING_MODE_TO_YQL[meterMode]}'`);
-
     const strategy = autoPartitioning.enabled
         ? AUTO_PARTITIONING_STRATEGY_TO_YQL[autoPartitioning.mode]
         : AUTO_PARTITIONING_STRATEGY_TO_YQL[AutoPartitioningStrategy.Disabled];
@@ -115,11 +89,6 @@ function buildTopicSettings(formData: StreamFormData): string[] {
         if (autoPartitioning.upUtilization !== undefined) {
             settings.push(
                 `AUTO_PARTITIONING_UP_UTILIZATION_PERCENT = ${autoPartitioning.upUtilization}`,
-            );
-        }
-        if (autoPartitioning.downUtilization !== undefined) {
-            settings.push(
-                `AUTO_PARTITIONING_DOWN_UTILIZATION_PERCENT = ${autoPartitioning.downUtilization}`,
             );
         }
     }

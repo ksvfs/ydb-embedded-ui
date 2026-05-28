@@ -1,7 +1,7 @@
 import {z} from 'zod';
 
 import type {StreamFormData} from '../../../store/reducers/topic/utils';
-import {AutoPartitioningStrategy, MeteringMode} from '../../../store/reducers/topic/utils';
+import {AutoPartitioningStrategy} from '../../../store/reducers/topic/utils';
 
 import i18n from './i18n';
 import {formatBandwidthBytes} from './utils';
@@ -103,13 +103,11 @@ export function getTopicFormValidationSchema(minPartitions: number) {
                 writeQuota: requiredNumber(),
                 retentionHours: optionalNumber(),
                 storageLimitMb: optionalNumber(),
-                meterMode: z.nativeEnum(MeteringMode).optional(),
                 retentionType: z.enum(['size', 'time']),
                 autoPartitioning: z.object({
                     enabled: z.boolean(),
                     mode: z.union([
                         z.literal(AutoPartitioningStrategy.ScaleUp),
-                        z.literal(AutoPartitioningStrategy.ScaleUpAndDown),
                         z.literal(AutoPartitioningStrategy.Paused),
                     ]),
                     minPartitions: optionalNumber(
@@ -123,7 +121,6 @@ export function getTopicFormValidationSchema(minPartitions: number) {
                             .min(1, MIN_ONE_MESSAGE),
                     ),
                     stabilizationWindow: optionalNumber(),
-                    downUtilization: optionalNumber(),
                     upUtilization: optionalNumber(
                         z
                             .number({invalid_type_error: i18n('error_number')})
@@ -132,7 +129,6 @@ export function getTopicFormValidationSchema(minPartitions: number) {
                 }),
             })
             // The form mirrors Cloud Console cross-field validation rules in one place.
-            // eslint-disable-next-line complexity
             .superRefine((data, ctx) => {
                 if (data.shards < minPartitions) {
                     addIssue(ctx, ['shards'], i18n('error_min-number', {count: minPartitions}));
@@ -163,7 +159,6 @@ export function getTopicFormValidationSchema(minPartitions: number) {
                 const minPath = ['autoPartitioning', 'minPartitions'];
                 const maxPath = ['autoPartitioning', 'maxPartitions'];
                 const stabilizationPath = ['autoPartitioning', 'stabilizationWindow'];
-                const downUtilizationPath = ['autoPartitioning', 'downUtilization'];
                 const upUtilizationPath = ['autoPartitioning', 'upUtilization'];
 
                 if (
@@ -190,39 +185,6 @@ export function getTopicFormValidationSchema(minPartitions: number) {
                     stabilizationPath,
                     autoPartitioning.stabilizationWindow,
                 );
-
-                if (
-                    autoPartitioning.mode === AutoPartitioningStrategy.ScaleUpAndDown &&
-                    validateRequiredNumber(
-                        ctx,
-                        downUtilizationPath,
-                        autoPartitioning.downUtilization,
-                    )
-                ) {
-                    if (
-                        autoPartitioning.downUtilization !== undefined &&
-                        autoPartitioning.downUtilization < 0
-                    ) {
-                        addIssue(ctx, downUtilizationPath, i18n('error_min-number', {count: 0}));
-                    }
-                    if (
-                        autoPartitioning.downUtilization !== undefined &&
-                        autoPartitioning.downUtilization > 99
-                    ) {
-                        addIssue(ctx, downUtilizationPath, i18n('error_max-number', {count: 99}));
-                    }
-                    if (
-                        autoPartitioning.downUtilization !== undefined &&
-                        autoPartitioning.upUtilization !== undefined &&
-                        autoPartitioning.downUtilization >= autoPartitioning.upUtilization
-                    ) {
-                        addIssue(
-                            ctx,
-                            downUtilizationPath,
-                            i18n('error_less-than-number', {count: autoPartitioning.upUtilization}),
-                        );
-                    }
-                }
 
                 validateRequiredNumber(ctx, upUtilizationPath, autoPartitioning.upUtilization);
             }) as z.ZodType<StreamFormData>
