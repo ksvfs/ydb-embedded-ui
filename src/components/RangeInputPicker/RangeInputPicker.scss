@@ -1,34 +1,22 @@
 .ydb-range-input-picker {
-    position: relative;
-
     width: 100%;
 
     &__input {
         width: 100%;
-        max-width: 100%;
     }
 
     &__slider {
         position: relative;
         z-index: 1;
 
-        margin-top: -10px;
-        padding: 0 9px;
-    }
+        margin-top: -8px;
 
-    &__slider .g-base-slider {
-        margin-bottom: 0;
-    }
+        .g-slider__top {
+            display: none;
+        }
 
-    &__slider .g-base-slider__rail {
-        visibility: hidden;
-    }
-
-    &__slider .g-base-slider__track {
-        background-color: var(--g-color-base-brand);
-    }
-
-    &__input .g-text-input__control {
-        padding-bottom: 8px;
+        .g-base-slider__rail {
+            visibility: hidden;
+        }
     }
 }

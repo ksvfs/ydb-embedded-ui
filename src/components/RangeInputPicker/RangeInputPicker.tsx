@@ -24,6 +24,16 @@ export interface RangeInputPickerProps {
     className?: string;
 }
 
+function clamp(value: number, min: number, max: number) {
+    if (value < min) {
+        return min;
+    }
+    if (value > max) {
+        return max;
+    }
+    return value;
+}
+
 function defaultAcceptInputValue(value: string) {
     return /^\d*$/.test(value);
 }
@@ -53,10 +63,9 @@ export function RangeInputPicker({
 }: RangeInputPickerProps) {
     const hasNumericValue = typeof value === 'number' && Number.isFinite(value);
     const displayValue = hasNumericValue ? formatInputValue(value) : '';
+
     const [inputValue, setInputValue] = React.useState(displayValue);
     const [isInputFocused, setIsInputFocused] = React.useState(false);
-
-    const sliderValue = hasNumericValue ? value : min;
 
     React.useEffect(() => {
         if (!isInputFocused) {
@@ -64,30 +73,13 @@ export function RangeInputPicker({
         }
     }, [displayValue, isInputFocused]);
 
-    const normalizeInputValue = React.useCallback(
-        (nextValue: string) => {
-            if (nextValue === '') {
-                return hasNumericValue ? Math.min(Math.max(value, min), max) : min;
-            }
-
-            const parsedValue = parseInputValue(nextValue);
-
-            if (typeof parsedValue !== 'number' || Number.isNaN(parsedValue)) {
-                return hasNumericValue ? Math.min(Math.max(value, min), max) : min;
-            }
-
-            if (parsedValue < min) {
-                return min;
-            }
-
-            if (parsedValue > max) {
-                return max;
-            }
-
-            return parsedValue;
-        },
-        [hasNumericValue, max, min, parseInputValue, value],
-    );
+    const sliderValue = React.useMemo(() => {
+        const parsedDraft = parseInputValue(inputValue);
+        if (typeof parsedDraft === 'number' && !Number.isNaN(parsedDraft)) {
+            return clamp(parsedDraft, min, max);
+        }
+        return hasNumericValue ? clamp(value, min, max) : min;
+    }, [hasNumericValue, inputValue, max, min, parseInputValue, value]);
 
     const handleSliderUpdate = React.useCallback(
         (nextValue: number | number[]) => {
@@ -125,12 +117,24 @@ export function RangeInputPicker({
     }, []);
 
     const handleInputBlur = React.useCallback(() => {
-        const normalizedValue = normalizeInputValue(inputValue);
+        const fallbackValue = hasNumericValue ? clamp(value, min, max) : min;
+
+        let normalizedValue: number;
+        if (inputValue === '') {
+            normalizedValue = fallbackValue;
+        } else {
+            const parsedValue = parseInputValue(inputValue);
+            if (typeof parsedValue !== 'number' || Number.isNaN(parsedValue)) {
+                normalizedValue = fallbackValue;
+            } else {
+                normalizedValue = clamp(parsedValue, min, max);
+            }
+        }
 
         setIsInputFocused(false);
         setInputValue(formatInputValue(normalizedValue));
         onUpdate(normalizedValue);
-    }, [formatInputValue, inputValue, normalizeInputValue, onUpdate]);
+    }, [formatInputValue, hasNumericValue, inputValue, max, min, onUpdate, parseInputValue, value]);
 
     return (
         <div className={b(null, className)}>
@@ -148,6 +152,7 @@ export function RangeInputPicker({
                 min={min}
                 max={max}
                 step={step}
+                size="s"
                 marks={marks}
                 markFormat={markFormat}
                 onUpdate={handleSliderUpdate}
