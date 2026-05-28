@@ -14,6 +14,7 @@ interface ColumnSelectorFieldProps {
     onChange: (value: string[]) => void;
     columns: Column[];
     invalid?: boolean;
+    className?: string;
 }
 
 const b = cn('ydb-table-form-column-selector');
@@ -158,7 +159,13 @@ function ItemSelector({items, value, onUpdate}: ItemSelectorProps) {
     );
 }
 
-export function ColumnSelectorField({value, onChange, columns, invalid}: ColumnSelectorFieldProps) {
+export function ColumnSelectorField({
+    value,
+    onChange,
+    columns,
+    invalid,
+    className,
+}: ColumnSelectorFieldProps) {
     const [open, setOpen] = React.useState(false);
     const [currentValue, setCurrentValue] = React.useState<string[] | undefined>(undefined);
     const controlRef = React.useRef<HTMLButtonElement>(null);
@@ -199,7 +206,7 @@ export function ColumnSelectorField({value, onChange, columns, invalid}: ColumnS
     }, []);
 
     return (
-        <div className={b()}>
+        <div className={b(null, className)}>
             <button
                 ref={controlRef}
                 type="button"

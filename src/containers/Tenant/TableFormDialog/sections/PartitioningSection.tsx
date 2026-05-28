@@ -41,6 +41,7 @@ export function PartitioningSection({pkTypes}: PartitioningSectionProps) {
                                 onChange={field.onChange}
                                 columns={pkColumns}
                                 invalid={Boolean(partitionKeyError)}
+                                className={b('control')}
                             />
                             <FormFieldError message={partitionKeyError} />
                         </React.Fragment>

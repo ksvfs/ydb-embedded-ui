@@ -64,6 +64,7 @@ export function SplitPointDialog({state, onClose, onSubmit}: SplitPointDialogPro
                             <span className={b('split-point-type')}> ({row.column.type})</span>
                         </div>
                         <TextInput
+                            className={b('control')}
                             value={row.value}
                             onUpdate={(value) => handleChange(row.id, value)}
                         />

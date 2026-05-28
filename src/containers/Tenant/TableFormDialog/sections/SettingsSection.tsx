@@ -173,6 +173,7 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                             className={b('split-point-row')}
                                         >
                                             <TextInput
+                                                className={b('control')}
                                                 value={display ? `(${display})` : ''}
                                                 controlProps={{readOnly: true}}
                                             />
@@ -221,13 +222,11 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                         control={control}
                         name="settings.autoPartitionBySize"
                         render={({field}) => (
-                            <Checkbox
-                                checked={Boolean(field.value)}
-                                onUpdate={field.onChange}
-                                className={b('checkbox-control')}
-                            >
-                                {i18n('label_enable')}
-                            </Checkbox>
+                            <div className={b('checkbox-control')}>
+                                <Checkbox checked={Boolean(field.value)} onUpdate={field.onChange}>
+                                    {i18n('label_enable')}
+                                </Checkbox>
+                            </div>
                         )}
                     />
                 </FormRow>
@@ -239,13 +238,11 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                         control={control}
                         name="settings.autoPartitionByLoad"
                         render={({field}) => (
-                            <Checkbox
-                                checked={Boolean(field.value)}
-                                onUpdate={field.onChange}
-                                className={b('checkbox-control')}
-                            >
-                                {i18n('label_enable')}
-                            </Checkbox>
+                            <div className={b('checkbox-control')}>
+                                <Checkbox checked={Boolean(field.value)} onUpdate={field.onChange}>
+                                    {i18n('label_enable')}
+                                </Checkbox>
+                            </div>
                         )}
                     />
                 </FormRow>
@@ -341,13 +338,14 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                 control={control}
                                 name="settings.keyBloomFilter"
                                 render={({field}) => (
-                                    <Checkbox
-                                        checked={Boolean(field.value)}
-                                        onUpdate={field.onChange}
-                                        className={b('checkbox-control')}
-                                    >
-                                        {i18n('label_enable')}
-                                    </Checkbox>
+                                    <div className={b('checkbox-control')}>
+                                        <Checkbox
+                                            checked={Boolean(field.value)}
+                                            onUpdate={field.onChange}
+                                        >
+                                            {i18n('label_enable')}
+                                        </Checkbox>
+                                    </div>
                                 )}
                             />
                         </FormRow>

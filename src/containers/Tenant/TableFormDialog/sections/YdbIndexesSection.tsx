@@ -117,6 +117,7 @@ export function YdbIndexesSection({mode, originalInfo}: YdbIndexesSectionProps) 
                                     name={`secondaryIndexes.${index}.name`}
                                     render={({field: nameField}) => (
                                         <TextInput
+                                            className={b('control')}
                                             value={nameField.value ?? ''}
                                             onUpdate={nameField.onChange}
                                             validationState={nameError ? 'invalid' : undefined}
@@ -136,6 +137,7 @@ export function YdbIndexesSection({mode, originalInfo}: YdbIndexesSectionProps) 
                                                 onChange={keyField.onChange}
                                                 columns={availableColumns}
                                                 invalid={Boolean(keyError)}
+                                                className={b('control')}
                                             />
                                             {keyError ? (
                                                 <Text color="danger" variant="body-1">
@@ -200,6 +202,7 @@ function UpdatedIndexRow({
                         name={`updatedSecondaryIndexes.${index}.newName`}
                         render={({field}) => (
                             <TextInput
+                                className={b('control')}
                                 value={field.value ?? ''}
                                 onUpdate={field.onChange}
                                 validationState={nameError ? 'invalid' : undefined}
