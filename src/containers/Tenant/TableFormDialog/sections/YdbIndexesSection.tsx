@@ -157,7 +157,7 @@ export function YdbIndexesSection({mode, originalInfo}: YdbIndexesSectionProps) 
                     );
                 })}
 
-                <div className={b('columns-actions')}>
+                <div>
                     <Button onClick={handleAddIndex}>
                         <Icon data={Plus} size={16} />
                         {i18n('button_add-index')}

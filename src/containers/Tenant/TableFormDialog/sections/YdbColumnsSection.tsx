@@ -209,7 +209,7 @@ export function YdbColumnsSection({
 
                 <FormFieldError message={columnsError} />
 
-                <div className={b('columns-actions')}>
+                <div>
                     <Button onClick={handleAddColumn}>
                         <Icon data={Plus} size={16} />
                         {i18n('button_add-column')}

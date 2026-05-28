@@ -1,4 +1,4 @@
-import {CirclePlus, Code, Copy, PencilToLine, PlugConnection} from '@gravity-ui/icons';
+import {CirclePlus, Code, Copy, Pencil, PlugConnection} from '@gravity-ui/icons';
 import {Flex, Icon, Spin} from '@gravity-ui/uikit';
 import copy from 'copy-to-clipboard';
 import {v4 as uuidv4} from 'uuid';
@@ -437,12 +437,12 @@ export const getActions =
         const updateTableItem = {
             text: i18n('actions.updateTable'),
             action: actions.updateTable,
-            iconStart: <PencilToLine />,
+            iconStart: <Pencil />,
         };
         const updateTopicItem = {
             text: i18n('actions.updateTopic'),
             action: actions.updateTopic,
-            iconStart: <PencilToLine />,
+            iconStart: <Pencil />,
         };
 
         const ROW_TABLE_SET: ActionsSet = [
