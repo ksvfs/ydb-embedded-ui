@@ -235,7 +235,7 @@ function TableForm({
                     loading={isSubmitting}
                     propsButtonApply={{
                         type: 'submit',
-                        view: mode === 'create' ? 'action' : 'normal',
+                        view: 'action',
                         disabled: isSubmitting || (mode === 'update' && !formState.isDirty),
                     }}
                 />

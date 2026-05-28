@@ -656,6 +656,7 @@ function TopicForm({
                                 </div>
                             </FormRow>
                             <Disclosure
+                                arrowPosition="end"
                                 summary={
                                     <Text variant="subheader-1">
                                         {i18n('title_auto-partitioning-settings')}
@@ -856,7 +857,7 @@ function TopicForm({
                 textButtonCancel={i18n('action_cancel')}
                 onClickButtonCancel={onClose}
                 loading={isSubmitting}
-                propsButtonApply={{type: 'submit', view: mode === 'create' ? 'action' : 'normal'}}
+                propsButtonApply={{type: 'submit', view: 'action'}}
             />
         </form>
     );

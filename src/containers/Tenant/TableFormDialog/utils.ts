@@ -4,9 +4,10 @@ import {SERIAL_TYPES_MAP} from '../../../store/reducers/table/constants';
 import {prepareFormValues} from '../../../store/reducers/table/utils';
 import type {TEvDescribeSchemeResult} from '../../../types/api/schema/schema';
 import {EPathType} from '../../../types/api/schema/schema';
+import type {TColumnDescription} from '../../../types/api/schema/shared';
 
 import i18n from './i18n';
-import type {ColumnField, FormValues, OriginalTableInfo, TableType} from './types';
+import type {Column, ColumnField, FormValues, OriginalTableInfo, TableType} from './types';
 import {PartitionsType} from './types';
 
 const TTL_VALID_TYPES = new Set([
@@ -55,14 +56,6 @@ export const partitionsTypeOptions = [
     {value: PartitionsType.Explicit, content: i18n('value_partitions-explicit')},
 ];
 
-const RANDOM_SUFFIX_LEN = 6;
-export function generateTableName(prefix = 'table') {
-    const random = Math.random()
-        .toString(36)
-        .slice(2, 2 + RANDOM_SUFFIX_LEN);
-    return `${prefix}_${random}`;
-}
-
 let columnIdCounter = 0;
 export function generateColumnId() {
     columnIdCounter += 1;
@@ -88,7 +81,7 @@ export function getCreateInitialValues(initialType: TableType = 'row'): FormValu
     const firstName = columns[0]?.name ?? '';
 
     return {
-        name: generateTableName('table'),
+        name: '',
         type: initialType,
         columns,
         secondaryIndexes: [],
@@ -120,6 +113,46 @@ export function getUpdateInitialValues(table: TEvDescribeSchemeResult): FormValu
     };
 }
 
+type DescribedColumn = Pick<
+    TColumnDescription,
+    'Name' | 'Type' | 'NotNull' | 'DefaultFromLiteral'
+> & {
+    DefaultFromSequence?: string;
+    DefaultValue?: unknown;
+};
+
+function getColumnDefaultValue(column: DescribedColumn) {
+    const literalValue = column.DefaultFromLiteral?.value;
+    if (literalValue) {
+        return Object.values(literalValue)[0] as string | number | boolean;
+    }
+
+    if (
+        typeof column.DefaultValue === 'string' ||
+        typeof column.DefaultValue === 'number' ||
+        typeof column.DefaultValue === 'boolean'
+    ) {
+        return column.DefaultValue;
+    }
+
+    return undefined;
+}
+
+function describeColumn(column: DescribedColumn, keyColumnNames: string[]): Column {
+    const name = column.Name ?? '';
+    const keyOrder = keyColumnNames.indexOf(name);
+
+    return {
+        name,
+        type: column.Type ?? '',
+        notNull: column.NotNull ?? false,
+        key: keyOrder >= 0,
+        keyOrder: keyOrder >= 0 ? keyOrder : undefined,
+        autoincrement: Boolean(column.DefaultFromSequence),
+        defaultValue: getColumnDefaultValue(column),
+    };
+}
+
 function sortColumnsByKeyOrder<T extends {key?: boolean; keyOrder?: number}>(columns: T[]): T[] {
     const keys = columns.filter((c) => c.key);
     const others = columns.filter((c) => !c.key);
@@ -145,16 +178,7 @@ export function describeOriginalTable(
         const desc = pathDesc.ColumnTableDescription;
         const keyColumnNames = desc.Schema?.KeyColumnNames ?? [];
         const columns = sortColumnsByKeyOrder(
-            (desc.Schema?.Columns ?? []).map((col) => {
-                const keyOrder = keyColumnNames.indexOf(col.Name ?? '');
-                return {
-                    name: col.Name ?? '',
-                    type: col.Type ?? '',
-                    notNull: col.NotNull ?? false,
-                    key: keyOrder >= 0,
-                    keyOrder: keyOrder >= 0 ? keyOrder : undefined,
-                };
-            }),
+            (desc.Schema?.Columns ?? []).map((col) => describeColumn(col, keyColumnNames)),
         );
         return {
             name,
@@ -170,16 +194,7 @@ export function describeOriginalTable(
     const desc = pathDesc?.Table;
     const keyColumnNames = desc?.KeyColumnNames ?? [];
     const columns = sortColumnsByKeyOrder(
-        (desc?.Columns ?? []).map((col) => {
-            const keyOrder = keyColumnNames.indexOf(col.Name ?? '');
-            return {
-                name: col.Name ?? '',
-                type: col.Type ?? '',
-                notNull: col.NotNull ?? false,
-                key: keyOrder >= 0,
-                keyOrder: keyOrder >= 0 ? keyOrder : undefined,
-            };
-        }),
+        (desc?.Columns ?? []).map((col) => describeColumn(col, keyColumnNames)),
     );
 
     const indexes = (desc?.TableIndexes ?? []).map((idx) => ({

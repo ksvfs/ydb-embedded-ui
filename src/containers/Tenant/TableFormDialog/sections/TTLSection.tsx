@@ -119,6 +119,7 @@ export function TTLSection({originalInfo}: TTLSectionProps) {
                                     className={b('control')}
                                     value={field.value ? [field.value] : []}
                                     options={columnOptions}
+                                    placeholder={i18n('action_select')}
                                     onUpdate={([value]) => field.onChange(value)}
                                     width="max"
                                     validationState={columnError ? 'invalid' : undefined}

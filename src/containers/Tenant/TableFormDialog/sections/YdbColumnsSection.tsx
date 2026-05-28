@@ -223,6 +223,14 @@ export function YdbColumnsSection({
     );
 }
 
+function formatDefaultValue(column: Column) {
+    if (column.autoincrement) {
+        return i18n('label_autoincrement');
+    }
+
+    return column.defaultValue !== undefined ? String(column.defaultValue) : '';
+}
+
 function PrimaryColumnRow({column}: {column: Column}) {
     return (
         <div className={b('columns-row', {readonly: true})}>
@@ -231,13 +239,7 @@ function PrimaryColumnRow({column}: {column: Column}) {
             <div className={b('columns-cell', {'not-null': true})}>
                 {column.notNull ? i18n('value_yes') : i18n('value_no')}
             </div>
-            <div className={b('columns-cell', {default: true})}>
-                {column.autoincrement
-                    ? i18n('label_autoincrement')
-                    : column.defaultValue !== undefined
-                      ? String(column.defaultValue)
-                      : ''}
-            </div>
+            <div className={b('columns-cell', {default: true})}>{formatDefaultValue(column)}</div>
             <div />
         </div>
     );
@@ -261,9 +263,7 @@ function NonPrimaryColumnRow({
             <div className={b('columns-cell', {'not-null': true})}>
                 {column.notNull ? i18n('value_yes') : i18n('value_no')}
             </div>
-            <div className={b('columns-cell', {default: true})}>
-                {column.defaultValue !== undefined ? String(column.defaultValue) : ''}
-            </div>
+            <div className={b('columns-cell', {default: true})}>{formatDefaultValue(column)}</div>
             <div className={b('columns-cell', {action: true})}>
                 {isDeleting ? (
                     <Button view="flat" size="m" onClick={onUndo} title={i18n('action_undo')}>
