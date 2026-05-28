@@ -1,6 +1,6 @@
 import {z} from 'zod';
 
-import type {StreamFormData} from '../../../store/reducers/topic/utils';
+import type {TopicFormData} from '../../../store/reducers/topic/utils';
 import {AutoPartitioningStrategy} from '../../../store/reducers/topic/utils';
 
 import i18n from './i18n';
@@ -187,6 +187,6 @@ export function getTopicFormValidationSchema(minPartitions: number) {
                 );
 
                 validateRequiredNumber(ctx, upUtilizationPath, autoPartitioning.upUtilization);
-            }) as z.ZodType<StreamFormData>
+            }) as z.ZodType<TopicFormData>
     );
 }

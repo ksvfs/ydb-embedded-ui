@@ -1,6 +1,7 @@
 import React from 'react';
 
-import {SegmentedRadioGroup, Text, TextInput} from '@gravity-ui/uikit';
+import type {SelectOption} from '@gravity-ui/uikit';
+import {Select, Text, TextInput} from '@gravity-ui/uikit';
 import {Controller, useFormContext, useWatch} from 'react-hook-form';
 
 import {cn} from '../../../../utils/cn';
@@ -24,10 +25,10 @@ export function GeneralSection({mode, insidePath}: GeneralSectionProps) {
     const {control, formState} = useFormContext<FormValues>();
     const type = useWatch({control, name: 'type'});
 
-    const typeOptions = React.useMemo(
+    const typeOptions = React.useMemo<SelectOption[]>(
         () => [
-            {value: 'row' as const, content: i18n('label_row-table')},
-            {value: 'column' as const, content: i18n('label_column-table')},
+            {value: 'row', content: i18n('label_row-table')},
+            {value: 'column', content: i18n('label_column-table')},
         ],
         [],
     );
@@ -40,7 +41,7 @@ export function GeneralSection({mode, insidePath}: GeneralSectionProps) {
         <FormSection title={i18n('label_section-general')}>
             {insidePath ? (
                 <FormRow title={i18n('field_inside')}>
-                    <Text as="div" className={b('readonly-text')}>
+                    <Text as="div" className={b('fixed-value')}>
                         {`${insidePath}/`}
                     </Text>
                 </FormRow>
@@ -58,6 +59,7 @@ export function GeneralSection({mode, insidePath}: GeneralSectionProps) {
                             disabled={nameDisabled}
                             validationState={nameError ? 'invalid' : undefined}
                             errorMessage={nameError}
+                            className={b('control')}
                             autoFocus={mode === 'create'}
                         />
                     )}
@@ -69,20 +71,14 @@ export function GeneralSection({mode, insidePath}: GeneralSectionProps) {
                         control={control}
                         name="type"
                         render={({field}) => (
-                            <SegmentedRadioGroup
-                                value={field.value}
-                                onUpdate={field.onChange}
+                            <Select
+                                value={field.value ? [field.value] : []}
+                                options={typeOptions}
+                                onUpdate={([value]) => field.onChange(value)}
                                 disabled={typeDisabled}
-                            >
-                                {typeOptions.map((option) => (
-                                    <SegmentedRadioGroup.Option
-                                        key={option.value}
-                                        value={option.value}
-                                    >
-                                        {option.content}
-                                    </SegmentedRadioGroup.Option>
-                                ))}
-                            </SegmentedRadioGroup>
+                                width="max"
+                                className={b('control')}
+                            />
                         )}
                     />
                     {mode === 'create' && type && tableTypeInfo[type] ? (

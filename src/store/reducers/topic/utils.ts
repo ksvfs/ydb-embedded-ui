@@ -4,7 +4,7 @@ export enum AutoPartitioningStrategy {
     ScaleUp = 'AUTO_PARTITIONING_STRATEGY_SCALE_UP',
 }
 
-export interface StreamFormData {
+export interface TopicFormData {
     databaseId?: string;
     path?: string;
     name?: string;
@@ -47,7 +47,7 @@ function buildTopicPath(path: string | undefined, name: string | undefined) {
     throw new Error('Topic name or path is required');
 }
 
-function buildTopicSettings(formData: StreamFormData): string[] {
+function buildTopicSettings(formData: TopicFormData): string[] {
     const {shards, writeQuota, retentionHours, storageLimitMb, retentionType, autoPartitioning} =
         formData;
 
@@ -96,13 +96,13 @@ function buildTopicSettings(formData: StreamFormData): string[] {
     return settings;
 }
 
-export function buildCreateTopicQuery(formData: StreamFormData): string {
+export function buildCreateTopicQuery(formData: TopicFormData): string {
     const topicRef = buildTopicPath(formData.path, formData.name);
     const settings = buildTopicSettings(formData);
     return `CREATE TOPIC ${topicRef} WITH (\n    ${settings.join(',\n    ')}\n);`;
 }
 
-export function buildAlterTopicQuery(formData: StreamFormData): string {
+export function buildAlterTopicQuery(formData: TopicFormData): string {
     const topicRef = buildTopicPath(formData.path, formData.name);
     const settings = buildTopicSettings(formData);
     return `ALTER TOPIC ${topicRef} SET (\n    ${settings.join(',\n    ')}\n);`;

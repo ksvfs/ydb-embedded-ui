@@ -27,7 +27,7 @@ import {Loader} from '../../../components/Loader';
 import {RangeInputPicker} from '../../../components/RangeInputPicker';
 import {useClusterWithProxy} from '../../../store/reducers/cluster/cluster';
 import {selectTopicFormData, topicApi} from '../../../store/reducers/topic/topic';
-import type {StreamFormData} from '../../../store/reducers/topic/utils';
+import type {TopicFormData} from '../../../store/reducers/topic/utils';
 import {AutoPartitioningStrategy} from '../../../store/reducers/topic/utils';
 import {cn} from '../../../utils/cn';
 import createToast from '../../../utils/createToast';
@@ -183,7 +183,7 @@ function FormRow({
                     <HelpMark
                         className={b('help-mark')}
                         popoverProps={{
-                            placement: ['right', 'bottom'],
+                            placement: ['bottom', 'right'],
                             className: b('help-mark-popup'),
                         }}
                     >
@@ -332,7 +332,7 @@ function TopicForm({
     database: string;
     databaseFullPath: string;
     parentPath?: string;
-    initialValues: StreamFormData;
+    initialValues: TopicFormData;
     onClose: () => void;
     onSuccess?: (path: string) => void;
 }) {
@@ -350,7 +350,7 @@ function TopicForm({
         trigger,
         watch,
         formState: {errors},
-    } = useForm<StreamFormData>({
+    } = useForm<TopicFormData>({
         defaultValues: initialValues,
         resolver: zodResolver(validationSchema),
         mode: 'onChange',
@@ -478,6 +478,7 @@ function TopicForm({
                                         onUpdate={field.onChange}
                                         validationState={errors.name ? 'invalid' : undefined}
                                         errorMessage={errors.name?.message}
+                                        className={b('control')}
                                         autoComplete={false}
                                         disabled={isSubmitting}
                                     />
@@ -490,7 +491,7 @@ function TopicForm({
                         </FormRow>
                     )}
                 </FormSection>
-                <FormSection title={i18n('title_stream-parameters')}>
+                <FormSection title={i18n('title_topic-parameters')}>
                     <FormRow
                         title={i18n('field_shard-write-quota')}
                         note={i18n('context_shards-write-quota')}
@@ -948,9 +949,7 @@ function TopicFormDialog({
     return (
         <Dialog open={open} onClose={onClose} size="m" className={b()}>
             <Dialog.Header
-                caption={
-                    mode === 'create' ? i18n('title_stream-create') : i18n('title_stream-edit')
-                }
+                caption={mode === 'create' ? i18n('title_topic-create') : i18n('title_topic-edit')}
             />
             {renderContent()}
         </Dialog>

@@ -27,7 +27,10 @@ export function FormSection({
                     {note ? (
                         <HelpMark
                             className={b('help-mark')}
-                            popoverProps={{placement: ['right', 'bottom']}}
+                            popoverProps={{
+                                placement: ['bottom', 'right'],
+                                className: b('help-mark-popup'),
+                            }}
                         >
                             {note}
                         </HelpMark>
@@ -74,7 +77,10 @@ export function FormRow({
                 {note ? (
                     <HelpMark
                         className={b('help-mark')}
-                        popoverProps={{placement: ['right', 'bottom']}}
+                        popoverProps={{
+                            placement: ['bottom', 'right'],
+                            className: b('help-mark-popup'),
+                        }}
                     >
                         {note}
                     </HelpMark>

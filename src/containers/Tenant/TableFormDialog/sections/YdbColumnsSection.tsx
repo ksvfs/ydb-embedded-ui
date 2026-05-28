@@ -148,7 +148,10 @@ export function YdbColumnsSection({
                                     {i18n('column_primary-key')}
                                     <HelpMark
                                         className={b('help-mark')}
-                                        popoverProps={{placement: ['bottom', 'top']}}
+                                        popoverProps={{
+                                            placement: ['bottom', 'top'],
+                                            className: b('help-mark-popup'),
+                                        }}
                                     >
                                         {i18n('tooltip_primary-key')}
                                     </HelpMark>

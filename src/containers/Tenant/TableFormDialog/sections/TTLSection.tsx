@@ -116,6 +116,7 @@ export function TTLSection({originalInfo}: TTLSectionProps) {
                             name="settings.ttl.column"
                             render={({field}) => (
                                 <Select
+                                    className={b('control')}
                                     value={field.value ? [field.value] : []}
                                     options={columnOptions}
                                     onUpdate={([value]) => field.onChange(value)}
@@ -137,6 +138,7 @@ export function TTLSection({originalInfo}: TTLSectionProps) {
                                 name="settings.ttl.epochMode"
                                 render={({field}) => (
                                     <Select
+                                        className={b('control')}
                                         value={field.value ? [field.value] : []}
                                         options={epochModeOptions}
                                         onUpdate={([value]) => field.onChange(value)}

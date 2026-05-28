@@ -67,6 +67,11 @@
         gap: var(--g-spacing-1);
     }
 
+    &__control {
+        width: 100%;
+        max-width: 320px;
+    }
+
     &__input-s,
     &__select-s {
         width: 120px;
@@ -95,7 +100,7 @@
 
     &__storage-control {
         width: 100%;
-        max-width: 360px;
+        max-width: 320px;
     }
 
     &__warning-icon {

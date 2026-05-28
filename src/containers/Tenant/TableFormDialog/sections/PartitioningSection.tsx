@@ -3,11 +3,14 @@ import React from 'react';
 import {TextInput} from '@gravity-ui/uikit';
 import {Controller, useFormContext, useWatch} from 'react-hook-form';
 
+import {cn} from '../../../../utils/cn';
 import {ColumnSelectorField} from '../components/ColumnSelectorField';
 import {FormFieldError, FormRow, FormSection} from '../components/layout';
 import i18n from '../i18n';
 import type {FormValues} from '../types';
 import {acceptIntegerInput} from '../utils';
+
+const b = cn('ydb-table-form-dialog');
 
 interface PartitioningSectionProps {
     pkTypes: Set<string>;
@@ -50,6 +53,7 @@ export function PartitioningSection({pkTypes}: PartitioningSectionProps) {
                     name="partitionCount"
                     render={({field}) => (
                         <TextInput
+                            className={b('control')}
                             value={
                                 field.value === undefined || Number.isNaN(field.value)
                                     ? ''

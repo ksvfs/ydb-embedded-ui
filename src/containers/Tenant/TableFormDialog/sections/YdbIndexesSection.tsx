@@ -69,7 +69,10 @@ export function YdbIndexesSection({mode, originalInfo}: YdbIndexesSectionProps) 
                             {i18n('column_index-key')}
                             <HelpMark
                                 className={b('help-mark')}
-                                popoverProps={{placement: ['bottom', 'top']}}
+                                popoverProps={{
+                                    placement: ['bottom', 'top'],
+                                    className: b('help-mark-popup'),
+                                }}
                             >
                                 {i18n('tooltip_index-key')}
                             </HelpMark>

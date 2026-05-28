@@ -139,6 +139,7 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                 name="settings.uniformPartitions"
                                 render={({field}) => (
                                     <TextInput
+                                        className={b('control')}
                                         value={field.value === undefined ? '' : String(field.value)}
                                         onUpdate={(value) => {
                                             if (!acceptIntegerInput(value)) {
@@ -220,7 +221,11 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                         control={control}
                         name="settings.autoPartitionBySize"
                         render={({field}) => (
-                            <Checkbox checked={Boolean(field.value)} onUpdate={field.onChange}>
+                            <Checkbox
+                                checked={Boolean(field.value)}
+                                onUpdate={field.onChange}
+                                className={b('checkbox-control')}
+                            >
                                 {i18n('label_enable')}
                             </Checkbox>
                         )}
@@ -234,7 +239,11 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                         control={control}
                         name="settings.autoPartitionByLoad"
                         render={({field}) => (
-                            <Checkbox checked={Boolean(field.value)} onUpdate={field.onChange}>
+                            <Checkbox
+                                checked={Boolean(field.value)}
+                                onUpdate={field.onChange}
+                                className={b('checkbox-control')}
+                            >
                                 {i18n('label_enable')}
                             </Checkbox>
                         )}
@@ -243,7 +252,14 @@ export function SettingsSection({mode}: SettingsSectionProps) {
             </FormSection>
 
             <FormSection>
-                <Disclosure summary={i18n('label_section-advanced')} className={b('disclosure')}>
+                <Disclosure
+                    summary={
+                        <Text as="div" variant="subheader-2" className={b('disclosure-summary')}>
+                            {i18n('label_section-advanced')}
+                        </Text>
+                    }
+                    className={b('disclosure')}
+                >
                     <div className={b('advanced')}>
                         <FormRow title={i18n('field_autopartition-by-size-mb')}>
                             <Controller
@@ -251,6 +267,7 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                 name="settings.autoPartitionBySizeMb"
                                 render={({field}) => (
                                     <RangeInputPicker
+                                        className={b('control')}
                                         value={field.value}
                                         min={MIN_PARTITION_SIZE_MB}
                                         max={MAX_PARTITION_SIZE_MB}
@@ -277,6 +294,7 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                 name="settings.autoPartitionMinPartitions"
                                 render={({field}) => (
                                     <TextInput
+                                        className={b('control')}
                                         value={field.value === undefined ? '' : String(field.value)}
                                         onUpdate={(value) => {
                                             if (!acceptIntegerInput(value)) {
@@ -300,6 +318,7 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                 name="settings.autoPartitionMaxPartitions"
                                 render={({field}) => (
                                     <TextInput
+                                        className={b('control')}
                                         value={field.value === undefined ? '' : String(field.value)}
                                         onUpdate={(value) => {
                                             if (!acceptIntegerInput(value)) {
@@ -325,6 +344,7 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                     <Checkbox
                                         checked={Boolean(field.value)}
                                         onUpdate={field.onChange}
+                                        className={b('checkbox-control')}
                                     >
                                         {i18n('label_enable')}
                                     </Checkbox>
