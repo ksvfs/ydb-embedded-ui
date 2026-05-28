@@ -84,9 +84,10 @@
 
     &__columns-head {
         display: grid;
+        align-items: center;
         grid-template-columns:
-            minmax(160px, 1.4fr) minmax(140px, 1fr) minmax(80px, 0.5fr) minmax(80px, 0.5fr)
-            minmax(200px, 1.5fr) 40px;
+            minmax(160px, 1.2fr) minmax(160px, 1fr) minmax(120px, 0.7fr) minmax(160px, 0.9fr)
+            minmax(220px, 1.5fr) 40px;
         gap: var(--g-spacing-2);
 
         padding: 0 var(--g-spacing-1);
@@ -100,29 +101,29 @@
         display: flex;
         align-items: center;
         gap: var(--g-spacing-1);
+
+        white-space: nowrap;
     }
 
     &__columns-table_update &__columns-head,
     &__columns-table_update &__columns-row {
         grid-template-columns:
-            minmax(160px, 1.4fr) minmax(140px, 1fr) minmax(80px, 0.5fr) minmax(200px, 1.5fr)
+            minmax(160px, 1.2fr) minmax(160px, 1fr) minmax(160px, 0.9fr) minmax(220px, 1.5fr)
             40px;
     }
 
     &__columns-row {
         display: grid;
-        align-items: start;
+        align-items: center;
         grid-template-columns:
-            minmax(160px, 1.4fr) minmax(140px, 1fr) minmax(80px, 0.5fr) minmax(80px, 0.5fr)
-            minmax(200px, 1.5fr) 40px;
+            minmax(160px, 1.2fr) minmax(160px, 1fr) minmax(120px, 0.7fr) minmax(160px, 0.9fr)
+            minmax(220px, 1.5fr) 40px;
         gap: var(--g-spacing-2);
 
         padding: var(--g-spacing-1);
     }
 
     &__columns-row_readonly {
-        align-items: center;
-
         color: var(--g-color-text-secondary);
     }
 
@@ -142,8 +143,6 @@
         display: flex;
         justify-content: center;
         align-items: center;
-
-        padding-top: 6px;
     }
 
     &__columns-separator {

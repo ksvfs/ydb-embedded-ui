@@ -141,8 +141,8 @@ export function YdbColumnsSection({
                 {showHeader ? (
                     <React.Fragment>
                         <div className={b('columns-head')}>
-                            <div>{i18n('column_name')}</div>
-                            <div>{i18n('column_type')}</div>
+                            <div className={b('columns-head-cell')}>{i18n('column_name')}</div>
+                            <div className={b('columns-head-cell')}>{i18n('column_type')}</div>
                             {mode === 'create' ? (
                                 <div className={b('columns-head-cell')}>
                                     {i18n('column_primary-key')}
@@ -154,8 +154,8 @@ export function YdbColumnsSection({
                                     </HelpMark>
                                 </div>
                             ) : null}
-                            <div>{i18n('column_not-null')}</div>
-                            <div>{i18n('column_default')}</div>
+                            <div className={b('columns-head-cell')}>{i18n('column_not-null')}</div>
+                            <div className={b('columns-head-cell')}>{i18n('column_default')}</div>
                             <div />
                         </div>
                         <hr className={b('columns-separator')} />
