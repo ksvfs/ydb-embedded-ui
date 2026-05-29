@@ -1,9 +1,6 @@
-import {createSelector} from '@reduxjs/toolkit';
-
 import type {SchemaPathParam} from '../../../types/api/common';
 import type {TEvDescribeSchemeResult} from '../../../types/api/schema/schema';
 import {isQueryErrorResponse, parseQueryAPIResponse} from '../../../utils/query';
-import type {RootState} from '../../defaultStore';
 import {api} from '../api';
 
 import type {BuildTemplateOptions, FormValues} from './types';
@@ -13,7 +10,6 @@ import {
     buildRenameQuery,
     buildResetQuery,
     buildUpdateTableQuery,
-    prepareFormValues,
     prepareYdbCreateQueryColumns,
 } from './utils';
 
@@ -168,22 +164,3 @@ export const tableApi = api.injectEndpoints({
     }),
     overrideExisting: 'throw',
 });
-
-const createGetTableSelector = createSelector(
-    (database: string) => database,
-    (_database: string, path: SchemaPathParam) => path,
-    (database, path) => tableApi.endpoints.getTable.select({database, path}),
-);
-
-export const selectTableFormData = createSelector(
-    (state: RootState) => state,
-    (_state: RootState, database: string, path: SchemaPathParam) =>
-        createGetTableSelector(database, path),
-    (state, selectGetTable) => {
-        const response = selectGetTable(state).data;
-        if (!response) {
-            return undefined;
-        }
-        return prepareFormValues(response);
-    },
-);

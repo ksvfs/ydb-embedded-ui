@@ -200,7 +200,6 @@ export enum TableFeatureFlag {
 export interface BuildTemplateOptions {
     tableName: string;
     columns?: Column[];
-    values?: {[key: string]: string | null};
     secondaryIndexes?: SecondaryIndex[];
     deletedColumns?: Column[];
     updatedSecondaryIndexes?: UpdatedSecondaryIndex[];

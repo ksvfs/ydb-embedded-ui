@@ -104,8 +104,6 @@ function prepareColumnValue(column: Column, value: string | null) {
     }
 }
 
-const buildParamName = (name: string) => `$p${name}`;
-
 const buildName = (name: string) => `\`${name.replace(/`/g, '\\`')}\``;
 
 const buildType = (column: Column) => {
@@ -151,15 +149,6 @@ const buildSecondaryIndex = ({name, key, cover}: SecondaryIndex) =>
     `INDEX ${buildName(name)} GLOBAL ON (${key.map(buildName).join(', ')})${
         cover ? ` COVER (${cover.map(buildName).join(', ')})` : ''
     }`;
-
-const buildDeclaration = (column: Column) =>
-    `DECLARE ${buildParamName(column.name)} AS ${column.type};`;
-
-const buildValues = (columns: Column[], data: {[key: string]: string | null}) => {
-    return columns
-        .filter((column) => typeof data[column.name] !== 'undefined')
-        .map((column) => prepareColumnValue(column, data[column.name]));
-};
 
 const buildSettingsCreateItems = (settings?: TableSettings) => {
     if (!settings) {
@@ -352,36 +341,6 @@ const buildCreateScheme = ({
     );
 };
 
-const buildSelectScheme = (columns: Column[] = [], pad = ' ') => {
-    return pad + buildNames(columns).join(`,${pad}`);
-};
-
-const buildInsertScheme = (
-    columns: Column[] = [],
-    values: {[key: string]: string | null} = {},
-    pad = ' ',
-) => {
-    return (
-        pad + buildNames(columns.filter((column) => Boolean(values[column.name]))).join(`,${pad}`)
-    );
-};
-
-const buildKeysScheme = (columns: Column[] = [], pad = ' ') => {
-    return pad + buildKeys(columns).join(`,${pad}`);
-};
-
-const buildDeclarationsScheme = (columns: Column[] = []) => {
-    return columns.map(buildDeclaration).join('\n');
-};
-
-const buildValuesScheme = (
-    columns: Column[] = [],
-    data: {[key: string]: string | null} = {},
-    pad = ' ',
-) => {
-    return pad + buildValues(columns, data).join(`,${pad}`);
-};
-
 const buildColumnsHash = (columns: string[] = []) =>
     `HASH(${columns.map((col) => '`' + col.replaceAll('`', '\\`') + '`').join(', ')})`;
 
@@ -390,7 +349,6 @@ function buildTemplate(
     {
         tableName,
         columns,
-        values,
         secondaryIndexes,
         deletedColumns,
         updatedSecondaryIndexes,
@@ -408,26 +366,6 @@ function buildTemplate(
                 secondaryIndexes,
                 settings,
             });
-        })
-        .replace(/\s*%columns%/g, (found: string) => {
-            const [pad] = /^\s*/.exec(found) || [];
-            return buildSelectScheme(columns, pad);
-        })
-        .replace(/\s*%insertColumns%/g, (found: string) => {
-            const [pad] = /^\s*/.exec(found) || [];
-            return buildInsertScheme(columns, values, pad);
-        })
-        .replace(/\s*%declarations%/g, (found: string) => {
-            const [pad] = /^\s*/.exec(found) || [];
-            return pad + buildDeclarationsScheme(columns);
-        })
-        .replace(/\s*%values%/g, (found: string) => {
-            const [pad] = /^\s*/.exec(found) || [];
-            return buildValuesScheme(columns, values, pad);
-        })
-        .replace(/\s*%keys%/g, (found: string) => {
-            const [pad] = /^\s*/.exec(found) || [];
-            return buildKeysScheme(columns, pad);
         })
         .replace(/\s*%actions%/g, (found: string) => {
             const [pad = ' '] = /^\s*/.exec(found) || [];
