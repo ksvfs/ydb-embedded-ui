@@ -948,7 +948,14 @@ function TopicFormDialog({
     };
 
     return (
-        <Dialog open={open} onClose={onClose} size="m" className={b()} contentOverflow="auto">
+        <Dialog
+            open={open}
+            onClose={onClose}
+            size="m"
+            className={b()}
+            modalClassName={b('modal')}
+            disableHeightTransition
+        >
             <Dialog.Header
                 caption={mode === 'create' ? i18n('title_topic-create') : i18n('title_topic-edit')}
             />

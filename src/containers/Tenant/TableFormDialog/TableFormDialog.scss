@@ -1,4 +1,8 @@
 .ydb-table-form-dialog {
+    &__modal {
+        overscroll-behavior: none;
+    }
+
     &__body {
         padding-top: var(--g-spacing-5);
     }
