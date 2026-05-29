@@ -78,13 +78,13 @@
   "label_section-partition-policy": "Partition policy",
   "label_section-ttl": "TTL Settings",
   "label_search": "Search",
-  "label_select-columns": "Select columns",
+  "label_select-columns": "Select 1 or more columns",
   "label_selected": "Selected",
   "label_ttl-remove-column-text": "Your table will stop clearing.",
   "label_ttl-remove-column-warning": "This is a TTL-column. Do you really want to delete it?",
   "label_ttl-warning": "You don't have columns with the right type",
 
-  "title_split-point": "Edit split point",
+  "title_split-point": "Split point",
 
   "tooltip_autopartition-by-load": "A table shard is split into two if it is under high loads for a certain period of time (uses a lot of CPU time)",
   "tooltip_autopartition-by-size": "A table shard is split into two when the specified data size is reached",
