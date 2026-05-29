@@ -65,7 +65,7 @@ function prepareEntityName(name: string) {
         : `\`${name.replaceAll('\\', '\\\\').replaceAll('`', '\\`')}\``;
 }
 
-function prepareColumnValue(column: Column, value: string | null) {
+export function prepareColumnValue(column: Column, value: string | null) {
     if (value === null) {
         return 'null';
     }

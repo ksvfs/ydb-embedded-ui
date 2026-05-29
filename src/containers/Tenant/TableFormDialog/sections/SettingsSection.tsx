@@ -14,6 +14,7 @@ import {Controller, useFormContext, useWatch} from 'react-hook-form';
 
 import {RangeInputPicker} from '../../../../components/RangeInputPicker';
 import type {ColumnValueField} from '../../../../store/reducers/table/types';
+import {prepareColumnValue} from '../../../../store/reducers/table/utils';
 import {cn} from '../../../../utils/cn';
 import {FormFieldError, FormRow, FormSection} from '../components/layout';
 import {MAX_PARTITION_SIZE_MB, MIN_PARTITION_SIZE_MB} from '../constants';
@@ -56,6 +57,15 @@ export function SettingsSection({mode}: SettingsSectionProps) {
         () => splitPointsRaw ?? [],
         [splitPointsRaw],
     );
+
+    const columns = useWatch({control, name: 'columns'});
+    const splitPointPlaceholder = React.useMemo(() => {
+        const pkNames = columns
+            .filter(({key}) => Boolean(key))
+            .map(({name}) => name)
+            .join(', ');
+        return pkNames ? `(${pkNames})` : '';
+    }, [columns]);
 
     const appendSplit = React.useCallback(() => {
         const current = (getValues('settings.partitionsAtKeys') ?? []) as ColumnValueField[][];
@@ -162,10 +172,7 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                             <div className={b('split-points')}>
                                 {splitPoints.map((row, index) => {
                                     const display = row
-                                        .map((column) =>
-                                            column.value === null ? '' : column.value,
-                                        )
-                                        .filter((value) => value !== '')
+                                        .map((column) => prepareColumnValue(column, column.value))
                                         .join(', ');
                                     return (
                                         <div
@@ -175,6 +182,7 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                             <TextInput
                                                 className={b('control')}
                                                 value={display ? `(${display})` : ''}
+                                                placeholder={splitPointPlaceholder}
                                                 controlProps={{readOnly: true}}
                                             />
                                             <Button

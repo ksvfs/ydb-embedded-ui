@@ -13,6 +13,8 @@ export const MAX_PARTITIONS_COUNT = 35000;
 export const MIN_COLUMN_PARTITION_COUNT = 1;
 export const MAX_COLUMN_PARTITION_COUNT = 1000;
 
+export const SPLIT_POINT_STRING_TYPES = new Set<string>(['String', 'Utf8']);
+
 export const YDB_TABLE_TYPES: string[] = [
     'Bool',
     'Int8',

@@ -242,3 +242,35 @@ export function isSerialCompatible(type: string | undefined) {
 export function acceptIntegerInput(value: string) {
     return value === '' || /^(0|[1-9][0-9]*)$/.test(value);
 }
+
+const columnTypeDescriptions: Record<string, string> = {
+    Bool: i18n('context_type-bool'),
+    Int8: i18n('context_type-int8'),
+    Int16: i18n('context_type-int16'),
+    Int32: i18n('context_type-int32'),
+    Int64: i18n('context_type-int64'),
+    Uint8: i18n('context_type-uint8'),
+    Uint16: i18n('context_type-uint16'),
+    Uint32: i18n('context_type-uint32'),
+    Uint64: i18n('context_type-uint64'),
+    'Decimal(22,9)': i18n('context_type-decimal22-9'),
+    Float: i18n('context_type-float'),
+    Double: i18n('context_type-double'),
+    String: i18n('context_type-string'),
+    Utf8: i18n('context_type-utf8'),
+    Json: i18n('context_type-json'),
+    JsonDocument: i18n('context_type-jsondocument'),
+    Date: i18n('context_type-date'),
+    Date32: i18n('context_type-date'),
+    Datetime: i18n('context_type-datetime'),
+    Datetime64: i18n('context_type-datetime'),
+    Timestamp: i18n('context_type-timestamp'),
+    Timestamp64: i18n('context_type-timestamp'),
+    Interval: i18n('context_type-interval'),
+    Interval64: i18n('context_type-interval'),
+    Uuid: i18n('context_type-uuid'),
+};
+
+export function getColumnTypeDescription(type: string): string | undefined {
+    return columnTypeDescriptions[type];
+}

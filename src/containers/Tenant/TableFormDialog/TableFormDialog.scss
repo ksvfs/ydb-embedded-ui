@@ -260,8 +260,25 @@
         gap: var(--g-spacing-3);
     }
 
-    &__split-point-label {
+    &__split-point-pk {
         margin-bottom: var(--g-spacing-1);
+    }
+
+    &__split-point-pk-label {
+        font-weight: 500;
+    }
+
+    &__split-point-field {
+        display: flex;
+        flex-direction: column;
+        gap: var(--g-spacing-1);
+    }
+
+    &__split-point-label {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--g-spacing-1);
 
         font-weight: 500;
     }
@@ -270,6 +287,15 @@
         font-weight: 400;
 
         color: var(--g-color-text-secondary);
+    }
+
+    &__not-null-label {
+        cursor: default;
+        user-select: none;
+    }
+
+    &__control_null {
+        font-style: italic;
     }
 
     &__advanced {
