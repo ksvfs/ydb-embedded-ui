@@ -876,7 +876,7 @@ function TopicFormDialog({
     const useMetaProxy = useClusterWithProxy();
     const topicQuery = topicApi.useGetTopicQuery(
         {path: topicPath ?? '', database, databaseFullPath, useMetaProxy},
-        {skip: mode !== 'update' || !topicPath},
+        {skip: mode !== 'update' || !topicPath, refetchOnMountOrArgChange: true},
     );
     const topicFormData = useTypedSelector((state) => {
         if (mode !== 'update' || !topicPath) {
@@ -948,7 +948,7 @@ function TopicFormDialog({
     };
 
     return (
-        <Dialog open={open} onClose={onClose} size="m" className={b()}>
+        <Dialog open={open} onClose={onClose} size="m" className={b()} contentOverflow="auto">
             <Dialog.Header
                 caption={mode === 'create' ? i18n('title_topic-create') : i18n('title_topic-edit')}
             />

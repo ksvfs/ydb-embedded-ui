@@ -1,8 +1,5 @@
 .ydb-topic-form-dialog {
     &__body {
-        overflow: auto;
-
-        max-height: min(70vh, 760px);
         padding-top: var(--g-spacing-5);
     }
 

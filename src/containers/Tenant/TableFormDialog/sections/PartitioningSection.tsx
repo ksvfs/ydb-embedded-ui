@@ -35,7 +35,7 @@ export function PartitioningSection({pkTypes}: PartitioningSectionProps) {
                     control={control}
                     name="partitionKey"
                     render={({field}) => (
-                        <React.Fragment>
+                        <div className={b('control-stack')}>
                             <ColumnSelectorField
                                 value={field.value ?? []}
                                 onChange={field.onChange}
@@ -44,7 +44,7 @@ export function PartitioningSection({pkTypes}: PartitioningSectionProps) {
                                 className={b('control')}
                             />
                             <FormFieldError message={partitionKeyError} />
-                        </React.Fragment>
+                        </div>
                     )}
                 />
             </FormRow>

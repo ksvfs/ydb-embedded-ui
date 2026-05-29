@@ -6,7 +6,7 @@ import {Controller, useFieldArray, useFormContext, useWatch} from 'react-hook-fo
 
 import {cn} from '../../../../utils/cn';
 import {ColumnSelectorField} from '../components/ColumnSelectorField';
-import {FormSection} from '../components/layout';
+import {FormFieldError, FormSection} from '../components/layout';
 import {YDB_PK_TYPES} from '../constants';
 import i18n from '../i18n';
 import type {Column, FormMode, FormValues, OriginalTableInfo} from '../types';
@@ -131,7 +131,7 @@ export function YdbIndexesSection({mode, originalInfo}: YdbIndexesSectionProps) 
                                     control={control}
                                     name={`secondaryIndexes.${index}.key`}
                                     render={({field: keyField}) => (
-                                        <React.Fragment>
+                                        <div className={b('control-stack')}>
                                             <ColumnSelectorField
                                                 value={keyField.value ?? []}
                                                 onChange={keyField.onChange}
@@ -139,12 +139,8 @@ export function YdbIndexesSection({mode, originalInfo}: YdbIndexesSectionProps) 
                                                 invalid={Boolean(keyError)}
                                                 className={b('control')}
                                             />
-                                            {keyError ? (
-                                                <Text color="danger" variant="body-1">
-                                                    {keyError}
-                                                </Text>
-                                            ) : null}
-                                        </React.Fragment>
+                                            <FormFieldError message={keyError} />
+                                        </div>
                                     )}
                                 />
                             </div>

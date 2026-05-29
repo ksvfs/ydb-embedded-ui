@@ -256,7 +256,7 @@ function TableFormDialog({
 }: TableFormDialogInnerProps) {
     const tableQuery = tableApi.useGetTableQuery(
         {database, path: {path: path ?? '', databaseFullPath}},
-        {skip: mode !== 'update' || !path},
+        {skip: mode !== 'update' || !path, refetchOnMountOrArgChange: true},
     );
 
     const originalTable = mode === 'update' ? tableQuery.data : undefined;
@@ -317,7 +317,7 @@ function TableFormDialog({
     };
 
     return (
-        <Dialog open={open} onClose={onClose} size="l" className={b()}>
+        <Dialog open={open} onClose={onClose} size="l" className={b()} contentOverflow="auto">
             <Dialog.Header
                 caption={mode === 'create' ? i18n('title_create') : i18n('title_update')}
             />

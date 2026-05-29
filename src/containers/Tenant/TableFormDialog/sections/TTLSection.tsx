@@ -5,7 +5,7 @@ import {SegmentedRadioGroup, Select, TextInput} from '@gravity-ui/uikit';
 import {Controller, useFormContext, useWatch} from 'react-hook-form';
 
 import {cn} from '../../../../utils/cn';
-import {FormRow, FormSection} from '../components/layout';
+import {FormFieldError, FormRow, FormSection} from '../components/layout';
 import i18n from '../i18n';
 import type {FormValues, OriginalTableInfo} from '../types';
 import {
@@ -115,18 +115,20 @@ export function TTLSection({originalInfo}: TTLSectionProps) {
                             control={control}
                             name="settings.ttl.column"
                             render={({field}) => (
-                                <Select
-                                    className={b('control')}
-                                    value={field.value ? [field.value] : []}
-                                    options={columnOptions}
-                                    placeholder={i18n('action_select')}
-                                    onUpdate={([value]) => field.onChange(value)}
-                                    width="max"
-                                    validationState={columnError ? 'invalid' : undefined}
-                                />
+                                <div className={b('control-stack')}>
+                                    <Select
+                                        className={b('control')}
+                                        value={field.value ? [field.value] : []}
+                                        options={columnOptions}
+                                        placeholder={i18n('action_select')}
+                                        onUpdate={([value]) => field.onChange(value)}
+                                        width="max"
+                                        validationState={columnError ? 'invalid' : undefined}
+                                    />
+                                    <FormFieldError message={columnError} />
+                                </div>
                             )}
                         />
-                        {columnError ? <div className={b('field-error')}>{columnError}</div> : null}
                     </FormRow>
                     {isEpochMode ? (
                         <FormRow
@@ -138,19 +140,19 @@ export function TTLSection({originalInfo}: TTLSectionProps) {
                                 control={control}
                                 name="settings.ttl.epochMode"
                                 render={({field}) => (
-                                    <Select
-                                        className={b('control')}
-                                        value={field.value ? [field.value] : []}
-                                        options={epochModeOptions}
-                                        onUpdate={([value]) => field.onChange(value)}
-                                        width="max"
-                                        validationState={epochError ? 'invalid' : undefined}
-                                    />
+                                    <div className={b('control-stack')}>
+                                        <Select
+                                            className={b('control')}
+                                            value={field.value ? [field.value] : []}
+                                            options={epochModeOptions}
+                                            onUpdate={([value]) => field.onChange(value)}
+                                            width="max"
+                                            validationState={epochError ? 'invalid' : undefined}
+                                        />
+                                        <FormFieldError message={epochError} />
+                                    </div>
                                 )}
                             />
-                            {epochError ? (
-                                <div className={b('field-error')}>{epochError}</div>
-                            ) : null}
                         </FormRow>
                     ) : null}
                     <FormRow
@@ -179,6 +181,7 @@ export function TTLSection({originalInfo}: TTLSectionProps) {
                                             );
                                         }}
                                         validationState={lifetimeError ? 'invalid' : undefined}
+                                        errorMessage={lifetimeError}
                                     />
                                 )}
                             />
@@ -195,9 +198,6 @@ export function TTLSection({originalInfo}: TTLSectionProps) {
                                 )}
                             />
                         </div>
-                        {lifetimeError ? (
-                            <div className={b('field-error')}>{lifetimeError}</div>
-                        ) : null}
                     </FormRow>
                 </React.Fragment>
             ) : null}

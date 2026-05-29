@@ -32,6 +32,7 @@ export const tableApi = api.injectEndpoints({
                     return {error};
                 }
             },
+            providesTags: ['All'],
         }),
         createTable: build.mutation({
             queryFn: async ({database, formValues}: {database: string; formValues: FormValues}) => {

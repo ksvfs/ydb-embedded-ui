@@ -1,8 +1,5 @@
 .ydb-table-form-dialog {
     &__body {
-        overflow: auto;
-
-        max-height: min(75vh, 820px);
         padding-top: var(--g-spacing-5);
     }
 
@@ -60,8 +57,6 @@
     }
 
     &__field-error {
-        margin-top: var(--g-spacing-1);
-
         color: var(--g-color-text-danger);
     }
 
@@ -125,7 +120,7 @@
 
     &__columns-row {
         display: grid;
-        align-items: center;
+        align-items: start;
         grid-template-columns:
             minmax(160px, 1.2fr) minmax(140px, 0.8fr) 105px 145px minmax(160px, 1.2fr)
             28px;
@@ -189,7 +184,7 @@
 
     &__indexes-row {
         display: grid;
-        align-items: center;
+        align-items: start;
         grid-template-columns: minmax(0, 320px) minmax(0, 320px) auto;
         gap: var(--g-spacing-2);
 
