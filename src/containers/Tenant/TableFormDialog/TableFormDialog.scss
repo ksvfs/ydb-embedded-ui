@@ -146,15 +146,17 @@
     }
 
     &__columns-cell_key,
-    &__columns-cell_not-null {
+    &__columns-cell_not-null,
+    &__columns-cell_default,
+    &__columns-cell_action {
         display: flex;
         align-items: center;
+
+        min-height: 28px;
     }
 
     &__columns-cell_action {
-        display: flex;
         justify-content: center;
-        align-items: center;
     }
 
     &__columns-separator {
@@ -178,7 +180,7 @@
 
     &__indexes-head {
         display: grid;
-        grid-template-columns: minmax(0, 320px) minmax(0, 320px) auto;
+        grid-template-columns: minmax(0, 320px) minmax(0, 320px) max-content;
         gap: var(--g-spacing-2);
 
         font-weight: 500;
@@ -189,7 +191,7 @@
     &__indexes-row {
         display: grid;
         align-items: start;
-        grid-template-columns: minmax(0, 320px) minmax(0, 320px) auto;
+        grid-template-columns: minmax(0, 320px) minmax(0, 320px) max-content;
         gap: var(--g-spacing-2);
 
         padding: var(--g-spacing-1) 0;
@@ -207,8 +209,10 @@
 
     &__indexes-cell_action {
         display: flex;
-        justify-content: center;
+        justify-content: flex-start;
         align-items: center;
+
+        min-height: 28px;
     }
 
     &__readonly-text {

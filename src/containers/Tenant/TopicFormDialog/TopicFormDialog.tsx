@@ -11,6 +11,7 @@ import {
     HelpMark,
     Icon,
     Link,
+    Popover,
     SegmentedRadioGroup,
     Select,
     Switch,
@@ -96,6 +97,7 @@ function showAutoPartitioningConfirmation() {
         children: i18n('confirm_auto-partitioning-message'),
         textButtonApply: i18n('action_enable'),
         buttonApplyView: 'action',
+        disableOutsideClick: false,
     }) as Promise<boolean>;
 }
 
@@ -206,7 +208,7 @@ function FixedValue({value}: {value?: string | number}) {
 
 function IncompatiblePopover({content}: {content: string}) {
     return (
-        <Tooltip content={content} placement={['top', 'bottom']}>
+        <Popover content={content} placement="top" hasArrow className={b('incompatible-popover')}>
             <Text
                 as="div"
                 color="warning"
@@ -216,7 +218,7 @@ function IncompatiblePopover({content}: {content: string}) {
             >
                 <Icon data={TriangleExclamationFill} size={16} />
             </Text>
-        </Tooltip>
+        </Popover>
     );
 }
 
@@ -656,6 +658,7 @@ function TopicForm({
                                 </div>
                             </FormRow>
                             <Disclosure
+                                className={b('disclosure')}
                                 arrowPosition="end"
                                 summary={
                                     <Text variant="subheader-1">

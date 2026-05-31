@@ -22,6 +22,7 @@ interface CommonDialogProps {
     textButtonApply?: string;
     buttonApplyView?: ButtonView;
     className?: string;
+    disableOutsideClick?: boolean;
     onConfirm?: () => void;
 }
 
@@ -47,6 +48,7 @@ function ConfirmationDialog({
     textButtonCancel,
     buttonApplyView = 'normal',
     className,
+    disableOutsideClick = true,
     renderButtons,
     open,
     confirmOnEnter,
@@ -56,7 +58,7 @@ function ConfirmationDialog({
             className={block(null, className)}
             size="s"
             onClose={onClose}
-            disableOutsideClick
+            disableOutsideClick={disableOutsideClick}
             open={open}
             onEnterKeyDown={confirmOnEnter ? onConfirm : undefined}
         >
