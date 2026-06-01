@@ -5,7 +5,6 @@ import {Checkbox, Dialog, HelpMark, Label, TextArea, TextInput} from '@gravity-u
 import type {ColumnValueField} from '../../../../store/reducers/table/types';
 import {cn} from '../../../../utils/cn';
 import {isValueForTypeValid} from '../columnValueValidation';
-import {FormFieldError} from '../components/layout';
 import {SPLIT_POINT_STRING_TYPES} from '../constants';
 import i18n from '../i18n';
 import type {Column, ColumnField} from '../types';
@@ -49,12 +48,14 @@ function isRowInvalid(row: SplitPointDraftRow) {
 function SplitPointValueControl({
     row,
     invalid,
+    errorMessage,
     isStringType,
     onChange,
     onBlur,
 }: {
     row: SplitPointDraftRow;
     invalid: boolean;
+    errorMessage?: string;
     isStringType: boolean;
     onChange: (id: string, value: string) => void;
     onBlur: (id: string) => void;
@@ -63,7 +64,7 @@ function SplitPointValueControl({
         const notDefinedValue = getNotDefinedValue(row.column);
         return (
             <TextInput
-                className={b('control', {null: notDefinedValue === 'NULL'})}
+                className={b('split-point-input', {null: notDefinedValue === 'NULL'})}
                 value={notDefinedValue}
                 disabled
             />
@@ -73,23 +74,25 @@ function SplitPointValueControl({
     if (isStringType) {
         return (
             <TextArea
-                className={b('control')}
+                className={b('split-point-input')}
                 value={row.value}
                 onUpdate={(value) => onChange(row.id, value)}
                 onBlur={() => onBlur(row.id)}
                 minRows={1}
                 validationState={invalid ? 'invalid' : undefined}
+                errorMessage={errorMessage}
             />
         );
     }
 
     return (
         <TextInput
-            className={b('control')}
+            className={b('split-point-input')}
             value={row.value}
             onUpdate={(value) => onChange(row.id, value)}
             onBlur={() => onBlur(row.id)}
             validationState={invalid ? 'invalid' : undefined}
+            errorMessage={errorMessage}
         />
     );
 }
@@ -162,6 +165,7 @@ export function SplitPointDialog({state, onClose, onSubmit}: SplitPointDialogPro
                         const isStringType = SPLIT_POINT_STRING_TYPES.has(type);
                         const showDefinedToggle = !isColumnValueMustBeDefined(row.column);
                         const invalid = Boolean(touched[row.id]) && isRowInvalid(row);
+                        const errorMessage = invalid ? i18n('error_value-invalid') : undefined;
 
                         return (
                             <div key={row.id} className={b('split-point-dialog-row')}>
@@ -203,13 +207,11 @@ export function SplitPointDialog({state, onClose, onSubmit}: SplitPointDialogPro
                                     <SplitPointValueControl
                                         row={row}
                                         invalid={invalid}
+                                        errorMessage={errorMessage}
                                         isStringType={isStringType}
                                         onChange={handleChange}
                                         onBlur={handleBlur}
                                     />
-                                    {invalid ? (
-                                        <FormFieldError message={i18n('error_value-invalid')} />
-                                    ) : null}
                                 </div>
                             </div>
                         );
