@@ -2,7 +2,7 @@
 import {createSelector} from '@reduxjs/toolkit';
 
 import type {IProtobufTimeObject} from '../../../types/api/common';
-import type {TopicDataRequest} from '../../../types/api/topic';
+import type {DescribeTopicResult, TopicDataRequest} from '../../../types/api/topic';
 import {convertBytesObjectToSpeed} from '../../../utils/bytesParsers';
 import {isQueryErrorResponse, parseQueryAPIResponse} from '../../../utils/query';
 import {parseLag, parseTimestampToIdleTime} from '../../../utils/timeParsers';
@@ -13,6 +13,10 @@ import type {TopicFormData} from './utils';
 import {AutoPartitioningStrategy, buildAlterTopicQuery, buildCreateTopicQuery} from './utils';
 
 export const TOPIC_MESSAGE_SIZE_LIMIT = 100;
+
+const DEFAULT_RETENTION_HOURS = 4;
+const SWITCHED_TIME_RETENTION_HOURS = 24;
+const DEFAULT_STORAGE_LIMIT_MB = 50 * 1024;
 
 export const topicApi = api.injectEndpoints({
     endpoints: (build) => ({
@@ -233,6 +237,20 @@ function mapApiAutoPartitioningStrategy(apiStrategy?: string): AutoPartitioningS
     }
 }
 
+function getTopicRetentionFormValues(topicData: DescribeTopicResult) {
+    const retentionStorageMb = parseInt(topicData.retention_storage_mb ?? '0', 10);
+    const retentionHours = parseDurationToHours(topicData.retention_period);
+    const hasStorageRetention = Number.isFinite(retentionStorageMb) && retentionStorageMb > 0;
+
+    return {
+        retentionHours: hasStorageRetention
+            ? SWITCHED_TIME_RETENTION_HOURS
+            : retentionHours || DEFAULT_RETENTION_HOURS,
+        storageLimitMb: hasStorageRetention ? retentionStorageMb : DEFAULT_STORAGE_LIMIT_MB,
+        retentionType: hasStorageRetention ? 'size' : 'time',
+    } as const;
+}
+
 export const selectTopicFormData = createSelector(
     (state: RootState) => state,
     (
@@ -258,13 +276,12 @@ export const selectTopicFormData = createSelector(
                 '0',
             10,
         );
-        const retentionStorageMb = parseInt(topicData.retention_storage_mb ?? '0', 10);
         const writeQuotaBytes = parseInt(
             topicData.partition_write_speed_bytes_per_second ?? '1048576',
             10,
         );
         const writeQuotaKb = Math.round(writeQuotaBytes / 1024);
-        const retentionHours = parseDurationToHours(topicData.retention_period);
+        const retentionValues = getTopicRetentionFormValues(topicData);
         const autoPartitioningSettings =
             topicData.partitioning_settings?.auto_partitioning_settings;
         const autoPartitioningStrategy = mapApiAutoPartitioningStrategy(
@@ -279,9 +296,7 @@ export const selectTopicFormData = createSelector(
             name: topicData.self?.name,
             shards: minActivePartitions,
             writeQuota: writeQuotaKb,
-            retentionHours: retentionHours || 4,
-            storageLimitMb: retentionStorageMb || 50 * 1024,
-            retentionType: retentionStorageMb > 0 ? 'size' : 'time',
+            ...retentionValues,
             autoPartitioning: {
                 enabled: autoPartitioningEnabled,
                 mode: autoPartitioningEnabled

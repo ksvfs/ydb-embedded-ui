@@ -89,6 +89,7 @@ const retentionHoursOptions: SelectOption[] = [
 const STORAGE_LIMIT_MIN_MB = 50 * 1024;
 const STORAGE_LIMIT_MAX_MB = 400 * 1024;
 const STORAGE_LIMIT_STEP_MB = 1024;
+const SWITCHED_TIME_RETENTION_HOURS = 24;
 
 function showAutoPartitioningConfirmation() {
     return NiceModal.show(CONFIRMATION_DIALOG, {
@@ -454,6 +455,25 @@ function TopicForm({
             ? transformPath(parentPath ?? databaseFullPath, databaseFullPath)
             : undefined;
 
+    const handleRetentionTypeUpdate = React.useCallback(
+        (nextRetentionType: TopicFormData['retentionType']) => {
+            setValue('retentionType', nextRetentionType, {
+                shouldDirty: true,
+                shouldTouch: true,
+            });
+
+            if (nextRetentionType === 'time' && retentionType === 'size') {
+                setValue('retentionHours', SWITCHED_TIME_RETENTION_HOURS, {
+                    shouldDirty: true,
+                    shouldTouch: true,
+                });
+            }
+
+            trigger(nextRetentionType === 'time' ? 'retentionHours' : 'storageLimitMb');
+        },
+        [retentionType, setValue, trigger],
+    );
+
     return (
         <form onSubmit={handleTopicSubmit} className={b('form')}>
             <Dialog.Body className={b('body')}>
@@ -770,7 +790,7 @@ function TopicForm({
                                     render={({field}) => (
                                         <SegmentedRadioGroup
                                             value={field.value}
-                                            onUpdate={field.onChange}
+                                            onUpdate={handleRetentionTypeUpdate}
                                             disabled={isSubmitting}
                                         >
                                             {retentionTypeOptions.map((option) => (
