@@ -20,7 +20,7 @@
   "field_auto-partitioning-up-utilization": "Upper utilization limit",
   "field_data-storage-options": "Data storage mode",
 
-  "context_field-name": "May contain slash-separated path segments with lowercase Latin letters, numbers, and dashes. Each segment must start with a letter and not end with a dash.",
+  "context_field-name": "May contain slash-separated path segments with lowercase Latin letters, numbers, underscores, and dashes. Each segment must start with a letter and not end with a dash.",
   "context_shards-write-quota": "The maximum allowed write speed per partition. [Read more](https://ydb.tech/docs/en/concepts/topic#partitioning) about partition throughput",
   "context_throughput-info": "Total throughput: up to {{speed}} (calculated using the formula: partition throughput * number of partitions)",
   "context_throughput-info-range": "Total throughput: from {{from}} to {{to}} (calculated using the formula: partition throughput * number of partitions)",
@@ -64,7 +64,7 @@
   "error_number": "Value must be a number",
   "error_int": "Value must be an integer",
   "error_lowercase": "Value must be lowercase",
-  "error_name-regex": "Can contain slash-separated path segments with lowercase Latin letters, numbers, and dashes. Each segment must start with a letter and not end with a dash.",
+  "error_name-regex": "Can contain slash-separated path segments with lowercase Latin letters, numbers, underscores, and dashes. Each segment must start with a letter and not end with a dash.",
   "error_min-length": "Value can't be shorter than {{count}} characters",
   "error_max-length": "Value can't be longer than {{count}} characters",
   "error_min-number": "Value must be an integer no less than {{count}}",

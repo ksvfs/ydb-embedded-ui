@@ -192,7 +192,7 @@ function TableForm({
     });
 
     const showIndexes = type === 'row' && mode === 'create';
-    const showSettings = type === 'row';
+    const showSettings = type === 'row' && mode === 'create';
     const showPartitioning = type === 'column' && mode === 'create';
 
     const columnTypes = type === 'column' ? YDB_COLUMN_TABLE_TYPES : YDB_TABLE_TYPES;

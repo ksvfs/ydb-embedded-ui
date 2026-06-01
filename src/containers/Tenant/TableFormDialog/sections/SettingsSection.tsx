@@ -33,6 +33,10 @@ import {SplitPointDialog, buildSplitPointEntries} from './SplitPointDialog';
 
 const b = cn('ydb-table-form-dialog');
 
+function formatPartitionSizeMark(value: number) {
+    return `${value} ${i18n('value_megabyte')}`;
+}
+
 interface SettingsSectionProps {
     mode: FormMode;
 }
@@ -282,6 +286,8 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                         min={MIN_PARTITION_SIZE_MB}
                                         max={MAX_PARTITION_SIZE_MB}
                                         step={1}
+                                        marks={[MIN_PARTITION_SIZE_MB, MAX_PARTITION_SIZE_MB]}
+                                        markFormat={formatPartitionSizeMark}
                                         onUpdate={field.onChange}
                                         acceptInputValue={acceptIntegerInput}
                                         parseInputValue={Number}

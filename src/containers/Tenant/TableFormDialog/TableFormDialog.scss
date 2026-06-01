@@ -201,7 +201,7 @@
 
     &__indexes-head {
         display: grid;
-        grid-template-columns: minmax(0, 320px) minmax(0, 320px) max-content;
+        grid-template-columns: minmax(0, 224px) minmax(0, 224px) max-content;
         gap: var(--g-spacing-2);
 
         font-weight: 500;
@@ -212,7 +212,7 @@
     &__indexes-row {
         display: grid;
         align-items: start;
-        grid-template-columns: minmax(0, 320px) minmax(0, 320px) max-content;
+        grid-template-columns: minmax(0, 224px) minmax(0, 224px) max-content;
         gap: var(--g-spacing-2);
 
         padding: var(--g-spacing-1) 0;

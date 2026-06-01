@@ -6,7 +6,7 @@ import {AutoPartitioningStrategy} from '../../../store/reducers/topic/utils';
 import i18n from './i18n';
 import {formatBandwidthBytes} from './utils';
 
-const NAME_REGEX = /^[a-z](?:[a-z\-0-9]*[a-z0-9])?$/;
+const NAME_REGEX = /^[a-z](?:[a-z0-9_-]*[a-z0-9_])?$/;
 const MIN_ONE_MESSAGE = i18n('error_min-number', {count: 1});
 const MAX_HUNDRED_MESSAGE = i18n('error_max-number', {count: 100});
 
