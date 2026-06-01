@@ -132,7 +132,16 @@
     }
 
     &__columns-row_readonly {
+        align-items: center;
+
         color: var(--g-color-text-secondary);
+    }
+
+    &__columns-row_readonly &__columns-cell {
+        display: flex;
+        align-items: center;
+
+        min-height: 28px;
     }
 
     &__columns-row_deleting {
@@ -260,21 +269,52 @@
     &__split-point-body {
         display: flex;
         flex-direction: column;
-        gap: var(--g-spacing-3);
+        gap: var(--g-spacing-4);
     }
 
     &__split-point-pk {
-        margin-bottom: var(--g-spacing-1);
+        margin-bottom: 0;
     }
 
     &__split-point-pk-label {
         font-weight: 500;
     }
 
-    &__split-point-field {
+    &__split-point-fields {
         display: flex;
         flex-direction: column;
-        gap: var(--g-spacing-1);
+        gap: var(--g-spacing-3);
+    }
+
+    &__split-point-dialog-row {
+        display: grid;
+        align-items: start;
+        grid-template-columns: minmax(0, 180px) minmax(0, 1fr);
+        gap: var(--g-spacing-4);
+
+        @media (max-width: 767px) {
+            grid-template-columns: minmax(0, 1fr);
+            gap: var(--g-spacing-2);
+        }
+    }
+
+    &__split-point-meta {
+        padding-top: 7px;
+    }
+
+    &__split-point-control {
+        display: flex;
+        flex-direction: column;
+        gap: var(--g-spacing-2);
+
+        min-width: 0;
+    }
+
+    &__split-point-toggle {
+        display: flex;
+        align-items: center;
+
+        min-height: 28px;
     }
 
     &__split-point-label {

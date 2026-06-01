@@ -173,13 +173,19 @@ const buildSettingsCreateItems = (settings?: TableSettings) => {
         items.push(`AUTO_PARTITIONING_PARTITION_SIZE_MB = ${settings.autoPartitionBySizeMb}`);
     }
 
-    if (typeof settings.autoPartitionMinPartitions !== 'undefined') {
+    if (
+        typeof settings.autoPartitionMinPartitions === 'number' &&
+        !Number.isNaN(settings.autoPartitionMinPartitions)
+    ) {
         items.push(
             `AUTO_PARTITIONING_MIN_PARTITIONS_COUNT = ${settings.autoPartitionMinPartitions}`,
         );
     }
 
-    if (typeof settings.autoPartitionMaxPartitions !== 'undefined') {
+    if (
+        typeof settings.autoPartitionMaxPartitions === 'number' &&
+        !Number.isNaN(settings.autoPartitionMaxPartitions)
+    ) {
         items.push(
             `AUTO_PARTITIONING_MAX_PARTITIONS_COUNT = ${settings.autoPartitionMaxPartitions}`,
         );
@@ -187,7 +193,8 @@ const buildSettingsCreateItems = (settings?: TableSettings) => {
 
     if (
         settings.partitionsType === PartitionsType.Uniform &&
-        typeof settings.uniformPartitions !== 'undefined'
+        typeof settings.uniformPartitions === 'number' &&
+        !Number.isNaN(settings.uniformPartitions)
     ) {
         items.push(`UNIFORM_PARTITIONS = ${settings.uniformPartitions}`);
     }
@@ -209,8 +216,13 @@ const buildSettingsCreateItems = (settings?: TableSettings) => {
         );
     }
 
-    if (settings?.ttl?.status === 'enabled' && settings?.ttl?.column) {
-        const {column, lifetime = 0, unit = 'seconds', epochMode} = settings.ttl;
+    if (
+        settings?.ttl?.status === 'enabled' &&
+        settings?.ttl?.column &&
+        typeof settings.ttl.lifetime === 'number' &&
+        !Number.isNaN(settings.ttl.lifetime)
+    ) {
+        const {column, lifetime, unit = 'seconds', epochMode} = settings.ttl;
         const duration = getDurationWithDaysOnly(lifetime, unit);
         items.push(
             `TTL = Interval("${duration}") ON ${buildName(column)}${
@@ -502,23 +514,15 @@ function prepareRowTableSettings(table: TTableDescription): TableSettings {
 
     return {
         partitionsType,
-        uniformPartitions: table.UniformPartitionsCount
-            ? String(table.UniformPartitionsCount)
-            : undefined,
+        uniformPartitions: table.UniformPartitionsCount,
         autoPartitionBySize,
         autoPartitionBySizeMb:
             autoPartitionBySize && sizeToSplit
                 ? Math.round(parseInt(sizeToSplit, 10) / (1024 * 1024))
                 : undefined,
         autoPartitionByLoad: partitioningPolicy?.SplitByLoadSettings?.Enabled ?? false,
-        autoPartitionMinPartitions:
-            partitioningPolicy?.MinPartitionsCount !== undefined
-                ? String(partitioningPolicy.MinPartitionsCount)
-                : undefined,
-        autoPartitionMaxPartitions:
-            partitioningPolicy?.MaxPartitionsCount !== undefined
-                ? String(partitioningPolicy.MaxPartitionsCount)
-                : undefined,
+        autoPartitionMinPartitions: partitioningPolicy?.MinPartitionsCount,
+        autoPartitionMaxPartitions: partitioningPolicy?.MaxPartitionsCount,
         keyBloomFilter: table.PartitionConfig?.EnableFilterByKey ?? false,
         ttl: prepareTTLSettings(table.TTLSettings?.Enabled),
         columnFamilies: columnFamilies.length > 0 ? columnFamilies : undefined,

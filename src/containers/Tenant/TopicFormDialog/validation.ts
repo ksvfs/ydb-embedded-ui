@@ -6,9 +6,7 @@ import {AutoPartitioningStrategy} from '../../../store/reducers/topic/utils';
 import i18n from './i18n';
 import {formatBandwidthBytes} from './utils';
 
-const NAME_MIN_LENGTH = 2;
-const NAME_MAX_LENGTH = 63;
-const NAME_REGEX = /^[a-z][a-z\-0-9]*[a-z0-9]$/;
+const NAME_REGEX = /^[a-z](?:[a-z\-0-9]*[a-z0-9])?$/;
 const MIN_ONE_MESSAGE = i18n('error_min-number', {count: 1});
 const MAX_HUNDRED_MESSAGE = i18n('error_max-number', {count: 100});
 
@@ -57,14 +55,6 @@ const topicNameSchema = z
         }
 
         for (const segment of segments) {
-            if (segment.length < NAME_MIN_LENGTH) {
-                addIssue(ctx, [], i18n('error_min-length', {count: NAME_MIN_LENGTH}));
-                return;
-            }
-            if (segment.length > NAME_MAX_LENGTH) {
-                addIssue(ctx, [], i18n('error_max-length', {count: NAME_MAX_LENGTH}));
-                return;
-            }
             if (!NAME_REGEX.test(segment)) {
                 addIssue(ctx, [], i18n('error_name-regex'));
                 return;

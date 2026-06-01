@@ -143,7 +143,7 @@ function validateTtl(data: FormValues, ctx: z.RefinementCtx) {
     if (ttl.columnWithEpochMode && !ttl.epochMode) {
         addIssue(ctx, ['settings', 'ttl', 'epochMode'], i18n('error_required'));
     }
-    if (ttl.lifetime === undefined || ttl.lifetime === null) {
+    if (ttl.lifetime === undefined || ttl.lifetime === null || Number.isNaN(ttl.lifetime)) {
         addIssue(ctx, ['settings', 'ttl', 'lifetime'], i18n('error_required'));
     }
 }
@@ -184,11 +184,7 @@ function validateSettings(
 
     if (settings.partitionsType === PartitionsType.Uniform) {
         const value = Number(settings.uniformPartitions);
-        if (
-            settings.uniformPartitions === undefined ||
-            settings.uniformPartitions === '' ||
-            !Number.isFinite(value)
-        ) {
+        if (settings.uniformPartitions === undefined || Number.isNaN(value)) {
             addIssue(ctx, ['settings', 'uniformPartitions'], i18n('error_required'));
         } else if (value < MIN_PARTITIONS_COUNT || value > MAX_PARTITIONS_COUNT) {
             addIssue(ctx, ['settings', 'uniformPartitions'], i18n('error_partitions-count'));
@@ -207,7 +203,7 @@ function validateSettings(
     if (originalInfo?.hasMinPartitions || settings.autoPartitionMinPartitions !== undefined) {
         if (settings.autoPartitionMinPartitions !== undefined) {
             const value = Number(settings.autoPartitionMinPartitions);
-            if (settings.autoPartitionMinPartitions === '' || !Number.isFinite(value)) {
+            if (Number.isNaN(value)) {
                 if (originalInfo?.hasMinPartitions) {
                     addIssue(
                         ctx,
@@ -230,7 +226,7 @@ function validateSettings(
     if (originalInfo?.hasMaxPartitions || settings.autoPartitionMaxPartitions !== undefined) {
         if (settings.autoPartitionMaxPartitions !== undefined) {
             const value = Number(settings.autoPartitionMaxPartitions);
-            if (settings.autoPartitionMaxPartitions === '' || !Number.isFinite(value)) {
+            if (Number.isNaN(value)) {
                 if (originalInfo?.hasMaxPartitions) {
                     addIssue(
                         ctx,

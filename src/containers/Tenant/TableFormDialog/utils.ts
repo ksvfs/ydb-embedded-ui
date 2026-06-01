@@ -243,6 +243,14 @@ export function acceptIntegerInput(value: string) {
     return value === '' || /^(0|[1-9][0-9]*)$/.test(value);
 }
 
+export function formatOptionalIntegerInput(value?: number) {
+    return value === undefined || Number.isNaN(value) ? '' : String(value);
+}
+
+export function parseOptionalIntegerInput(value: string) {
+    return value === '' ? Number.NaN : Number(value);
+}
+
 const columnTypeDescriptions: Record<string, string> = {
     Bool: i18n('context_type-bool'),
     Int8: i18n('context_type-int8'),

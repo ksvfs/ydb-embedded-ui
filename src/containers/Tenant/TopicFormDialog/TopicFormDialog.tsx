@@ -486,7 +486,7 @@ function TopicForm({
                     {mode === 'create' ? (
                         <FormRow
                             title={i18n('field_name')}
-                            note={i18n('context_field-name', {min: 2})}
+                            note={i18n('context_field-name')}
                             required
                             htmlFor="topicName"
                         >

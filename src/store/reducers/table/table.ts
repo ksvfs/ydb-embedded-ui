@@ -56,7 +56,7 @@ export const tableApi = api.injectEndpoints({
                             type === 'column'
                                 ? {
                                       ttl: settings.ttl,
-                                      autoPartitionMinPartitions: String(partitionCount),
+                                      autoPartitionMinPartitions: partitionCount,
                                   }
                                 : settings,
                     };

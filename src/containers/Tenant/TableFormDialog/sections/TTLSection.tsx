@@ -11,9 +11,11 @@ import type {FormValues, OriginalTableInfo} from '../types';
 import {
     acceptIntegerInput,
     epochModeOptions,
+    formatOptionalIntegerInput,
     isValidTtlNumType,
     isValidTtlType,
     lifetimeUnitOptions,
+    parseOptionalIntegerInput,
     ttlStatusOptions,
 } from '../utils';
 
@@ -167,18 +169,12 @@ export function TTLSection({originalInfo}: TTLSectionProps) {
                                 render={({field}) => (
                                     <TextInput
                                         className={b('ttl-lifetime-input')}
-                                        value={
-                                            field.value === undefined || field.value === null
-                                                ? ''
-                                                : String(field.value)
-                                        }
+                                        value={formatOptionalIntegerInput(field.value)}
                                         onUpdate={(value) => {
                                             if (!acceptIntegerInput(value)) {
                                                 return;
                                             }
-                                            field.onChange(
-                                                value === '' ? undefined : Number(value),
-                                            );
+                                            field.onChange(parseOptionalIntegerInput(value));
                                         }}
                                         validationState={lifetimeError ? 'invalid' : undefined}
                                         errorMessage={lifetimeError}

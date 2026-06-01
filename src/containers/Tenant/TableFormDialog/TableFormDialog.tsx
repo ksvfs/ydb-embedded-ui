@@ -115,7 +115,7 @@ function TableForm({
         mode: 'onChange',
     });
 
-    const {control, handleSubmit, setValue, formState} = methods;
+    const {control, handleSubmit, setValue} = methods;
     const type: TableType = useWatch({control, name: 'type'});
 
     const previousTypeRef = React.useRef<TableType>(initialValues.type);
@@ -236,7 +236,7 @@ function TableForm({
                     propsButtonApply={{
                         type: 'submit',
                         view: 'action',
-                        disabled: isSubmitting || (mode === 'update' && !formState.isDirty),
+                        disabled: isSubmitting,
                     }}
                 />
             </form>

@@ -21,7 +21,12 @@ import {MAX_PARTITION_SIZE_MB, MIN_PARTITION_SIZE_MB} from '../constants';
 import i18n from '../i18n';
 import type {ColumnField, FormMode, FormValues} from '../types';
 import {PartitionsType} from '../types';
-import {acceptIntegerInput, partitionsTypeOptions} from '../utils';
+import {
+    acceptIntegerInput,
+    formatOptionalIntegerInput,
+    parseOptionalIntegerInput,
+    partitionsTypeOptions,
+} from '../utils';
 
 import type {SplitPointDialogState} from './SplitPointDialog';
 import {SplitPointDialog, buildSplitPointEntries} from './SplitPointDialog';
@@ -150,12 +155,12 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                 render={({field}) => (
                                     <TextInput
                                         className={b('control')}
-                                        value={field.value === undefined ? '' : String(field.value)}
+                                        value={formatOptionalIntegerInput(field.value)}
                                         onUpdate={(value) => {
                                             if (!acceptIntegerInput(value)) {
                                                 return;
                                             }
-                                            field.onChange(value || undefined);
+                                            field.onChange(parseOptionalIntegerInput(value));
                                         }}
                                         validationState={uniformError ? 'invalid' : undefined}
                                         errorMessage={uniformError}
@@ -300,12 +305,12 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                 render={({field}) => (
                                     <TextInput
                                         className={b('control')}
-                                        value={field.value === undefined ? '' : String(field.value)}
+                                        value={formatOptionalIntegerInput(field.value)}
                                         onUpdate={(value) => {
                                             if (!acceptIntegerInput(value)) {
                                                 return;
                                             }
-                                            field.onChange(value || undefined);
+                                            field.onChange(parseOptionalIntegerInput(value));
                                         }}
                                         disabled={minMaxDisabled}
                                         validationState={minPartitionsError ? 'invalid' : undefined}
@@ -324,12 +329,12 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                 render={({field}) => (
                                     <TextInput
                                         className={b('control')}
-                                        value={field.value === undefined ? '' : String(field.value)}
+                                        value={formatOptionalIntegerInput(field.value)}
                                         onUpdate={(value) => {
                                             if (!acceptIntegerInput(value)) {
                                                 return;
                                             }
-                                            field.onChange(value || undefined);
+                                            field.onChange(parseOptionalIntegerInput(value));
                                         }}
                                         disabled={minMaxDisabled}
                                         validationState={maxPartitionsError ? 'invalid' : undefined}

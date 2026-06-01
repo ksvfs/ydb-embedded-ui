@@ -8,7 +8,7 @@ import {ColumnSelectorField} from '../components/ColumnSelectorField';
 import {FormFieldError, FormRow, FormSection} from '../components/layout';
 import i18n from '../i18n';
 import type {FormValues} from '../types';
-import {acceptIntegerInput} from '../utils';
+import {acceptIntegerInput, formatOptionalIntegerInput, parseOptionalIntegerInput} from '../utils';
 
 const b = cn('ydb-table-form-dialog');
 
@@ -55,16 +55,12 @@ export function PartitioningSection({pkTypes}: PartitioningSectionProps) {
                     render={({field}) => (
                         <TextInput
                             className={b('control')}
-                            value={
-                                field.value === undefined || Number.isNaN(field.value)
-                                    ? ''
-                                    : String(field.value)
-                            }
+                            value={formatOptionalIntegerInput(field.value)}
                             onUpdate={(value) => {
                                 if (!acceptIntegerInput(value)) {
                                     return;
                                 }
-                                field.onChange(value === '' ? NaN : Number(value));
+                                field.onChange(parseOptionalIntegerInput(value));
                             }}
                             validationState={partitionCountError ? 'invalid' : undefined}
                             errorMessage={partitionCountError}

@@ -168,13 +168,13 @@ export interface TTLSettings {
 
 export interface TableSettings {
     partitionsType?: PartitionsType;
-    uniformPartitions?: string;
+    uniformPartitions?: number;
     partitionsAtKeys?: ColumnValueField[][];
     autoPartitionBySize?: boolean;
     autoPartitionByLoad?: boolean;
     autoPartitionBySizeMb?: number;
-    autoPartitionMinPartitions?: string;
-    autoPartitionMaxPartitions?: string;
+    autoPartitionMinPartitions?: number;
+    autoPartitionMaxPartitions?: number;
     keyBloomFilter?: boolean;
     ttl: TTLSettings;
     columnFamilies?: ColumnFamiliesDescription;

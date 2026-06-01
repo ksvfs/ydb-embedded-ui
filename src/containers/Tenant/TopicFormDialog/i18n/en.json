@@ -20,7 +20,7 @@
   "field_auto-partitioning-up-utilization": "Upper utilization limit",
   "field_data-storage-options": "Data storage mode",
 
-  "context_field-name": "May contain slash-separated path segments with lowercase Latin letters, numbers, and dashes. Each segment must be from {{min}} to 63 characters in length, start with a letter, and not end with a dash.",
+  "context_field-name": "May contain slash-separated path segments with lowercase Latin letters, numbers, and dashes. Each segment must start with a letter and not end with a dash.",
   "context_shards-write-quota": "The maximum allowed write speed per partition. [Read more](https://ydb.tech/docs/en/concepts/topic#partitioning) about partition throughput",
   "context_throughput-info": "Total throughput: up to {{speed}} (calculated using the formula: partition throughput * number of partitions)",
   "context_throughput-info-range": "Total throughput: from {{from}} to {{to}} (calculated using the formula: partition throughput * number of partitions)",

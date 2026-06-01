@@ -115,7 +115,18 @@ export function SplitPointDialog({state, onClose, onSubmit}: SplitPointDialogPro
         setDraftValues((prev) => prev.map((row) => (row.id === id ? {...row, isDefined} : row)));
     };
 
+    const markAllTouched = React.useCallback(() => {
+        setTouched(Object.fromEntries(draftValues.map((row) => [row.id, true] as const)));
+    }, [draftValues]);
+
+    const hasErrors = draftValues.some(isRowInvalid);
+
     const handleSubmit = () => {
+        if (hasErrors) {
+            markAllTouched();
+            return;
+        }
+
         onSubmit(
             state.index,
             draftValues.map((row) => ({
@@ -131,10 +142,9 @@ export function SplitPointDialog({state, onClose, onSubmit}: SplitPointDialogPro
     };
 
     const primaryKeyNames = state.columns.map((column) => column.name).join(', ');
-    const hasErrors = draftValues.some(isRowInvalid);
 
     return (
-        <Dialog open={state.open} onClose={onClose} size="m">
+        <Dialog open={state.open} onClose={onClose} size="s" disableHeightTransition>
             <Dialog.Header caption={i18n('title_split-point')} />
             <Dialog.Body className={b('split-point-body')}>
                 {primaryKeyNames ? (
@@ -145,63 +155,72 @@ export function SplitPointDialog({state, onClose, onSubmit}: SplitPointDialogPro
                         <span>{primaryKeyNames}</span>
                     </div>
                 ) : null}
-                {draftValues.map((row) => {
-                    const {type} = row.column;
-                    const typeDescription = getColumnTypeDescription(type);
-                    const isStringType = SPLIT_POINT_STRING_TYPES.has(type);
-                    const showDefinedToggle = !isColumnValueMustBeDefined(row.column);
-                    const invalid = Boolean(touched[row.id]) && isRowInvalid(row);
+                <div className={b('split-point-fields')}>
+                    {draftValues.map((row) => {
+                        const {type} = row.column;
+                        const typeDescription = getColumnTypeDescription(type);
+                        const isStringType = SPLIT_POINT_STRING_TYPES.has(type);
+                        const showDefinedToggle = !isColumnValueMustBeDefined(row.column);
+                        const invalid = Boolean(touched[row.id]) && isRowInvalid(row);
 
-                    return (
-                        <div key={row.id} className={b('split-point-field')}>
-                            <div className={b('split-point-label')}>
-                                <span>{row.column.name}</span>
-                                <span className={b('split-point-type')}>({type})</span>
-                                {typeDescription ? (
-                                    <HelpMark
-                                        className={b('help-mark')}
-                                        popoverProps={{
-                                            placement: ['bottom', 'right'],
-                                            className: b('help-mark-popup'),
-                                        }}
-                                    >
-                                        {typeDescription}
-                                    </HelpMark>
-                                ) : null}
-                                {row.column.notNull ? (
-                                    <Label theme="unknown" className={b('not-null-label')}>
-                                        NOT NULL
-                                    </Label>
-                                ) : null}
+                        return (
+                            <div key={row.id} className={b('split-point-dialog-row')}>
+                                <div className={b('split-point-meta')}>
+                                    <div className={b('split-point-label')}>
+                                        <span>{row.column.name}</span>
+                                        <span className={b('split-point-type')}>({type})</span>
+                                        {typeDescription ? (
+                                            <HelpMark
+                                                className={b('help-mark')}
+                                                popoverProps={{
+                                                    placement: ['bottom', 'right'],
+                                                    className: b('help-mark-popup'),
+                                                }}
+                                            >
+                                                {typeDescription}
+                                            </HelpMark>
+                                        ) : null}
+                                        {row.column.notNull ? (
+                                            <Label theme="unknown" className={b('not-null-label')}>
+                                                NOT NULL
+                                            </Label>
+                                        ) : null}
+                                    </div>
+                                </div>
+                                <div className={b('split-point-control')}>
+                                    {showDefinedToggle ? (
+                                        <div className={b('split-point-toggle')}>
+                                            <Checkbox
+                                                checked={row.isDefined}
+                                                onUpdate={(checked) =>
+                                                    handleToggleDefined(row.id, checked)
+                                                }
+                                            >
+                                                {i18n('action_set-value')}
+                                            </Checkbox>
+                                        </div>
+                                    ) : null}
+                                    <SplitPointValueControl
+                                        row={row}
+                                        invalid={invalid}
+                                        isStringType={isStringType}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                    />
+                                    {invalid ? (
+                                        <FormFieldError message={i18n('error_value-invalid')} />
+                                    ) : null}
+                                </div>
                             </div>
-                            {showDefinedToggle ? (
-                                <Checkbox
-                                    checked={row.isDefined}
-                                    onUpdate={(checked) => handleToggleDefined(row.id, checked)}
-                                >
-                                    {i18n('action_set-value')}
-                                </Checkbox>
-                            ) : null}
-                            <SplitPointValueControl
-                                row={row}
-                                invalid={invalid}
-                                isStringType={isStringType}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                            />
-                            {invalid ? (
-                                <FormFieldError message={i18n('error_value-invalid')} />
-                            ) : null}
-                        </div>
-                    );
-                })}
+                        );
+                    })}
+                </div>
             </Dialog.Body>
             <Dialog.Footer
                 textButtonApply={i18n('action_add')}
                 textButtonCancel={i18n('action_cancel')}
                 onClickButtonApply={handleSubmit}
                 onClickButtonCancel={onClose}
-                propsButtonApply={{disabled: hasErrors}}
             />
         </Dialog>
     );
