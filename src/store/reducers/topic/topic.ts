@@ -14,7 +14,8 @@ import {AutoPartitioningStrategy, buildAlterTopicQuery, buildCreateTopicQuery} f
 
 export const TOPIC_MESSAGE_SIZE_LIMIT = 100;
 
-const DEFAULT_RETENTION_HOURS = 4;
+const DEFAULT_RETENTION_PERIOD_SECONDS = 4 * 60 * 60;
+const DEFAULT_WRITE_QUOTA_BYTES = 1024 * 1024;
 
 export const topicApi = api.injectEndpoints({
     endpoints: (build) => ({
@@ -185,27 +186,6 @@ export const selectPreparedConsumersData = createSelector(selectConsumers, (cons
     });
 });
 
-function parseDurationToHours(duration?: string | IProtobufTimeObject): number {
-    if (!duration) {
-        return 0;
-    }
-    if (typeof duration === 'string') {
-        const match = duration.match(/^(\d+)s$/);
-        if (match) {
-            return Math.round(parseInt(match[1], 10) / 3600);
-        }
-        return 0;
-    }
-    if (typeof duration === 'object' && duration.seconds) {
-        const seconds =
-            typeof duration.seconds === 'string'
-                ? parseInt(duration.seconds, 10)
-                : duration.seconds;
-        return Math.round(seconds / 3600);
-    }
-    return 0;
-}
-
 function parseDurationToSeconds(duration?: string | IProtobufTimeObject): number | undefined {
     if (!duration) {
         return undefined;
@@ -214,7 +194,7 @@ function parseDurationToSeconds(duration?: string | IProtobufTimeObject): number
         const match = duration.match(/^(\d+)s$/);
         return match ? parseInt(match[1], 10) : undefined;
     }
-    if (typeof duration === 'object' && duration.seconds) {
+    if (typeof duration === 'object' && duration.seconds !== undefined) {
         return typeof duration.seconds === 'string'
             ? parseInt(duration.seconds, 10)
             : duration.seconds;
@@ -222,29 +202,16 @@ function parseDurationToSeconds(duration?: string | IProtobufTimeObject): number
     return undefined;
 }
 
-function mapApiAutoPartitioningStrategy(apiStrategy?: string): AutoPartitioningStrategy {
-    switch (apiStrategy) {
-        case 'AUTO_PARTITIONING_STRATEGY_PAUSED':
-            return AutoPartitioningStrategy.Paused;
-        case 'AUTO_PARTITIONING_STRATEGY_SCALE_UP':
-            return AutoPartitioningStrategy.ScaleUp;
-        case 'AUTO_PARTITIONING_STRATEGY_DISABLED':
-        case 'AUTO_PARTITIONING_STRATEGY_UNSPECIFIED':
-        default:
-            return AutoPartitioningStrategy.Disabled;
-    }
-}
-
 function getTopicRetentionFormValues(topicData: DescribeTopicResult) {
     const parsedRetentionStorageMb = parseInt(topicData.retention_storage_mb ?? '0', 10);
-    const retentionHours = parseDurationToHours(topicData.retention_period);
+    const retentionPeriodSeconds = parseDurationToSeconds(topicData.retention_period);
     const retentionStorageMb = Number.isFinite(parsedRetentionStorageMb)
         ? parsedRetentionStorageMb
         : 0;
     const hasStorageRetention = retentionStorageMb > 0;
 
     return {
-        retentionHours: retentionHours || DEFAULT_RETENTION_HOURS,
+        retentionPeriodSeconds: retentionPeriodSeconds ?? DEFAULT_RETENTION_PERIOD_SECONDS,
         storageLimitMb: retentionStorageMb,
         retentionType: hasStorageRetention ? 'size' : 'time',
     } as const;
@@ -275,32 +242,33 @@ export const selectTopicFormData = createSelector(
                 '0',
             10,
         );
-        const writeQuotaBytes = parseInt(
-            topicData.partition_write_speed_bytes_per_second ?? '1048576',
+        const parsedWriteQuotaBytes = parseInt(
+            topicData.partition_write_speed_bytes_per_second ?? '',
             10,
         );
-        const writeQuotaKb = Math.round(writeQuotaBytes / 1024);
+        const writeQuotaBytes = Number.isFinite(parsedWriteQuotaBytes)
+            ? parsedWriteQuotaBytes
+            : DEFAULT_WRITE_QUOTA_BYTES;
         const retentionValues = getTopicRetentionFormValues(topicData);
         const autoPartitioningSettings =
             topicData.partitioning_settings?.auto_partitioning_settings;
-        const autoPartitioningStrategy = mapApiAutoPartitioningStrategy(
-            autoPartitioningSettings?.strategy,
+        const autoPartitioningStrategy = String(
+            autoPartitioningSettings?.strategy ?? AutoPartitioningStrategy.Unspecified,
         );
         const autoPartitioningEnabled =
-            autoPartitioningStrategy !== AutoPartitioningStrategy.Disabled;
+            autoPartitioningStrategy !== AutoPartitioningStrategy.Disabled &&
+            autoPartitioningStrategy !== AutoPartitioningStrategy.Unspecified;
         const partitionWriteSpeed = autoPartitioningSettings?.partition_write_speed;
 
         return {
             path: undefined,
             name: topicData.self?.name,
             shards: minActivePartitions,
-            writeQuota: writeQuotaKb,
+            writeQuotaBytes,
             ...retentionValues,
             autoPartitioning: {
                 enabled: autoPartitioningEnabled,
-                mode: autoPartitioningEnabled
-                    ? autoPartitioningStrategy
-                    : AutoPartitioningStrategy.ScaleUp,
+                mode: autoPartitioningStrategy,
                 minPartitions: minActivePartitions,
                 maxPartitions: maxActivePartitions > 0 ? maxActivePartitions : undefined,
                 stabilizationWindow: parseDurationToSeconds(

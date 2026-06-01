@@ -41,6 +41,7 @@
   "confirm_auto-partitioning-message": "The Kafka protocol does not support topic auto-partitioning. If you enable auto-partitioning, you will not be able to work with the topics you create using the Kafka protocol. You can not disabling auto-partitioning for a specific topic.",
 
   "value_auto-partitioning-scale-up": "Scale up",
+  "value_auto-partitioning-scale-up-and-down": "Scale up and down",
   "value_auto-partitioning-paused": "Paused",
   "value_min": "Minimum",
   "value_max": "Maximum",

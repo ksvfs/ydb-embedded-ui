@@ -1,7 +1,6 @@
 import {z} from 'zod';
 
 import type {TopicFormData} from '../../../store/reducers/topic/utils';
-import {AutoPartitioningStrategy} from '../../../store/reducers/topic/utils';
 
 import i18n from './i18n';
 import {formatBandwidthBytes} from './utils';
@@ -90,16 +89,13 @@ export function getTopicFormValidationSchema(minPartitions: number) {
                         })
                         .min(1, MIN_ONE_MESSAGE),
                 ),
-                writeQuota: requiredNumber(),
-                retentionHours: optionalNumber(),
+                writeQuotaBytes: requiredNumber(),
+                retentionPeriodSeconds: optionalNumber(),
                 storageLimitMb: optionalNumber(),
                 retentionType: z.enum(['size', 'time']),
                 autoPartitioning: z.object({
                     enabled: z.boolean(),
-                    mode: z.union([
-                        z.literal(AutoPartitioningStrategy.ScaleUp),
-                        z.literal(AutoPartitioningStrategy.Paused),
-                    ]),
+                    mode: z.string().min(1, i18n('error_required')),
                     minPartitions: optionalNumber(
                         z
                             .number({invalid_type_error: i18n('error_number')})
@@ -124,10 +120,13 @@ export function getTopicFormValidationSchema(minPartitions: number) {
                     addIssue(ctx, ['shards'], i18n('error_min-number', {count: minPartitions}));
                 }
 
-                if (data.retentionHours === 1 && data.writeQuota !== 128) {
+                if (
+                    data.retentionPeriodSeconds === 60 * 60 &&
+                    data.writeQuotaBytes !== 128 * 1024
+                ) {
                     addIssue(
                         ctx,
-                        ['retentionHours'],
+                        ['retentionPeriodSeconds'],
                         i18n('error_retention-unavailable', {
                             speed: formatBandwidthBytes(128 * 1024),
                         }),
@@ -135,7 +134,11 @@ export function getTopicFormValidationSchema(minPartitions: number) {
                 }
 
                 if (data.retentionType === 'time') {
-                    validateRequiredNumber(ctx, ['retentionHours'], data.retentionHours);
+                    validateRequiredNumber(
+                        ctx,
+                        ['retentionPeriodSeconds'],
+                        data.retentionPeriodSeconds,
+                    );
                 } else if (data.retentionType === 'size') {
                     validateRequiredNumber(ctx, ['storageLimitMb'], data.storageLimitMb);
                 }

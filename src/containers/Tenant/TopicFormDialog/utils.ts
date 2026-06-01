@@ -9,8 +9,8 @@ const MEGABYTE = KILOBYTE * 1024;
 
 export const DEFAULT_TOPIC_FORM_VALUES: TopicFormData = {
     shards: 1,
-    writeQuota: 1024,
-    retentionHours: 4,
+    writeQuotaBytes: 1024 * 1024,
+    retentionPeriodSeconds: 4 * 60 * 60,
     storageLimitMb: 50 * 1024,
     retentionType: 'time',
     autoPartitioning: {

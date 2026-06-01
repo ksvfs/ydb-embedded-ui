@@ -1,7 +1,9 @@
 export enum AutoPartitioningStrategy {
     Disabled = 'AUTO_PARTITIONING_STRATEGY_DISABLED',
+    Unspecified = 'AUTO_PARTITIONING_STRATEGY_UNSPECIFIED',
     Paused = 'AUTO_PARTITIONING_STRATEGY_PAUSED',
     ScaleUp = 'AUTO_PARTITIONING_STRATEGY_SCALE_UP',
+    ScaleUpAndDown = 'AUTO_PARTITIONING_STRATEGY_SCALE_UP_AND_DOWN',
 }
 
 export interface TopicFormData {
@@ -9,13 +11,14 @@ export interface TopicFormData {
     path?: string;
     name?: string;
     shards: number;
-    writeQuota: number;
-    retentionHours: number;
+    writeQuotaBytes: number;
+    retentionPeriodSeconds: number;
     storageLimitMb: number;
     retentionType: 'size' | 'time';
+    preserveRawRetentionSettings?: boolean;
     autoPartitioning: {
         enabled: boolean;
-        mode: AutoPartitioningStrategy.ScaleUp | AutoPartitioningStrategy.Paused;
+        mode: string;
         minPartitions?: number;
         maxPartitions?: number;
         stabilizationWindow?: number;
@@ -25,11 +28,13 @@ export interface TopicFormData {
 
 const AUTO_PARTITIONING_STRATEGY_TO_YQL: Record<AutoPartitioningStrategy, string> = {
     [AutoPartitioningStrategy.Disabled]: 'disabled',
+    [AutoPartitioningStrategy.Unspecified]: 'unspecified',
     [AutoPartitioningStrategy.Paused]: 'paused',
     [AutoPartitioningStrategy.ScaleUp]: 'scale_up',
+    [AutoPartitioningStrategy.ScaleUpAndDown]: 'scale_up_and_down',
 };
 
-const SIZE_RETENTION_PERIOD_HOURS = 24 * 7;
+const SIZE_RETENTION_PERIOD_SECONDS = 24 * 7 * 60 * 60;
 
 const NAME_REGEX = /^[a-z_][a-z0-9_]*$/i;
 
@@ -47,9 +52,23 @@ function buildTopicPath(path: string | undefined, name: string | undefined) {
     throw new Error('Topic name or path is required');
 }
 
+function formatAutoPartitioningStrategy(strategy: string) {
+    return (
+        AUTO_PARTITIONING_STRATEGY_TO_YQL[strategy as AutoPartitioningStrategy] ??
+        strategy.replace(/^AUTO_PARTITIONING_STRATEGY_/, '').toLowerCase()
+    );
+}
+
 function buildTopicSettings(formData: TopicFormData): string[] {
-    const {shards, writeQuota, retentionHours, storageLimitMb, retentionType, autoPartitioning} =
-        formData;
+    const {
+        shards,
+        writeQuotaBytes,
+        retentionPeriodSeconds,
+        storageLimitMb,
+        retentionType,
+        preserveRawRetentionSettings,
+        autoPartitioning,
+    } = formData;
 
     const settings: string[] = [];
 
@@ -66,18 +85,23 @@ function buildTopicSettings(formData: TopicFormData): string[] {
         settings.push(`PARTITION_COUNT_LIMIT = ${shards}`);
     }
 
-    const effectiveRetentionHours =
-        retentionType === 'time' ? retentionHours : SIZE_RETENTION_PERIOD_HOURS;
-    settings.push(`RETENTION_PERIOD = Interval('PT${effectiveRetentionHours}H')`);
+    let effectiveRetentionPeriodSeconds = retentionPeriodSeconds;
+    if (!preserveRawRetentionSettings && retentionType !== 'time') {
+        effectiveRetentionPeriodSeconds = SIZE_RETENTION_PERIOD_SECONDS;
+    }
+    settings.push(`RETENTION_PERIOD = Interval('PT${effectiveRetentionPeriodSeconds}S')`);
 
-    const effectiveStorageMb = retentionType === 'time' ? 0 : storageLimitMb;
+    let effectiveStorageMb = storageLimitMb;
+    if (!preserveRawRetentionSettings && retentionType === 'time') {
+        effectiveStorageMb = 0;
+    }
     settings.push(`RETENTION_STORAGE_MB = ${effectiveStorageMb}`);
 
-    settings.push(`PARTITION_WRITE_SPEED_BYTES_PER_SECOND = ${writeQuota * 1024}`);
+    settings.push(`PARTITION_WRITE_SPEED_BYTES_PER_SECOND = ${writeQuotaBytes}`);
 
     const strategy = autoPartitioning.enabled
-        ? AUTO_PARTITIONING_STRATEGY_TO_YQL[autoPartitioning.mode]
-        : AUTO_PARTITIONING_STRATEGY_TO_YQL[AutoPartitioningStrategy.Disabled];
+        ? formatAutoPartitioningStrategy(autoPartitioning.mode)
+        : formatAutoPartitioningStrategy(AutoPartitioningStrategy.Disabled);
     settings.push(`AUTO_PARTITIONING_STRATEGY = '${strategy}'`);
 
     if (autoPartitioning.enabled) {

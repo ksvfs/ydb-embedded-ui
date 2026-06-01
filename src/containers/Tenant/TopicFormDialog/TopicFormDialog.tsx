@@ -31,6 +31,7 @@ import type {TopicFormData} from '../../../store/reducers/topic/utils';
 import {AutoPartitioningStrategy} from '../../../store/reducers/topic/utils';
 import {cn} from '../../../utils/cn';
 import createToast from '../../../utils/createToast';
+import {formatDurationSeconds} from '../../../utils/dataFormatters/dataFormatters';
 import {prepareCommonErrorMessage} from '../../../utils/errors';
 import {useTypedSelector} from '../../../utils/hooks';
 import {transformPath} from '../ObjectSummary/transformPath';
@@ -75,20 +76,24 @@ interface TopicFormDialogProps extends CommonDialogProps {
 
 const writeQuotaOptions: SelectOption[] = [128, 512, 1024].map((value) => ({
     content: formatBandwidthBytes(value * 1024),
-    value: String(value),
+    value: String(value * 1024),
 }));
 
-const retentionHoursOptions: SelectOption[] = [
-    {content: `1 ${i18n('value_hour')}`, value: '1'},
-    {content: `4 ${i18n('value_hours')}`, value: '4'},
-    {content: `12 ${i18n('value_hours')}`, value: '12'},
-    {content: `1 ${i18n('value_day')}`, value: '24'},
+const retentionPeriodOptions: SelectOption[] = [
+    {content: `1 ${i18n('value_hour')}`, value: String(60 * 60)},
+    {content: `4 ${i18n('value_hours')}`, value: String(4 * 60 * 60)},
+    {content: `12 ${i18n('value_hours')}`, value: String(12 * 60 * 60)},
+    {content: `1 ${i18n('value_day')}`, value: String(24 * 60 * 60)},
 ];
 
 const STORAGE_LIMIT_MIN_MB = 50 * 1024;
 const STORAGE_LIMIT_MAX_MB = 400 * 1024;
 const STORAGE_LIMIT_STEP_MB = 1024;
-const SWITCHED_TIME_RETENTION_HOURS = 24;
+const SWITCHED_TIME_RETENTION_SECONDS = 24 * 60 * 60;
+
+function isEditableAutoPartitioningMode(mode?: string) {
+    return mode === AutoPartitioningStrategy.ScaleUp || mode === AutoPartitioningStrategy.Paused;
+}
 
 function showAutoPartitioningConfirmation() {
     return NiceModal.show(CONFIRMATION_DIALOG, {
@@ -329,6 +334,51 @@ function formatStorageLimitMark(value: number) {
     return `${fromMbToGb(value)} ${i18n('value_gigabyte')}`;
 }
 
+function addCurrentValueOption(
+    options: SelectOption[],
+    value: number | undefined,
+    formatter: (value: number) => string,
+) {
+    if (value === undefined || options.some((option) => option.value === String(value))) {
+        return options;
+    }
+
+    return [{content: formatter(value), value: String(value)}, ...options];
+}
+
+function formatRetentionPeriod(value: number) {
+    if (value % (24 * 60 * 60) === 0) {
+        const days = value / (24 * 60 * 60);
+        if (days === 1) {
+            return `1 ${i18n('value_day')}`;
+        }
+    }
+
+    if (value % (60 * 60) === 0) {
+        const hours = value / (60 * 60);
+        return `${hours} ${i18n(hours === 1 ? 'value_hour' : 'value_hours')}`;
+    }
+
+    return formatDurationSeconds(value) ?? `${value} ${i18n('value_seconds')}`;
+}
+
+function formatAutoPartitioningMode(mode: string) {
+    switch (mode) {
+        case AutoPartitioningStrategy.ScaleUp:
+            return i18n('value_auto-partitioning-scale-up');
+        case AutoPartitioningStrategy.Paused:
+            return i18n('value_auto-partitioning-paused');
+        case AutoPartitioningStrategy.ScaleUpAndDown:
+            return i18n('value_auto-partitioning-scale-up-and-down');
+        default:
+            return mode
+                .replace(/^AUTO_PARTITIONING_STRATEGY_/, '')
+                .toLowerCase()
+                .replace(/_/g, ' ')
+                .replace(/^./, (char) => char.toUpperCase());
+    }
+}
+
 function TopicForm({
     mode,
     database,
@@ -359,7 +409,7 @@ function TopicForm({
         setValue,
         trigger,
         watch,
-        formState: {errors},
+        formState: {dirtyFields, errors},
     } = useForm<TopicFormData>({
         defaultValues: initialValues,
         resolver: zodResolver(validationSchema),
@@ -372,7 +422,8 @@ function TopicForm({
     const autoPartitioningMode = watch('autoPartitioning.mode');
     const retentionType = watch('retentionType');
     const shards = watch('shards');
-    const writeQuota = watch('writeQuota');
+    const writeQuotaBytes = watch('writeQuotaBytes');
+    const retentionPeriodSeconds = watch('retentionPeriodSeconds');
     const minPartitions = watch('autoPartitioning.minPartitions');
     const maxPartitions = watch('autoPartitioning.maxPartitions');
     const minPartitionsError = errors.autoPartitioning?.minPartitions?.message;
@@ -398,8 +449,8 @@ function TopicForm({
         [autoPartitioningEnabled],
     );
 
-    const autoPartitioningModeOptions = React.useMemo(
-        () => [
+    const autoPartitioningModeOptions = React.useMemo(() => {
+        const options = [
             {
                 content: i18n('value_auto-partitioning-scale-up'),
                 value: AutoPartitioningStrategy.ScaleUp,
@@ -410,29 +461,66 @@ function TopicForm({
                 value: AutoPartitioningStrategy.Paused,
                 disabled: retentionType === 'size',
             },
-        ],
-        [retentionType],
+        ];
+
+        if (!autoPartitioningMode || isEditableAutoPartitioningMode(autoPartitioningMode)) {
+            return options;
+        }
+
+        return [
+            {
+                content: formatAutoPartitioningMode(autoPartitioningMode),
+                value: autoPartitioningMode,
+                disabled: retentionType === 'size',
+            },
+            ...options,
+        ];
+    }, [autoPartitioningMode, retentionType]);
+
+    const writeQuotaSelectOptions = React.useMemo(
+        () => addCurrentValueOption(writeQuotaOptions, writeQuotaBytes, formatBandwidthBytes),
+        [writeQuotaBytes],
+    );
+
+    const retentionPeriodSelectOptions = React.useMemo(
+        () =>
+            addCurrentValueOption(
+                retentionPeriodOptions,
+                retentionPeriodSeconds,
+                formatRetentionPeriod,
+            ),
+        [retentionPeriodSeconds],
     );
 
     const throughputInfo = React.useMemo(() => {
         if (autoPartitioningEnabled) {
             return i18n('context_throughput-info-range', {
-                from: minPartitions ? formatBandwidthBytes(minPartitions * writeQuota * 1024) : '_',
-                to: maxPartitions ? formatBandwidthBytes(maxPartitions * writeQuota * 1024) : '_',
+                from: minPartitions ? formatBandwidthBytes(minPartitions * writeQuotaBytes) : '_',
+                to: maxPartitions ? formatBandwidthBytes(maxPartitions * writeQuotaBytes) : '_',
             });
         }
 
         return i18n('context_throughput-info', {
-            speed: formatBandwidthBytes(Number(shards || 0) * writeQuota * 1024),
+            speed: formatBandwidthBytes(Number(shards || 0) * writeQuotaBytes),
         });
-    }, [autoPartitioningEnabled, maxPartitions, minPartitions, shards, writeQuota]);
+    }, [autoPartitioningEnabled, maxPartitions, minPartitions, shards, writeQuotaBytes]);
 
     const handleTopicSubmit = handleSubmit(async (data) => {
+        const preserveRawRetentionSettings =
+            mode === 'update' &&
+            !dirtyFields.retentionType &&
+            !dirtyFields.retentionPeriodSeconds &&
+            !dirtyFields.storageLimitMb;
+
+        const preparedData = preserveRawRetentionSettings
+            ? {...data, preserveRawRetentionSettings}
+            : data;
+
         try {
             if (mode === 'create') {
-                await createTopic({database, formData: data}).unwrap();
+                await createTopic({database, formData: preparedData}).unwrap();
             } else {
-                await updateTopic({database, formData: data}).unwrap();
+                await updateTopic({database, formData: preparedData}).unwrap();
             }
 
             createToast({
@@ -442,7 +530,7 @@ function TopicForm({
                 theme: 'success',
                 autoHiding: 5000,
             });
-            onSuccess?.(buildFullTopicPath(data, databaseFullPath));
+            onSuccess?.(buildFullTopicPath(preparedData, databaseFullPath));
         } catch (error) {
             createToast({
                 name: `topic-${mode}-error`,
@@ -473,13 +561,13 @@ function TopicForm({
             });
 
             if (nextRetentionType === 'time' && retentionType === 'size') {
-                setValue('retentionHours', SWITCHED_TIME_RETENTION_HOURS, {
+                setValue('retentionPeriodSeconds', SWITCHED_TIME_RETENTION_SECONDS, {
                     shouldDirty: true,
                     shouldTouch: true,
                 });
             }
 
-            trigger(nextRetentionType === 'time' ? 'retentionHours' : 'storageLimitMb');
+            trigger(nextRetentionType === 'time' ? 'retentionPeriodSeconds' : 'storageLimitMb');
         },
         [retentionType, setValue, trigger],
     );
@@ -529,7 +617,7 @@ function TopicForm({
                         note={i18n('context_shards-write-quota')}
                     >
                         <Controller
-                            name="writeQuota"
+                            name="writeQuotaBytes"
                             control={control}
                             render={({field}) => (
                                 <div className={b('control-stack')}>
@@ -537,10 +625,10 @@ function TopicForm({
                                         value={field.value}
                                         onChange={(value) => {
                                             field.onChange(value);
-                                            trigger('retentionHours');
+                                            trigger('retentionPeriodSeconds');
                                         }}
-                                        options={writeQuotaOptions}
-                                        errorMessage={errors.writeQuota?.message}
+                                        options={writeQuotaSelectOptions}
+                                        errorMessage={errors.writeQuotaBytes?.message}
                                     />
                                     <Text color="secondary">{throughputInfo}</Text>
                                 </div>
@@ -578,6 +666,23 @@ function TopicForm({
                                                         return;
                                                     }
                                                 }
+
+                                                if (
+                                                    enabled &&
+                                                    !isEditableAutoPartitioningMode(
+                                                        autoPartitioningMode,
+                                                    )
+                                                ) {
+                                                    setValue(
+                                                        'autoPartitioning.mode',
+                                                        AutoPartitioningStrategy.ScaleUp,
+                                                        {
+                                                            shouldDirty: true,
+                                                            shouldTouch: true,
+                                                        },
+                                                    );
+                                                }
+
                                                 field.onChange(enabled);
                                             }}
                                         />
@@ -837,9 +942,11 @@ function TopicForm({
                                     name="storageLimitMb"
                                     control={control}
                                     render={({field}) => {
-                                        const value = Number.isNaN(field.value)
-                                            ? STORAGE_LIMIT_MIN_MB
-                                            : (field.value ?? STORAGE_LIMIT_MIN_MB);
+                                        const value =
+                                            typeof field.value === 'number' &&
+                                            !Number.isNaN(field.value)
+                                                ? field.value
+                                                : undefined;
 
                                         return (
                                             <div className={b('storage-control')}>
@@ -864,6 +971,7 @@ function TopicForm({
                                                     formatInputValue={(nextValue) =>
                                                         String(fromMbToGb(nextValue))
                                                     }
+                                                    preserveValueOnBlurWithoutChanges
                                                     disabled={isSubmitting}
                                                     endContent={
                                                         <span className={b('input-details')}>
@@ -871,22 +979,25 @@ function TopicForm({
                                                         </span>
                                                     }
                                                 />
-                                                <StorageSizeNote size={value} shards={shards} />
+                                                <StorageSizeNote
+                                                    size={value ?? 0}
+                                                    shards={shards}
+                                                />
                                             </div>
                                         );
                                     }}
                                 />
                             ) : (
                                 <Controller
-                                    key="retention-hours"
-                                    name="retentionHours"
+                                    key="retention-period"
+                                    name="retentionPeriodSeconds"
                                     control={control}
                                     render={({field}) => (
                                         <SelectNumberField
                                             value={field.value}
                                             onChange={field.onChange}
-                                            options={retentionHoursOptions}
-                                            errorMessage={errors.retentionHours?.message}
+                                            options={retentionPeriodSelectOptions}
+                                            errorMessage={errors.retentionPeriodSeconds?.message}
                                         />
                                     )}
                                 />

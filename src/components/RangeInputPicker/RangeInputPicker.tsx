@@ -22,6 +22,7 @@ export interface RangeInputPickerProps {
     disabled?: boolean;
     endContent?: React.ReactNode;
     className?: string;
+    preserveValueOnBlurWithoutChanges?: boolean;
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -60,12 +61,14 @@ export function RangeInputPicker({
     disabled,
     endContent,
     className,
+    preserveValueOnBlurWithoutChanges,
 }: RangeInputPickerProps) {
     const hasNumericValue = typeof value === 'number' && Number.isFinite(value);
     const displayValue = hasNumericValue ? formatInputValue(value) : '';
 
     const [inputValue, setInputValue] = React.useState(displayValue);
     const [isInputFocused, setIsInputFocused] = React.useState(false);
+    const [hasInputChanges, setHasInputChanges] = React.useState(false);
 
     React.useEffect(() => {
         if (!isInputFocused) {
@@ -74,12 +77,25 @@ export function RangeInputPicker({
     }, [displayValue, isInputFocused]);
 
     const sliderValue = React.useMemo(() => {
+        if (!isInputFocused || !hasInputChanges) {
+            return hasNumericValue ? clamp(value, min, max) : min;
+        }
+
         const parsedDraft = parseInputValue(inputValue);
         if (typeof parsedDraft === 'number' && !Number.isNaN(parsedDraft)) {
             return clamp(parsedDraft, min, max);
         }
         return hasNumericValue ? clamp(value, min, max) : min;
-    }, [hasNumericValue, inputValue, max, min, parseInputValue, value]);
+    }, [
+        hasInputChanges,
+        hasNumericValue,
+        inputValue,
+        isInputFocused,
+        max,
+        min,
+        parseInputValue,
+        value,
+    ]);
 
     const handleSliderUpdate = React.useCallback(
         (nextValue: number | number[]) => {
@@ -98,6 +114,7 @@ export function RangeInputPicker({
             }
 
             setInputValue(nextValue);
+            setHasInputChanges(true);
 
             const parsedValue = parseInputValue(nextValue);
             if (
@@ -114,9 +131,16 @@ export function RangeInputPicker({
 
     const handleInputFocus = React.useCallback(() => {
         setIsInputFocused(true);
+        setHasInputChanges(false);
     }, []);
 
     const handleInputBlur = React.useCallback(() => {
+        if (preserveValueOnBlurWithoutChanges && !hasInputChanges) {
+            setIsInputFocused(false);
+            setInputValue(displayValue);
+            return;
+        }
+
         const fallbackValue = hasNumericValue ? clamp(value, min, max) : min;
 
         let normalizedValue: number;
@@ -134,7 +158,19 @@ export function RangeInputPicker({
         setIsInputFocused(false);
         setInputValue(formatInputValue(normalizedValue));
         onUpdate(normalizedValue);
-    }, [formatInputValue, hasNumericValue, inputValue, max, min, onUpdate, parseInputValue, value]);
+    }, [
+        displayValue,
+        formatInputValue,
+        hasInputChanges,
+        hasNumericValue,
+        inputValue,
+        max,
+        min,
+        onUpdate,
+        parseInputValue,
+        preserveValueOnBlurWithoutChanges,
+        value,
+    ]);
 
     return (
         <div className={b(null, className)}>
