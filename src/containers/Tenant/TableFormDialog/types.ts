@@ -28,6 +28,7 @@ export interface OriginalTableInfo {
     name: string;
     type: 'row' | 'column';
     columns: Column[];
+    partitionKey: string[];
     indexes: Array<{name: string; columns: string[]}>;
     hasTtl: boolean;
     hasMinPartitions: boolean;

@@ -135,8 +135,25 @@ export function YdbColumnsSection({
         primaryOriginalColumns.length > 0 ||
         nonPrimaryOriginalColumns.length > 0;
 
+    const primaryKeyColumnNames = primaryOriginalColumns.map((column) => column.name);
+    const partitionKeyColumnNames = originalInfo?.partitionKey ?? [];
+
     return (
         <FormSection title={i18n('label_columns')}>
+            {mode === 'update' ? (
+                <div className={b('special-columns')}>
+                    <SpecialColumnLabel
+                        label={i18n('column_primary-key')}
+                        columns={primaryKeyColumnNames}
+                    />
+                    {originalInfo?.type === 'column' ? (
+                        <SpecialColumnLabel
+                            label={i18n('field_partition-key')}
+                            columns={partitionKeyColumnNames}
+                        />
+                    ) : null}
+                </div>
+            ) : null}
             <div className={b('columns-table', {update: mode === 'update'})}>
                 {showHeader ? (
                     <React.Fragment>
@@ -220,6 +237,17 @@ export function YdbColumnsSection({
                 </div>
             </div>
         </FormSection>
+    );
+}
+
+function SpecialColumnLabel({label, columns}: {label: string; columns: string[]}) {
+    if (!columns.length) {
+        return null;
+    }
+    return (
+        <div className={b('special-column')}>
+            <span className={b('special-column-label')}>{label}:</span> {columns.join(', ')}
+        </div>
     );
 }
 

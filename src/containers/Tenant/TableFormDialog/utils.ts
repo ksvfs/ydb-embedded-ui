@@ -184,6 +184,7 @@ export function describeOriginalTable(
             name,
             type: 'column',
             columns,
+            partitionKey: desc.Sharding?.HashSharding?.Columns ?? [],
             indexes: [],
             hasTtl: Boolean(desc.TtlSettings?.Enabled),
             hasMinPartitions: false,
@@ -206,6 +207,7 @@ export function describeOriginalTable(
         name,
         type: 'row',
         columns,
+        partitionKey: [],
         indexes,
         hasTtl: Boolean(desc?.TTLSettings?.Enabled),
         hasMinPartitions:

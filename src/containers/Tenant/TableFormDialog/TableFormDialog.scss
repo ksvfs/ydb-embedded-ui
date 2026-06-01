@@ -88,6 +88,18 @@
         max-width: 320px;
     }
 
+    &__special-columns {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--g-spacing-1) var(--g-spacing-4);
+
+        margin-bottom: var(--g-spacing-3);
+    }
+
+    &__special-column-label {
+        font-weight: 500;
+    }
+
     &__columns-table {
         display: flex;
         flex-direction: column;
