@@ -121,6 +121,10 @@ export function getUpdateTopicInitialValues({
     topicPath: string;
 }): TopicFormData {
     const topicPathData = splitTopicPath(topicPath, databaseFullPath);
+    const hasStorageRetention =
+        typeof formData.storageLimitMb === 'number' &&
+        !Number.isNaN(formData.storageLimitMb) &&
+        formData.storageLimitMb > 0;
 
     return {
         ...DEFAULT_TOPIC_FORM_VALUES,
@@ -128,6 +132,10 @@ export function getUpdateTopicInitialValues({
         databaseId: formData.databaseId ?? database,
         path: topicPathData.path,
         name: topicPathData.name || formData.name,
+        retentionType: hasStorageRetention ? 'size' : 'time',
+        storageLimitMb: hasStorageRetention
+            ? formData.storageLimitMb
+            : DEFAULT_TOPIC_FORM_VALUES.storageLimitMb,
         autoPartitioning: {
             ...DEFAULT_TOPIC_FORM_VALUES.autoPartitioning,
             ...formData.autoPartitioning,

@@ -15,8 +15,6 @@ import {AutoPartitioningStrategy, buildAlterTopicQuery, buildCreateTopicQuery} f
 export const TOPIC_MESSAGE_SIZE_LIMIT = 100;
 
 const DEFAULT_RETENTION_HOURS = 4;
-const SWITCHED_TIME_RETENTION_HOURS = 24;
-const DEFAULT_STORAGE_LIMIT_MB = 50 * 1024;
 
 export const topicApi = api.injectEndpoints({
     endpoints: (build) => ({
@@ -238,15 +236,16 @@ function mapApiAutoPartitioningStrategy(apiStrategy?: string): AutoPartitioningS
 }
 
 function getTopicRetentionFormValues(topicData: DescribeTopicResult) {
-    const retentionStorageMb = parseInt(topicData.retention_storage_mb ?? '0', 10);
+    const parsedRetentionStorageMb = parseInt(topicData.retention_storage_mb ?? '0', 10);
     const retentionHours = parseDurationToHours(topicData.retention_period);
-    const hasStorageRetention = Number.isFinite(retentionStorageMb) && retentionStorageMb > 0;
+    const retentionStorageMb = Number.isFinite(parsedRetentionStorageMb)
+        ? parsedRetentionStorageMb
+        : 0;
+    const hasStorageRetention = retentionStorageMb > 0;
 
     return {
-        retentionHours: hasStorageRetention
-            ? SWITCHED_TIME_RETENTION_HOURS
-            : retentionHours || DEFAULT_RETENTION_HOURS,
-        storageLimitMb: hasStorageRetention ? retentionStorageMb : DEFAULT_STORAGE_LIMIT_MB,
+        retentionHours: retentionHours || DEFAULT_RETENTION_HOURS,
+        storageLimitMb: retentionStorageMb,
         retentionType: hasStorageRetention ? 'size' : 'time',
     } as const;
 }
