@@ -79,15 +79,6 @@
 
     &__badge {
         flex-shrink: 0;
-
-        padding: 0 4px;
-
-        font-size: var(--g-text-caption-1-font-size);
-        line-height: 18px;
-
-        color: var(--g-color-text-misc);
-        border-radius: var(--g-border-radius-s);
-        background-color: var(--g-color-base-misc-medium);
     }
 
     &__chevron {
@@ -106,7 +97,7 @@
     }
 
     &__panels {
-        --g-list-item-padding: 4px 8px;
+        --g-list-item-padding: 4px 16px;
         display: flex;
 
         min-height: 200px;
@@ -145,6 +136,11 @@
 
         width: 100%;
 
+        &:hover &-action,
+        &:focus-within &-action {
+            visibility: visible;
+        }
+
         &-text {
             overflow: hidden;
             flex: 1;
@@ -160,6 +156,8 @@
         &-action {
             visibility: hidden;
             flex-shrink: 0;
+
+            border-radius: var(--g-border-radius-l);
 
             &_visible {
                 visibility: visible;

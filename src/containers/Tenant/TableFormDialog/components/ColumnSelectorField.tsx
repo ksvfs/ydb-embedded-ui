@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {ChevronDown, Xmark} from '@gravity-ui/icons';
-import {Button, Icon, List, Popup} from '@gravity-ui/uikit';
+import {Button, Icon, Label, List, Popup} from '@gravity-ui/uikit';
 
 import {cn} from '../../../../utils/cn';
 import i18n from '../i18n';
@@ -125,7 +125,7 @@ function ItemSelector({items, value, onUpdate}: ItemSelectorProps) {
         <div className={b('panels')}>
             <div className={b('panel')}>
                 <div className={b('panel-header')}>
-                    <span className={b('panel-title')}>{i18n('label_items')}</span>
+                    <span className={b('panel-title')}>{i18n('label_columns')}</span>
                     <Button view="flat-secondary" size="s" onClick={handleSelectAll}>
                         {i18n('action_select-all')}
                     </Button>
@@ -135,7 +135,6 @@ function ItemSelector({items, value, onUpdate}: ItemSelectorProps) {
                     filterItem={filterColumnItem}
                     filterPlaceholder={i18n('label_search')}
                     itemsHeight={196}
-                    onItemClick={handleSelect}
                     renderItem={renderAvailableItem}
                 />
             </div>
@@ -151,7 +150,6 @@ function ItemSelector({items, value, onUpdate}: ItemSelectorProps) {
                     filterItem={filterColumnItem}
                     filterPlaceholder={i18n('label_search')}
                     itemsHeight={196}
-                    onItemClick={handleRemove}
                     renderItem={renderSelectedItem}
                 />
             </div>
@@ -218,7 +216,11 @@ export function ColumnSelectorField({
                 ) : (
                     <span className={b('placeholder')}>{i18n('label_select-columns')}</span>
                 )}
-                {value.length > 1 && <span className={b('badge')}>{value.length}</span>}
+                {value.length > 0 ? (
+                    <Label size="xs" className={b('badge')}>
+                        {value.length}
+                    </Label>
+                ) : null}
                 <Icon data={ChevronDown} className={b('chevron', {open})} size={16} />
             </button>
             <Popup

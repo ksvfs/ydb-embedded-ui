@@ -17,7 +17,6 @@ import {
     Switch,
     Text,
     TextInput,
-    Tooltip,
 } from '@gravity-ui/uikit';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {Controller, useForm} from 'react-hook-form';
@@ -450,6 +449,13 @@ function TopicForm({
     const autoPartitioningCanBeDisabled =
         mode === 'create' || !initialValues.autoPartitioning.enabled;
     const autoPartitioningRestricted = retentionType === 'size';
+    let autoPartitioningDisabledReason: string | undefined;
+
+    if (autoPartitioningRestricted) {
+        autoPartitioningDisabledReason = i18n('context_auto-partitioning-mode-restricted');
+    } else if (!autoPartitioningCanBeDisabled) {
+        autoPartitioningDisabledReason = i18n('context_auto-partitioning-mode-disabled');
+    }
     const insidePath =
         mode === 'create'
             ? transformPath(parentPath ?? databaseFullPath, databaseFullPath)
@@ -547,41 +553,33 @@ function TopicForm({
                                 name="autoPartitioning.enabled"
                                 control={control}
                                 render={({field}) => (
-                                    <Tooltip
-                                        disabled={autoPartitioningCanBeDisabled}
-                                        placement={['top', 'bottom']}
-                                        content={i18n('context_auto-partitioning-mode-disabled')}
-                                    >
-                                        <Switch
-                                            checked={field.value}
-                                            disabled={
-                                                isSubmitting ||
-                                                autoPartitioningRestricted ||
-                                                !autoPartitioningCanBeDisabled
-                                            }
-                                            onUpdate={async (enabled) => {
-                                                if (
-                                                    enabled &&
-                                                    autoPartitioningMode !==
-                                                        AutoPartitioningStrategy.Paused &&
-                                                    mode !== 'update'
-                                                ) {
-                                                    const confirmed =
-                                                        await showAutoPartitioningConfirmation();
-                                                    if (!confirmed) {
-                                                        return;
-                                                    }
+                                    <Switch
+                                        checked={field.value}
+                                        disabled={
+                                            isSubmitting ||
+                                            autoPartitioningRestricted ||
+                                            !autoPartitioningCanBeDisabled
+                                        }
+                                        onUpdate={async (enabled) => {
+                                            if (
+                                                enabled &&
+                                                autoPartitioningMode !==
+                                                    AutoPartitioningStrategy.Paused &&
+                                                mode !== 'update'
+                                            ) {
+                                                const confirmed =
+                                                    await showAutoPartitioningConfirmation();
+                                                if (!confirmed) {
+                                                    return;
                                                 }
-                                                field.onChange(enabled);
-                                            }}
-                                        />
-                                    </Tooltip>
+                                            }
+                                            field.onChange(enabled);
+                                        }}
+                                    />
                                 )}
                             />
-                            {autoPartitioningRestricted ? (
-                                <IncompatiblePopover
-                                    content={i18n('context_auto-partitioning-mode-restricted')}
-                                />
+                            {autoPartitioningDisabledReason ? (
+                                <IncompatiblePopover content={autoPartitioningDisabledReason} />
                             ) : null}
                         </Flex>
                     </FormRow>
