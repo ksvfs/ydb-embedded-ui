@@ -226,7 +226,7 @@ const buildSettingsCreateItems = (settings?: TableSettings) => {
         const duration = getDurationWithDaysOnly(lifetime, unit);
         items.push(
             `TTL = Interval("${duration}") ON ${buildName(column)}${
-                epochMode ? ` AS ${epochMode.toUpperCase()}` : ''
+                epochMode ? ` AS ${formatTtlEpochMode(epochMode)}` : ''
             }`,
         );
     }
@@ -429,8 +429,14 @@ function mapEpochUnit(unit: EUnit): TTLSettings['epochMode'] {
         case EUnit.UNIT_NANOSECONDS:
             return 'nanoseconds';
         default:
-            return undefined;
+            return unit;
     }
+}
+
+function formatTtlEpochMode(epochMode: string) {
+    return epochMode.startsWith('UNIT_')
+        ? epochMode.slice('UNIT_'.length)
+        : epochMode.toUpperCase();
 }
 
 function rawColumnToColumnField(
@@ -579,6 +585,17 @@ export function prepareFormValues(response: TEvDescribeSchemeResult): FormValues
         partitionCount: 0,
         settings: desc ? prepareRowTableSettings(desc) : {ttl: {status: 'disabled'}},
     };
+}
+
+export function getUpdateTableSettings(
+    settings: TableSettings | undefined,
+    shouldUpdateTtl: boolean,
+): TableSettings | undefined {
+    if (!settings || !shouldUpdateTtl) {
+        return undefined;
+    }
+
+    return {ttl: settings.ttl};
 }
 
 export function buildCreateTableQuery(options: BuildTemplateOptions) {

@@ -119,8 +119,14 @@ export function YdbColumnsSection({
 
             if (isTtlColumn) {
                 onRequestTtlColumnDeletion(column.name, () => {
-                    setValue('settings.ttl.status', 'disabled', {shouldValidate: true});
-                    setValue('settings.ttl.column', undefined, {shouldValidate: false});
+                    setValue('settings.ttl.status', 'disabled', {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                    });
+                    setValue('settings.ttl.column', undefined, {
+                        shouldDirty: true,
+                        shouldValidate: false,
+                    });
                     doDelete();
                 });
             } else {

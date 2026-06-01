@@ -42,6 +42,18 @@ import './TableFormDialog.scss';
 
 const b = cn('ydb-table-form-dialog');
 
+function hasDirtyValue(value: unknown): boolean {
+    if (value === true) {
+        return true;
+    }
+
+    if (!value || typeof value !== 'object') {
+        return false;
+    }
+
+    return Object.values(value).some(hasDirtyValue);
+}
+
 interface CommonDialogProps {
     mode: FormMode;
     database: string;
@@ -115,7 +127,12 @@ function TableForm({
         mode: 'onChange',
     });
 
-    const {control, handleSubmit, setValue} = methods;
+    const {
+        control,
+        handleSubmit,
+        setValue,
+        formState: {dirtyFields},
+    } = methods;
     const type: TableType = useWatch({control, name: 'type'});
 
     const previousTypeRef = React.useRef<TableType>(initialValues.type);
@@ -166,10 +183,13 @@ function TableForm({
                 if (!originalTable || !path) {
                     throw new Error('Original table is required for update');
                 }
+                const shouldUpdateTtl = hasDirtyValue(dirtyFields.settings?.ttl);
+
                 await updateTable({
                     database,
                     formValues,
                     originalTable,
+                    shouldUpdateTtl,
                 }).unwrap();
                 createToast({
                     name: 'table-update-success',

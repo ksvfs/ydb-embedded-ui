@@ -163,7 +163,7 @@ export interface TTLSettings {
     expire?: number;
     lifetime?: number;
     unit?: 'seconds' | 'minutes' | 'hours' | 'days';
-    epochMode?: 'seconds' | 'milliseconds' | 'microseconds' | 'nanoseconds';
+    epochMode?: string;
 }
 
 export interface TableSettings {

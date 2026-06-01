@@ -21,6 +21,33 @@ import {
 
 const b = cn('ydb-table-form-dialog');
 
+function addCurrentValueOption(
+    options: SelectOption[],
+    value: string | undefined,
+    formatValue?: (nextValue: string) => string,
+) {
+    if (!value || options.some((option) => option.value === value)) {
+        return options;
+    }
+
+    return [
+        {
+            value,
+            content: formatValue ? formatValue(value) : value,
+        },
+        ...options,
+    ];
+}
+
+function formatEpochModeValue(value: string) {
+    const normalized = value
+        .replace(/^UNIT_/, '')
+        .toLowerCase()
+        .replace(/_/g, ' ');
+
+    return normalized ? normalized[0].toUpperCase() + normalized.slice(1) : value;
+}
+
 interface TTLSectionProps {
     originalInfo?: OriginalTableInfo;
 }
@@ -31,6 +58,7 @@ export function TTLSection({originalInfo}: TTLSectionProps) {
     const status = useWatch({control, name: 'settings.ttl.status'});
     const column = useWatch({control, name: 'settings.ttl.column'});
     const columnWithEpochMode = useWatch({control, name: 'settings.ttl.columnWithEpochMode'});
+    const epochMode = useWatch({control, name: 'settings.ttl.epochMode'});
     const formColumns = useWatch({control, name: 'columns'});
     const deletedColumns = useWatch({control, name: 'deletedColumns'});
 
@@ -46,39 +74,39 @@ export function TTLSection({originalInfo}: TTLSectionProps) {
     }, [originalInfo, formColumns, deletedColumns]);
 
     const columnOptions = React.useMemo<SelectOption[]>(() => {
-        if (ttlColumns.length === 0) {
-            return [
-                {
-                    value: '',
-                    content: i18n('label_ttl-warning'),
-                    disabled: true,
-                },
-            ];
-        }
-        return ttlColumns.map(({name}) => ({value: name, content: name}));
-    }, [ttlColumns]);
+        const options =
+            ttlColumns.length === 0
+                ? [
+                      {
+                          value: '',
+                          content: i18n('label_ttl-warning'),
+                          disabled: true,
+                      },
+                  ]
+                : ttlColumns.map(({name}) => ({value: name, content: name}));
+
+        return addCurrentValueOption(options, column);
+    }, [ttlColumns, column]);
+
+    const epochModeSelectOptions = React.useMemo(
+        () => addCurrentValueOption(epochModeOptions, epochMode, formatEpochModeValue),
+        [epochMode],
+    );
 
     React.useEffect(() => {
-        if (!enabled) {
+        if (!enabled || !column) {
             return;
         }
+
         const matchedType = ttlColumns.find(({name}) => name === column)?.type;
-        const withEpochMode = Boolean(matchedType && isValidTtlNumType(matchedType));
+        if (!matchedType) {
+            return;
+        }
+
+        const withEpochMode = isValidTtlNumType(matchedType);
         setValue('settings.ttl.columnWithEpochMode', withEpochMode, {shouldValidate: false});
         if (!withEpochMode) {
             setValue('settings.ttl.epochMode', undefined, {shouldValidate: false});
-        }
-    }, [enabled, column, ttlColumns, setValue]);
-
-    React.useEffect(() => {
-        if (!enabled) {
-            return;
-        }
-        if (!column) {
-            return;
-        }
-        if (!ttlColumns.some(({name}) => name === column)) {
-            setValue('settings.ttl.column', undefined, {shouldValidate: false});
         }
     }, [enabled, column, ttlColumns, setValue]);
 
@@ -146,7 +174,7 @@ export function TTLSection({originalInfo}: TTLSectionProps) {
                                         <Select
                                             className={b('control')}
                                             value={field.value ? [field.value] : []}
-                                            options={epochModeOptions}
+                                            options={epochModeSelectOptions}
                                             onUpdate={([value]) => field.onChange(value)}
                                             width="max"
                                             validationState={epochError ? 'invalid' : undefined}

@@ -175,10 +175,16 @@ function validatePartitionsAtKeys(data: FormValues, ctx: z.RefinementCtx) {
 function validateSettings(
     data: FormValues,
     ctx: z.RefinementCtx,
+    mode: FormMode,
     originalInfo?: OriginalTableInfo,
 ) {
     const settings = data.settings;
     if (!settings) {
+        return;
+    }
+
+    if (mode === 'update') {
+        validateTtl(data, ctx);
         return;
     }
 
@@ -260,6 +266,6 @@ export function buildTableValidationSchema({
         validateColumns(data, ctx, mode);
         validateSecondaryIndexes(data, ctx, originalInfo);
         validatePartitioning(data, ctx, mode);
-        validateSettings(data, ctx, originalInfo);
+        validateSettings(data, ctx, mode, originalInfo);
     }) as z.ZodType<FormValues>;
 }

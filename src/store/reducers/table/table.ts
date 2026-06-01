@@ -10,6 +10,7 @@ import {
     buildRenameQuery,
     buildResetQuery,
     buildUpdateTableQuery,
+    getUpdateTableSettings,
     prepareYdbCreateQueryColumns,
 } from './utils';
 
@@ -89,10 +90,12 @@ export const tableApi = api.injectEndpoints({
                 database,
                 formValues,
                 originalTable,
+                shouldUpdateTtl,
             }: {
                 database: string;
                 formValues: FormValues;
                 originalTable: TEvDescribeSchemeResult;
+                shouldUpdateTtl: boolean;
             }) => {
                 try {
                     const {
@@ -115,10 +118,11 @@ export const tableApi = api.injectEndpoints({
                         pathDesc?.Table?.TTLSettings?.Enabled ??
                             pathDesc?.ColumnTableDescription?.TtlSettings?.Enabled,
                     );
+                    const updateSettings = getUpdateTableSettings(settings, shouldUpdateTtl);
 
                     const queries: string[] = [];
 
-                    if (settings.ttl.status === 'disabled' && originalHadTtl) {
+                    if (shouldUpdateTtl && settings.ttl.status === 'disabled' && originalHadTtl) {
                         queries.push(buildResetQuery(tableName, 'TTL'));
                     }
 
@@ -128,7 +132,7 @@ export const tableApi = api.injectEndpoints({
                         secondaryIndexes,
                         deletedColumns,
                         updatedSecondaryIndexes,
-                        settings,
+                        settings: updateSettings,
                     };
                     const updateQuery = buildUpdateTableQuery(updateOptions);
                     const updateQueryEmpty = buildUpdateTableQuery({tableName});
