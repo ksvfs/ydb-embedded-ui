@@ -123,6 +123,10 @@
         align-items: center;
     }
 
+    &__popover-target {
+        display: inline-flex;
+    }
+
     &__error {
         max-width: 100%;
     }

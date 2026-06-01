@@ -206,18 +206,26 @@ function FixedValue({value}: {value?: string | number}) {
     );
 }
 
-function IncompatiblePopover({content}: {content: string}) {
+function IncompatiblePopover({
+    content,
+    children,
+}: {
+    content: string;
+    children?: React.ReactElement;
+}) {
     return (
         <Popover content={content} placement="top" hasArrow className={b('incompatible-popover')}>
-            <Text
-                as="div"
-                color="warning"
-                variant="body-short"
-                tabIndex={0}
-                className={b('warning-icon')}
-            >
-                <Icon data={TriangleExclamationFill} size={16} />
-            </Text>
+            {children ?? (
+                <Text
+                    as="div"
+                    color="warning"
+                    variant="body-short"
+                    tabIndex={0}
+                    className={b('warning-icon')}
+                >
+                    <Icon data={TriangleExclamationFill} size={16} />
+                </Text>
+            )}
         </Popover>
     );
 }
@@ -446,16 +454,12 @@ function TopicForm({
         }
     });
 
-    const autoPartitioningCanBeDisabled =
-        mode === 'create' || !initialValues.autoPartitioning.enabled;
+    const autoPartitioningCannotBeDisabled =
+        mode === 'update' && initialValues.autoPartitioning.enabled;
     const autoPartitioningRestricted = retentionType === 'size';
-    let autoPartitioningDisabledReason: string | undefined;
-
-    if (autoPartitioningRestricted) {
-        autoPartitioningDisabledReason = i18n('context_auto-partitioning-mode-restricted');
-    } else if (!autoPartitioningCanBeDisabled) {
-        autoPartitioningDisabledReason = i18n('context_auto-partitioning-mode-disabled');
-    }
+    const autoPartitioningDisabledReason = autoPartitioningCannotBeDisabled
+        ? i18n('context_auto-partitioning-mode-disabled')
+        : undefined;
     const insidePath =
         mode === 'create'
             ? transformPath(parentPath ?? databaseFullPath, databaseFullPath)
@@ -552,34 +556,52 @@ function TopicForm({
                             <Controller
                                 name="autoPartitioning.enabled"
                                 control={control}
-                                render={({field}) => (
-                                    <Switch
-                                        checked={field.value}
-                                        disabled={
-                                            isSubmitting ||
-                                            autoPartitioningRestricted ||
-                                            !autoPartitioningCanBeDisabled
-                                        }
-                                        onUpdate={async (enabled) => {
-                                            if (
-                                                enabled &&
-                                                autoPartitioningMode !==
-                                                    AutoPartitioningStrategy.Paused &&
-                                                mode !== 'update'
-                                            ) {
-                                                const confirmed =
-                                                    await showAutoPartitioningConfirmation();
-                                                if (!confirmed) {
-                                                    return;
-                                                }
+                                render={({field}) => {
+                                    const switchControl = (
+                                        <Switch
+                                            checked={field.value}
+                                            disabled={
+                                                isSubmitting ||
+                                                autoPartitioningRestricted ||
+                                                autoPartitioningCannotBeDisabled
                                             }
-                                            field.onChange(enabled);
-                                        }}
-                                    />
-                                )}
+                                            onUpdate={async (enabled) => {
+                                                if (
+                                                    enabled &&
+                                                    autoPartitioningMode !==
+                                                        AutoPartitioningStrategy.Paused &&
+                                                    mode !== 'update'
+                                                ) {
+                                                    const confirmed =
+                                                        await showAutoPartitioningConfirmation();
+                                                    if (!confirmed) {
+                                                        return;
+                                                    }
+                                                }
+                                                field.onChange(enabled);
+                                            }}
+                                        />
+                                    );
+
+                                    if (!autoPartitioningDisabledReason) {
+                                        return switchControl;
+                                    }
+
+                                    return (
+                                        <IncompatiblePopover
+                                            content={autoPartitioningDisabledReason}
+                                        >
+                                            <span className={b('popover-target')} tabIndex={0}>
+                                                {switchControl}
+                                            </span>
+                                        </IncompatiblePopover>
+                                    );
+                                }}
                             />
-                            {autoPartitioningDisabledReason ? (
-                                <IncompatiblePopover content={autoPartitioningDisabledReason} />
+                            {autoPartitioningRestricted ? (
+                                <IncompatiblePopover
+                                    content={i18n('context_auto-partitioning-mode-restricted')}
+                                />
                             ) : null}
                         </Flex>
                     </FormRow>
