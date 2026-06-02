@@ -242,6 +242,10 @@ export const selectTopicFormData = createSelector(
                 '0',
             10,
         );
+        const parsedPartitionCountLimit = parseInt(
+            topicData.partitioning_settings?.partition_count_limit ?? '',
+            10,
+        );
         const parsedWriteQuotaBytes = parseInt(
             topicData.partition_write_speed_bytes_per_second ?? '',
             10,
@@ -249,6 +253,9 @@ export const selectTopicFormData = createSelector(
         const writeQuotaBytes = Number.isFinite(parsedWriteQuotaBytes)
             ? parsedWriteQuotaBytes
             : DEFAULT_WRITE_QUOTA_BYTES;
+        const partitionCountLimit = Number.isFinite(parsedPartitionCountLimit)
+            ? parsedPartitionCountLimit
+            : undefined;
         const retentionValues = getTopicRetentionFormValues(topicData);
         const autoPartitioningSettings =
             topicData.partitioning_settings?.auto_partitioning_settings;
@@ -263,6 +270,7 @@ export const selectTopicFormData = createSelector(
         return {
             name: topicData.self?.name,
             shards: minActivePartitions,
+            partitionCountLimit,
             writeQuotaBytes,
             ...retentionValues,
             autoPartitioning: {

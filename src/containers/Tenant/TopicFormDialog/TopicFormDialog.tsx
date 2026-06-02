@@ -511,10 +511,18 @@ function TopicForm({
             !dirtyFields.retentionType &&
             !dirtyFields.retentionPeriodSeconds &&
             !dirtyFields.storageLimitMb;
+        const preservePartitionCountLimit =
+            mode === 'update' &&
+            !data.autoPartitioning.enabled &&
+            !dirtyFields.shards &&
+            !dirtyFields.autoPartitioning?.enabled;
 
-        const preparedData = preserveRawRetentionSettings
-            ? {...data, preserveRawRetentionSettings}
-            : data;
+        const preparedData = {
+            ...data,
+            partitionCountLimit: initialValues.partitionCountLimit,
+            ...(preserveRawRetentionSettings ? {preserveRawRetentionSettings} : {}),
+            ...(preservePartitionCountLimit ? {preservePartitionCountLimit} : {}),
+        };
 
         try {
             if (mode === 'create') {

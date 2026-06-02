@@ -10,11 +10,13 @@ export interface TopicFormData {
     path?: string;
     name?: string;
     shards: number;
+    partitionCountLimit?: number;
     writeQuotaBytes: number;
     retentionPeriodSeconds: number;
     storageLimitMb: number;
     retentionType: 'size' | 'time';
     preserveRawRetentionSettings?: boolean;
+    preservePartitionCountLimit?: boolean;
     autoPartitioning: {
         enabled: boolean;
         mode: string;
@@ -66,6 +68,8 @@ function buildTopicSettings(formData: TopicFormData): string[] {
         storageLimitMb,
         retentionType,
         preserveRawRetentionSettings,
+        partitionCountLimit,
+        preservePartitionCountLimit,
         autoPartitioning,
     } = formData;
 
@@ -81,7 +85,10 @@ function buildTopicSettings(formData: TopicFormData): string[] {
             settings.push(`MAX_ACTIVE_PARTITIONS = ${autoPartitioning.maxPartitions}`);
         }
     } else {
-        settings.push(`PARTITION_COUNT_LIMIT = ${shards}`);
+        const effectivePartitionCountLimit = preservePartitionCountLimit
+            ? partitionCountLimit
+            : shards;
+        settings.push(`PARTITION_COUNT_LIMIT = ${effectivePartitionCountLimit ?? shards}`);
     }
 
     let effectiveRetentionPeriodSeconds = retentionPeriodSeconds;

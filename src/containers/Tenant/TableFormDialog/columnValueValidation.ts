@@ -101,7 +101,7 @@ function isTimestamp64(stringValue: string) {
 export function isValueForTypeValid(value: string, type: string) {
     switch (type) {
         case 'Bool':
-            return /^true|false$/i.test(value);
+            return /^(true|false)$/i.test(value);
         case 'Int8':
             return isInt(8, value);
         case 'Int16':
