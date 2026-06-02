@@ -92,7 +92,6 @@ export function prepareColumnValue(column: Column, value: string | null) {
         case 'Json': {
             const escapedValue = value
                 .replaceAll('\\', '\\\\')
-                // Escape control characters (\u0000-\u001F and \u007F) as Unicode escape sequences
                 // eslint-disable-next-line no-control-regex
                 .replace(/[\u0000-\u001F\u007F]/g, (controlCharacters) => {
                     return '\\u' + controlCharacters.charCodeAt(0).toString(16).padStart(4, '0');

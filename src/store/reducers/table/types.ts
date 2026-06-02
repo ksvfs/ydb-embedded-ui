@@ -137,12 +137,12 @@ export interface Column {
     notNull: boolean;
     defaultValue?: string | number | boolean;
     family?: string;
-    autoincrement?: boolean; // column table
-    key?: boolean; // column table
-    keyOrder?: number; // column table
+    autoincrement?: boolean;
+    key?: boolean;
+    keyOrder?: number;
 
     isDeletable?: boolean;
-    isDisabled?: boolean; // to block a change, for example, if the type is unknown
+    isDisabled?: boolean;
 }
 
 export interface ColumnValueField extends Column {

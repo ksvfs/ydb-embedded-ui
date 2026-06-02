@@ -75,110 +75,96 @@ function validateRequiredNumber(
 }
 
 export function getTopicFormValidationSchema(minPartitions: number) {
-    return (
-        z
-            .object({
-                path: z.string().optional(),
-                name: topicNameSchema,
-                shards: requiredNumber(
-                    z
-                        .number({
-                            required_error: i18n('error_required'),
-                            invalid_type_error: i18n('error_number'),
-                        })
-                        .min(1, MIN_ONE_MESSAGE),
+    return z
+        .object({
+            path: z.string().optional(),
+            name: topicNameSchema,
+            shards: requiredNumber(
+                z
+                    .number({
+                        required_error: i18n('error_required'),
+                        invalid_type_error: i18n('error_number'),
+                    })
+                    .min(1, MIN_ONE_MESSAGE),
+            ),
+            writeQuotaBytes: requiredNumber(),
+            retentionPeriodSeconds: optionalNumber(),
+            storageLimitMb: optionalNumber(),
+            retentionType: z.enum(['size', 'time']),
+            autoPartitioning: z.object({
+                enabled: z.boolean(),
+                mode: z.string().min(1, i18n('error_required')),
+                minPartitions: optionalNumber(
+                    z.number({invalid_type_error: i18n('error_number')}).min(1, MIN_ONE_MESSAGE),
                 ),
-                writeQuotaBytes: requiredNumber(),
-                retentionPeriodSeconds: optionalNumber(),
-                storageLimitMb: optionalNumber(),
-                retentionType: z.enum(['size', 'time']),
-                autoPartitioning: z.object({
-                    enabled: z.boolean(),
-                    mode: z.string().min(1, i18n('error_required')),
-                    minPartitions: optionalNumber(
-                        z
-                            .number({invalid_type_error: i18n('error_number')})
-                            .min(1, MIN_ONE_MESSAGE),
-                    ),
-                    maxPartitions: optionalNumber(
-                        z
-                            .number({invalid_type_error: i18n('error_number')})
-                            .min(1, MIN_ONE_MESSAGE),
-                    ),
-                    stabilizationWindow: optionalNumber(),
-                    upUtilization: optionalNumber(
-                        z
-                            .number({invalid_type_error: i18n('error_number')})
-                            .max(100, MAX_HUNDRED_MESSAGE),
-                    ),
-                }),
-            })
-            // The form mirrors Cloud Console cross-field validation rules in one place.
-            .superRefine((data, ctx) => {
-                if (data.shards < minPartitions) {
-                    addIssue(ctx, ['shards'], i18n('error_min-number', {count: minPartitions}));
-                }
+                maxPartitions: optionalNumber(
+                    z.number({invalid_type_error: i18n('error_number')}).min(1, MIN_ONE_MESSAGE),
+                ),
+                stabilizationWindow: optionalNumber(),
+                upUtilization: optionalNumber(
+                    z
+                        .number({invalid_type_error: i18n('error_number')})
+                        .max(100, MAX_HUNDRED_MESSAGE),
+                ),
+            }),
+        })
+        .superRefine((data, ctx) => {
+            if (data.shards < minPartitions) {
+                addIssue(ctx, ['shards'], i18n('error_min-number', {count: minPartitions}));
+            }
 
-                if (
-                    data.retentionPeriodSeconds === 60 * 60 &&
-                    data.writeQuotaBytes !== 128 * 1024
-                ) {
-                    addIssue(
-                        ctx,
-                        ['retentionPeriodSeconds'],
-                        i18n('error_retention-unavailable', {
-                            speed: formatBandwidthBytes(128 * 1024),
-                        }),
-                    );
-                }
+            if (data.retentionPeriodSeconds === 60 * 60 && data.writeQuotaBytes !== 128 * 1024) {
+                addIssue(
+                    ctx,
+                    ['retentionPeriodSeconds'],
+                    i18n('error_retention-unavailable', {
+                        speed: formatBandwidthBytes(128 * 1024),
+                    }),
+                );
+            }
 
-                if (data.retentionType === 'time') {
-                    validateRequiredNumber(
-                        ctx,
-                        ['retentionPeriodSeconds'],
-                        data.retentionPeriodSeconds,
-                    );
-                } else if (data.retentionType === 'size') {
-                    validateRequiredNumber(ctx, ['storageLimitMb'], data.storageLimitMb);
-                }
-
-                const {autoPartitioning} = data;
-
-                if (!autoPartitioning.enabled) {
-                    return;
-                }
-
-                const minPath = ['autoPartitioning', 'minPartitions'];
-                const maxPath = ['autoPartitioning', 'maxPartitions'];
-                const stabilizationPath = ['autoPartitioning', 'stabilizationWindow'];
-                const upUtilizationPath = ['autoPartitioning', 'upUtilization'];
-
-                if (
-                    validateRequiredNumber(ctx, minPath, autoPartitioning.minPartitions) &&
-                    autoPartitioning.minPartitions !== undefined &&
-                    autoPartitioning.minPartitions < minPartitions
-                ) {
-                    addIssue(ctx, minPath, i18n('error_min-number', {count: minPartitions}));
-                }
-
-                if (validateRequiredNumber(ctx, maxPath, autoPartitioning.maxPartitions)) {
-                    const minValue = autoPartitioning.minPartitions;
-                    if (
-                        minValue !== undefined &&
-                        autoPartitioning.maxPartitions !== undefined &&
-                        autoPartitioning.maxPartitions <= minValue
-                    ) {
-                        addIssue(ctx, maxPath, i18n('error_more-than-number', {count: minValue}));
-                    }
-                }
-
+            if (data.retentionType === 'time') {
                 validateRequiredNumber(
                     ctx,
-                    stabilizationPath,
-                    autoPartitioning.stabilizationWindow,
+                    ['retentionPeriodSeconds'],
+                    data.retentionPeriodSeconds,
                 );
+            } else if (data.retentionType === 'size') {
+                validateRequiredNumber(ctx, ['storageLimitMb'], data.storageLimitMb);
+            }
 
-                validateRequiredNumber(ctx, upUtilizationPath, autoPartitioning.upUtilization);
-            }) as z.ZodType<TopicFormData>
-    );
+            const {autoPartitioning} = data;
+
+            if (!autoPartitioning.enabled) {
+                return;
+            }
+
+            const minPath = ['autoPartitioning', 'minPartitions'];
+            const maxPath = ['autoPartitioning', 'maxPartitions'];
+            const stabilizationPath = ['autoPartitioning', 'stabilizationWindow'];
+            const upUtilizationPath = ['autoPartitioning', 'upUtilization'];
+
+            if (
+                validateRequiredNumber(ctx, minPath, autoPartitioning.minPartitions) &&
+                autoPartitioning.minPartitions !== undefined &&
+                autoPartitioning.minPartitions < minPartitions
+            ) {
+                addIssue(ctx, minPath, i18n('error_min-number', {count: minPartitions}));
+            }
+
+            if (validateRequiredNumber(ctx, maxPath, autoPartitioning.maxPartitions)) {
+                const minValue = autoPartitioning.minPartitions;
+                if (
+                    minValue !== undefined &&
+                    autoPartitioning.maxPartitions !== undefined &&
+                    autoPartitioning.maxPartitions <= minValue
+                ) {
+                    addIssue(ctx, maxPath, i18n('error_more-than-number', {count: minValue}));
+                }
+            }
+
+            validateRequiredNumber(ctx, stabilizationPath, autoPartitioning.stabilizationWindow);
+
+            validateRequiredNumber(ctx, upUtilizationPath, autoPartitioning.upUtilization);
+        }) as z.ZodType<TopicFormData>;
 }

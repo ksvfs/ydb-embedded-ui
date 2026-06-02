@@ -36,7 +36,6 @@ export const topicApi = api.injectEndpoints({
                         path: {path, databaseFullPath, useMetaProxy},
                         database,
                     });
-                    // On older version it can return HTML page of Developer UI with an error
                     if (typeof data !== 'object') {
                         return {error: {}};
                     }

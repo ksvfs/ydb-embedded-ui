@@ -140,13 +140,6 @@ interface PartitioningSettings {
      */
     min_active_partitions?: string;
 
-    /**
-     * int64
-     *
-     * Maximum partition count auto split would stop working at.
-     *
-     * Zero value means default - 1.
-     */
     max_active_partitions?: string;
 
     /**
@@ -158,7 +151,6 @@ interface PartitioningSettings {
      */
     partition_count_limit?: string;
 
-    /** Settings for the partitions count auto partitioning. */
     auto_partitioning_settings?: AutoPartitioningSettings;
 }
 

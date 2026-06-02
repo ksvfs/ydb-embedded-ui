@@ -44,7 +44,6 @@ function isUInt64(stringValue: string) {
 }
 
 function isDate32(stringValue: string) {
-    // Check the YYYY-MM-DD format
     const dateRegex = /^-?\d{4,6}-(0\d|1[0-2])-([0-2]\d|3[0-1])$/;
     if (!dateRegex.test(stringValue)) {
         return false;
@@ -57,13 +56,10 @@ function isDate32(stringValue: string) {
 
     const year = parseInt(yearStr, 10);
 
-    // Date32 range: from 00:00 01.01.144169 BC to 00:00 01.01.148107 AD,
-    // i.e. years from -144169 to 148107
     return year >= -144169 && year <= 148107;
 }
 
 function isDatetime64(stringValue: string) {
-    // Check the YYYY-MM-DDTHH:mm:ssZ format
     const datetimeRegex = /^-?\d{4,6}-(0\d|1[0-2])-([0-2]\d|3[0-1])T\d{2}:\d{2}:\d{2}Z$/;
     if (!datetimeRegex.test(stringValue)) {
         return false;
@@ -75,13 +71,10 @@ function isDatetime64(stringValue: string) {
     }
     const year = parseInt(yearStr, 10);
 
-    // Datetime64 range: from 00:00 01.01.144169 BC to 00:00 01.01.148107 AD,
-    // i.e. years from -144169 to 148107
     return year >= -144169 && year <= 148107;
 }
 
 function isTimestamp64(stringValue: string) {
-    // Check the YYYY-MM-DDTHH:mm:ss.ssssssZ format
     const timestampRegex = /^-?\d{4,6}-(0\d|1[0-2])-([0-2]\d|3[0-1])T\d{2}:\d{2}:\d{2}\.\d{1,6}Z$/;
     if (!timestampRegex.test(stringValue)) {
         return false;
@@ -93,8 +86,6 @@ function isTimestamp64(stringValue: string) {
     }
     const year = parseInt(yearStr, 10);
 
-    // Timestamp64 range: from 00:00 01.01.144169 BC to 00:00 01.01.148107 AD,
-    // i.e. years from -144169 to 148107
     return year >= -144169 && year <= 148107;
 }
 
