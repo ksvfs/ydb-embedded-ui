@@ -6,7 +6,7 @@ export enum AutoPartitioningStrategy {
     ScaleUpAndDown = 'AUTO_PARTITIONING_STRATEGY_SCALE_UP_AND_DOWN',
 }
 
-export interface TopicFormData {
+export interface TopicFormValues {
     path?: string;
     name?: string;
     shards: number;
@@ -60,7 +60,7 @@ function formatAutoPartitioningStrategy(strategy: string) {
     );
 }
 
-function buildTopicSettings(formData: TopicFormData): string[] {
+function buildTopicSettings(formData: TopicFormValues): string[] {
     const {
         shards,
         writeQuotaBytes,
@@ -126,13 +126,13 @@ function buildTopicSettings(formData: TopicFormData): string[] {
     return settings;
 }
 
-export function buildCreateTopicQuery(formData: TopicFormData): string {
+export function buildCreateTopicQuery(formData: TopicFormValues): string {
     const topicRef = buildTopicPath(formData.path, formData.name);
     const settings = buildTopicSettings(formData);
     return `CREATE TOPIC ${topicRef} WITH (\n    ${settings.join(',\n    ')}\n);`;
 }
 
-export function buildAlterTopicQuery(formData: TopicFormData): string {
+export function buildAlterTopicQuery(formData: TopicFormValues): string {
     const topicRef = buildTopicPath(formData.path, formData.name);
     const settings = buildTopicSettings(formData);
     return `ALTER TOPIC ${topicRef} SET (\n    ${settings.join(',\n    ')}\n);`;

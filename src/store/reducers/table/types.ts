@@ -200,7 +200,7 @@ export interface BuildTemplateOptions {
     settings?: Partial<TableSettings>;
 }
 
-export interface FormValues {
+export interface TableFormValues {
     name: string;
     type: TableType;
     columns: ColumnField[];

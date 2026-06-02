@@ -1,6 +1,6 @@
 import {z} from 'zod';
 
-import type {TopicFormData} from '../../../store/reducers/topic/utils';
+import type {TopicFormValues} from '../../../store/reducers/topic/utils';
 
 import i18n from './i18n';
 import {formatBandwidthBytes} from './utils';
@@ -166,5 +166,5 @@ export function getTopicFormValidationSchema(minPartitions: number) {
             validateRequiredNumber(ctx, stabilizationPath, autoPartitioning.stabilizationWindow);
 
             validateRequiredNumber(ctx, upUtilizationPath, autoPartitioning.upUtilization);
-        }) as z.ZodType<TopicFormData>;
+        }) as z.ZodType<TopicFormValues>;
 }

@@ -1,4 +1,4 @@
-import type {TopicFormData} from '../../../store/reducers/topic/utils';
+import type {TopicFormValues} from '../../../store/reducers/topic/utils';
 import {AutoPartitioningStrategy} from '../../../store/reducers/topic/utils';
 import {UNBREAKABLE_GAP} from '../../../utils/constants';
 
@@ -7,7 +7,7 @@ export const TOPIC_FORM_DIALOG = 'topic-form-dialog';
 const KILOBYTE = 1024;
 const MEGABYTE = KILOBYTE * 1024;
 
-export const DEFAULT_TOPIC_FORM_VALUES: TopicFormData = {
+export const DEFAULT_TOPIC_FORM_VALUES: TopicFormValues = {
     shards: 1,
     writeQuotaBytes: 1024 * 1024,
     retentionPeriodSeconds: 4 * 60 * 60,
@@ -83,7 +83,7 @@ function splitTopicPath(topicPath: string, databaseFullPath: string) {
     return {path: path || undefined, name};
 }
 
-export function buildFullTopicPath(formData: TopicFormData, databaseFullPath: string) {
+export function buildFullTopicPath(formData: TopicFormValues, databaseFullPath: string) {
     const databasePath = databaseFullPath.startsWith('/')
         ? databaseFullPath
         : `/${databaseFullPath}`;
@@ -98,7 +98,7 @@ export function getCreateTopicInitialValues({
 }: {
     databaseFullPath: string;
     parentPath?: string;
-}): TopicFormData {
+}): TopicFormValues {
     return {
         ...DEFAULT_TOPIC_FORM_VALUES,
         path: parentPath ? getRelativePath(parentPath, databaseFullPath) : undefined,
@@ -112,9 +112,9 @@ export function getUpdateTopicInitialValues({
     topicPath,
 }: {
     databaseFullPath: string;
-    formData: TopicFormData;
+    formData: TopicFormValues;
     topicPath: string;
-}): TopicFormData {
+}): TopicFormValues {
     const topicPathData = splitTopicPath(topicPath, databaseFullPath);
     const hasStorageRetention =
         typeof formData.storageLimitMb === 'number' &&

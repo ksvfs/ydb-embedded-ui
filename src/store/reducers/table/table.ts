@@ -3,7 +3,7 @@ import type {TEvDescribeSchemeResult} from '../../../types/api/schema/schema';
 import {isQueryErrorResponse, parseQueryAPIResponse} from '../../../utils/query';
 import {api} from '../api';
 
-import type {BuildTemplateOptions, FormValues} from './types';
+import type {BuildTemplateOptions, TableFormValues} from './types';
 import {
     buildCreateColumnTableQuery,
     buildCreateTableQuery,
@@ -37,7 +37,13 @@ export const tableApi = api.injectEndpoints({
             providesTags: ['All'],
         }),
         createTable: build.mutation({
-            queryFn: async ({database, formValues}: {database: string; formValues: FormValues}) => {
+            queryFn: async ({
+                database,
+                formValues,
+            }: {
+                database: string;
+                formValues: TableFormValues;
+            }) => {
                 try {
                     const {
                         type,
@@ -94,7 +100,7 @@ export const tableApi = api.injectEndpoints({
                 updateSettings,
             }: {
                 database: string;
-                formValues: FormValues;
+                formValues: TableFormValues;
                 originalTable: TEvDescribeSchemeResult;
                 updateSettings?: BuildTemplateOptions['settings'];
             }) => {

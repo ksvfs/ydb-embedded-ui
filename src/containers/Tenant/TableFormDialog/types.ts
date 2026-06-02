@@ -1,18 +1,25 @@
 import type {
     Column,
     ColumnField,
-    FormValues,
     SecondaryIndex,
     TTLSettings,
+    TableFormValues,
     TableSettings,
 } from '../../../store/reducers/table/types';
 import {PartitionsType} from '../../../store/reducers/table/types';
 import type {TEvDescribeSchemeResult} from '../../../types/api/schema/schema';
 
 export type FormMode = 'create' | 'update';
-export type TableType = FormValues['type'];
+export type TableType = TableFormValues['type'];
 
-export type {Column, ColumnField, FormValues, SecondaryIndex, TTLSettings, TableSettings};
+export type {
+    Column,
+    ColumnField,
+    TableFormValues as FormValues,
+    SecondaryIndex,
+    TTLSettings,
+    TableSettings,
+};
 export {PartitionsType};
 
 export interface OriginalTableInfo {

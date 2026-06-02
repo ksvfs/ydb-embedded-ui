@@ -9,7 +9,7 @@ import {parseLag, parseTimestampToIdleTime} from '../../../utils/timeParsers';
 import type {RootState} from '../../defaultStore';
 import {api} from '../api';
 
-import type {TopicFormData} from './utils';
+import type {TopicFormValues} from './utils';
 import {AutoPartitioningStrategy, buildAlterTopicQuery, buildCreateTopicQuery} from './utils';
 
 export const TOPIC_MESSAGE_SIZE_LIMIT = 100;
@@ -61,7 +61,13 @@ export const topicApi = api.injectEndpoints({
             keepUnusedDataFor: 0,
         }),
         createTopic: build.mutation({
-            queryFn: async ({database, formData}: {database: string; formData: TopicFormData}) => {
+            queryFn: async ({
+                database,
+                formData,
+            }: {
+                database: string;
+                formData: TopicFormValues;
+            }) => {
                 try {
                     const query = buildCreateTopicQuery(formData);
 
@@ -83,7 +89,13 @@ export const topicApi = api.injectEndpoints({
             invalidatesTags: (_result, error) => (error ? [] : ['All']),
         }),
         updateTopic: build.mutation({
-            queryFn: async ({database, formData}: {database: string; formData: TopicFormData}) => {
+            queryFn: async ({
+                database,
+                formData,
+            }: {
+                database: string;
+                formData: TopicFormValues;
+            }) => {
                 try {
                     const query = buildAlterTopicQuery(formData);
 
@@ -282,6 +294,6 @@ export const selectTopicFormData = createSelector(
                 ),
                 upUtilization: partitionWriteSpeed?.up_utilization_percent,
             },
-        } as TopicFormData;
+        } as TopicFormValues;
     },
 );

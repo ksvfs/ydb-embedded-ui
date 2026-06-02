@@ -20,9 +20,9 @@ import type {
     Column,
     ColumnFamilyDescription,
     ColumnField,
-    FormValues,
     SecondaryIndex,
     TTLSettings,
+    TableFormValues,
     TableSettings,
 } from './types';
 
@@ -492,7 +492,7 @@ function prepareColumnTableSettings(table: TColumnTableDescription): TableSettin
     };
 }
 
-export function prepareFormValues(response: TEvDescribeSchemeResult): FormValues {
+export function prepareFormValues(response: TEvDescribeSchemeResult): TableFormValues {
     const pathDesc = response.PathDescription;
     const name = pathDesc?.Self?.Name ?? '';
     const pathType = pathDesc?.Self?.PathType;

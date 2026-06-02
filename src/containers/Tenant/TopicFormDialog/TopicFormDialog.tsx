@@ -27,7 +27,7 @@ import {Loader} from '../../../components/Loader';
 import {RangeInputPicker} from '../../../components/RangeInputPicker';
 import {useClusterWithProxy} from '../../../store/reducers/cluster/cluster';
 import {selectTopicFormData, topicApi} from '../../../store/reducers/topic/topic';
-import type {TopicFormData} from '../../../store/reducers/topic/utils';
+import type {TopicFormValues} from '../../../store/reducers/topic/utils';
 import {AutoPartitioningStrategy} from '../../../store/reducers/topic/utils';
 import {cn} from '../../../utils/cn';
 import createToast from '../../../utils/createToast';
@@ -79,7 +79,7 @@ interface TopicFormProps {
     database: string;
     databaseFullPath: string;
     parentPath?: string;
-    initialValues: TopicFormData;
+    initialValues: TopicFormValues;
     onClose: () => void;
     onSuccess?: (path: string) => void;
     nameInputRef?: React.Ref<HTMLInputElement>;
@@ -417,7 +417,7 @@ function TopicForm({
         trigger,
         watch,
         formState: {dirtyFields, errors},
-    } = useForm<TopicFormData>({
+    } = useForm<TopicFormValues>({
         defaultValues: initialValues,
         resolver: zodResolver(validationSchema),
         mode: 'onChange',
@@ -553,7 +553,7 @@ function TopicForm({
             : undefined;
 
     const handleRetentionTypeUpdate = React.useCallback(
-        (nextRetentionType: TopicFormData['retentionType']) => {
+        (nextRetentionType: TopicFormValues['retentionType']) => {
             setValue('retentionType', nextRetentionType, {
                 shouldDirty: true,
                 shouldTouch: true,
