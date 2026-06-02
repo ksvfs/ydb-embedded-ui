@@ -11,7 +11,7 @@ import {
     buildResetQuery,
     buildUpdateTableQuery,
     getTablePathInfoForUpdate,
-    getUpdateTableSettings,
+    hasUpdateTableSettings,
     prepareYdbCreateQueryColumns,
 } from './utils';
 
@@ -91,15 +91,15 @@ export const tableApi = api.injectEndpoints({
                 database,
                 formValues,
                 originalTable,
-                shouldUpdateTtl,
+                updateSettings,
             }: {
                 database: string;
                 formValues: FormValues;
                 originalTable: TEvDescribeSchemeResult;
-                shouldUpdateTtl: boolean;
+                updateSettings?: BuildTemplateOptions['settings'];
             }) => {
                 try {
-                    const {name, columns, settings, deletedColumns} = formValues;
+                    const {name, columns, deletedColumns} = formValues;
 
                     const pathDesc = originalTable.PathDescription;
                     const {originalName, tablePath, updatedTablePath} = getTablePathInfoForUpdate(
@@ -110,11 +110,10 @@ export const tableApi = api.injectEndpoints({
                         pathDesc?.Table?.TTLSettings?.Enabled ??
                             pathDesc?.ColumnTableDescription?.TtlSettings?.Enabled,
                     );
-                    const updateSettings = getUpdateTableSettings(settings, shouldUpdateTtl);
 
                     const queries: string[] = [];
 
-                    if (shouldUpdateTtl && settings.ttl.status === 'disabled' && originalHadTtl) {
+                    if (updateSettings?.ttl?.status === 'disabled' && originalHadTtl) {
                         queries.push(buildResetQuery(tablePath, 'TTL'));
                     }
 
@@ -128,7 +127,7 @@ export const tableApi = api.injectEndpoints({
                     const hasUpdateActions =
                         deletedColumns.length > 0 ||
                         columns.length > 0 ||
-                        updateSettings?.ttl.status === 'enabled';
+                        hasUpdateTableSettings(updateSettings);
 
                     if (hasUpdateActions) {
                         queries.push(buildUpdateTableQuery(updateOptions));

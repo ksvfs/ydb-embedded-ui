@@ -279,26 +279,34 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                             <Controller
                                 control={control}
                                 name="settings.autoPartitionBySizeMb"
-                                render={({field}) => (
-                                    <RangeInputPicker
-                                        className={b('control')}
-                                        value={field.value}
-                                        min={MIN_PARTITION_SIZE_MB}
-                                        max={MAX_PARTITION_SIZE_MB}
-                                        step={1}
-                                        marks={[MIN_PARTITION_SIZE_MB, MAX_PARTITION_SIZE_MB]}
-                                        markFormat={formatPartitionSizeMark}
-                                        onUpdate={field.onChange}
-                                        acceptInputValue={acceptIntegerInput}
-                                        parseInputValue={Number}
-                                        disabled={!autoPartitionBySize}
-                                        endContent={
-                                            <span className={b('input-suffix')}>
-                                                {i18n('value_megabyte')}
-                                            </span>
-                                        }
-                                    />
-                                )}
+                                render={({field}) => {
+                                    const value =
+                                        typeof field.value === 'number' &&
+                                        !Number.isNaN(field.value)
+                                            ? field.value
+                                            : undefined;
+
+                                    return (
+                                        <RangeInputPicker
+                                            className={b('control')}
+                                            value={value}
+                                            min={MIN_PARTITION_SIZE_MB}
+                                            max={MAX_PARTITION_SIZE_MB}
+                                            step={1}
+                                            marks={[MIN_PARTITION_SIZE_MB, MAX_PARTITION_SIZE_MB]}
+                                            markFormat={formatPartitionSizeMark}
+                                            onUpdate={field.onChange}
+                                            acceptInputValue={acceptIntegerInput}
+                                            parseInputValue={Number}
+                                            disabled={!autoPartitionBySize}
+                                            endContent={
+                                                <span className={b('input-suffix')}>
+                                                    {i18n('value_megabyte')}
+                                                </span>
+                                            }
+                                        />
+                                    );
+                                }}
                             />
                         </FormRow>
                         <FormRow

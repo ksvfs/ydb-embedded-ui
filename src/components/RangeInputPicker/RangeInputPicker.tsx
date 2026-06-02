@@ -22,7 +22,6 @@ export interface RangeInputPickerProps {
     disabled?: boolean;
     endContent?: React.ReactNode;
     className?: string;
-    preserveValueOnBlurWithoutChanges?: boolean;
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -61,7 +60,6 @@ export function RangeInputPicker({
     disabled,
     endContent,
     className,
-    preserveValueOnBlurWithoutChanges,
 }: RangeInputPickerProps) {
     const hasNumericValue = typeof value === 'number' && Number.isFinite(value);
     const displayValue = hasNumericValue ? formatInputValue(value) : '';
@@ -135,7 +133,7 @@ export function RangeInputPicker({
     }, []);
 
     const handleInputBlur = React.useCallback(() => {
-        if (preserveValueOnBlurWithoutChanges && !hasInputChanges) {
+        if (!hasInputChanges) {
             setIsInputFocused(false);
             setInputValue(displayValue);
             return;
@@ -168,7 +166,6 @@ export function RangeInputPicker({
         min,
         onUpdate,
         parseInputValue,
-        preserveValueOnBlurWithoutChanges,
         value,
     ]);
 

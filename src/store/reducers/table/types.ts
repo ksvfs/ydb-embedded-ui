@@ -197,7 +197,7 @@ export interface BuildTemplateOptions {
     secondaryIndexes?: SecondaryIndex[];
     deletedColumns?: Column[];
     columnsHash?: string[];
-    settings?: TableSettings;
+    settings?: Partial<TableSettings>;
 }
 
 export interface FormValues {

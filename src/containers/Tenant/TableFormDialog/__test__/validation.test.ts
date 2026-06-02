@@ -1,7 +1,7 @@
 import {buildTableValidationSchema} from '../validation';
 
 describe('buildTableValidationSchema', () => {
-    test('ignores hidden settings validation in update mode', () => {
+    test('validates visible row table settings in update mode', () => {
         const schema = buildTableValidationSchema({mode: 'update'});
 
         expect(() =>
@@ -18,6 +18,28 @@ describe('buildTableValidationSchema', () => {
                     autoPartitionBySizeMb: 0,
                     autoPartitionMinPartitions: 0,
                     autoPartitionMaxPartitions: 0,
+                    ttl: {status: 'disabled'},
+                },
+            }),
+        ).toThrow();
+    });
+
+    test('ignores create-only partition policy validation in update mode', () => {
+        const schema = buildTableValidationSchema({mode: 'update'});
+
+        expect(() =>
+            schema.parse({
+                name: 'table',
+                type: 'row',
+                columns: [],
+                secondaryIndexes: [],
+                deletedColumns: [],
+                partitionKey: [],
+                partitionCount: 0,
+                settings: {
+                    partitionsType: 'uniform',
+                    uniformPartitions: 0,
+                    autoPartitionBySize: false,
                     ttl: {status: 'disabled'},
                 },
             }),

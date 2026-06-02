@@ -1,4 +1,5 @@
 import type {TEvDescribeSchemeResult} from '../../../../types/api/schema/schema';
+import {PartitionsType} from '../types';
 import {
     buildCreateTableQuery,
     buildUpdateTableQuery,
@@ -22,7 +23,7 @@ describe('table update settings helpers', () => {
         expect(query).toContain('PRIMARY KEY (`id`)');
     });
 
-    test('omits hidden settings from update queries when TTL was not edited', () => {
+    test('omits unchanged settings from update queries when nothing was edited', () => {
         const settings = {
             ttl: {status: 'disabled' as const},
             autoPartitionBySize: true,
@@ -34,7 +35,7 @@ describe('table update settings helpers', () => {
 
         const query = buildUpdateTableQuery({
             tableName: '/Root/table',
-            settings: getUpdateTableSettings(settings, false),
+            settings: getUpdateTableSettings(settings, undefined),
         });
 
         expect(query).not.toContain('AUTO_PARTITIONING_PARTITION_SIZE_MB');
@@ -42,6 +43,40 @@ describe('table update settings helpers', () => {
         expect(query).not.toContain('AUTO_PARTITIONING_MAX_PARTITIONS_COUNT');
         expect(query).not.toContain('KEY_BLOOM_FILTER');
         expect(query).not.toContain('TTL =');
+    });
+
+    test('updates only dirty row settings and keeps hidden partition policy fields out', () => {
+        const query = buildUpdateTableQuery({
+            tableName: '/Root/table',
+            settings: getUpdateTableSettings(
+                {
+                    ttl: {status: 'disabled'},
+                    autoPartitionBySize: true,
+                    autoPartitionBySizeMb: 2,
+                    autoPartitionByLoad: true,
+                    autoPartitionMinPartitions: 4,
+                    autoPartitionMaxPartitions: 8,
+                    keyBloomFilter: true,
+                    partitionsType: PartitionsType.Uniform,
+                    uniformPartitions: 32,
+                },
+                {
+                    autoPartitionBySizeMb: true,
+                    keyBloomFilter: true,
+                    partitionsType: true,
+                    uniformPartitions: true,
+                },
+            ),
+        });
+
+        expect(query).toContain('SET AUTO_PARTITIONING_BY_SIZE ENABLED');
+        expect(query).toContain('SET AUTO_PARTITIONING_PARTITION_SIZE_MB 2');
+        expect(query).toContain('SET KEY_BLOOM_FILTER ENABLED');
+        expect(query).not.toContain('AUTO_PARTITIONING_BY_LOAD');
+        expect(query).not.toContain('AUTO_PARTITIONING_MIN_PARTITIONS_COUNT');
+        expect(query).not.toContain('AUTO_PARTITIONING_MAX_PARTITIONS_COUNT');
+        expect(query).not.toContain('UNIFORM_PARTITIONS');
+        expect(query).not.toContain('PARTITION_AT_KEYS');
     });
 
     test('keeps TTL update settings and preserves raw epoch mode values', () => {
@@ -59,7 +94,7 @@ describe('table update settings helpers', () => {
                     autoPartitionBySize: true,
                     autoPartitionBySizeMb: 2,
                 },
-                true,
+                {ttl: {status: true}},
             ),
         });
 

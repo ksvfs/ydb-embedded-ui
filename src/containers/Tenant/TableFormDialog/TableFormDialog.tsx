@@ -10,7 +10,10 @@ import {CONFIRMATION_DIALOG} from '../../../components/ConfirmationDialog/Confir
 import {ResponseError} from '../../../components/Errors/ResponseError';
 import {Loader} from '../../../components/Loader';
 import {tableApi} from '../../../store/reducers/table/table';
-import {getTablePathInfoForUpdate} from '../../../store/reducers/table/utils';
+import {
+    getTablePathInfoForUpdate,
+    getUpdateTableSettings,
+} from '../../../store/reducers/table/utils';
 import type {TEvDescribeSchemeResult} from '../../../types/api/schema/schema';
 import {cn} from '../../../utils/cn';
 import createToast from '../../../utils/createToast';
@@ -38,18 +41,6 @@ import {buildTableValidationSchema} from './validation';
 import './TableFormDialog.scss';
 
 const b = cn('ydb-table-form-dialog');
-
-function hasDirtyValue(value: unknown): boolean {
-    if (value === true) {
-        return true;
-    }
-
-    if (!value || typeof value !== 'object') {
-        return false;
-    }
-
-    return Object.values(value).some(hasDirtyValue);
-}
 
 interface CommonDialogProps {
     mode: FormMode;
@@ -185,13 +176,16 @@ function TableForm({
             if (!originalTable || !path) {
                 throw new Error('Original table is required for update');
             }
-            const shouldUpdateTtl = hasDirtyValue(dirtyFields.settings?.ttl);
+            const updateSettings = getUpdateTableSettings(
+                formValues.settings,
+                dirtyFields.settings,
+            );
 
             await updateTable({
                 database,
                 formValues,
                 originalTable,
-                shouldUpdateTtl,
+                updateSettings,
             }).unwrap();
             createToast({
                 name: 'table-update-success',
@@ -218,7 +212,7 @@ function TableForm({
     });
 
     const showIndexes = type === 'row' && mode === 'create';
-    const showSettings = type === 'row' && mode === 'create';
+    const showSettings = type === 'row';
     const showPartitioning = type === 'column' && mode === 'create';
 
     const columnTypes = type === 'column' ? YDB_COLUMN_TABLE_TYPES : YDB_TABLE_TYPES;

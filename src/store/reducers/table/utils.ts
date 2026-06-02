@@ -26,6 +26,20 @@ import type {
     TableSettings,
 } from './types';
 
+type DirtyTableSettings = Partial<Record<keyof TableSettings, unknown>>;
+
+function hasDirtyValue(value: unknown): boolean {
+    if (value === true) {
+        return true;
+    }
+
+    if (!value || typeof value !== 'object') {
+        return false;
+    }
+
+    return Object.values(value).some(hasDirtyValue);
+}
+
 function getDurationWithDaysOnly(value: number, unit: 'seconds' | 'minutes' | 'hours' | 'days') {
     let seconds = value;
 
@@ -148,7 +162,7 @@ const buildSecondaryIndex = ({name, key, cover}: SecondaryIndex) =>
         cover ? ` COVER (${cover.map(buildName).join(', ')})` : ''
     }`;
 
-const buildSettingsCreateItems = (settings?: TableSettings) => {
+const buildSettingsCreateItems = (settings?: Partial<TableSettings>) => {
     if (!settings) {
         return [];
     }
@@ -236,7 +250,7 @@ const buildSettingsCreateItems = (settings?: TableSettings) => {
     return items;
 };
 
-const buildSettingsUpdateItems = (settings?: TableSettings, pad = ' ') =>
+const buildSettingsUpdateItems = (settings?: Partial<TableSettings>, pad = ' ') =>
     buildSettingsCreateItems(settings)
         .map((item) => `SET ${item.replace(/ = /g, ' ')}`)
         .join(`,${pad}`);
@@ -273,7 +287,7 @@ const convertCompressionStorageDeviceType = (columnFamilyDescription: ColumnFami
     return columnFamilyDescription?.data?.media || null;
 };
 
-const buildFamilyGroups = (settings?: TableSettings) => {
+const buildFamilyGroups = (settings?: Partial<TableSettings>) => {
     const columnFamilies = settings?.columnFamilies || [];
     const isEmpty =
         !columnFamilies?.length ||
@@ -308,7 +322,7 @@ const buildCreateScheme = ({
     columns?: Column[];
     pad: string | undefined;
     secondaryIndexes?: SecondaryIndex[];
-    settings?: TableSettings;
+    settings?: Partial<TableSettings>;
 }) => {
     const fields = buildFields(columns);
     const keys = buildKeys(columns);
@@ -529,13 +543,54 @@ export function getTablePathInfoForUpdate(originalTable: TEvDescribeSchemeResult
 
 export function getUpdateTableSettings(
     settings: TableSettings | undefined,
-    shouldUpdateTtl: boolean,
-): TableSettings | undefined {
-    if (!settings || !shouldUpdateTtl) {
+    dirtySettings: DirtyTableSettings | undefined,
+): Partial<TableSettings> | undefined {
+    if (!settings || !dirtySettings) {
         return undefined;
     }
 
-    return {ttl: settings.ttl};
+    const shouldUpdateAutoPartitionBySize =
+        hasDirtyValue(dirtySettings.autoPartitionBySize) ||
+        hasDirtyValue(dirtySettings.autoPartitionBySizeMb);
+    const nextSettings: Partial<TableSettings> = {};
+
+    if (shouldUpdateAutoPartitionBySize) {
+        nextSettings.autoPartitionBySize = settings.autoPartitionBySize;
+
+        if (
+            settings.autoPartitionBySize &&
+            typeof settings.autoPartitionBySizeMb === 'number' &&
+            !Number.isNaN(settings.autoPartitionBySizeMb)
+        ) {
+            nextSettings.autoPartitionBySizeMb = settings.autoPartitionBySizeMb;
+        }
+    }
+
+    if (hasDirtyValue(dirtySettings.autoPartitionByLoad)) {
+        nextSettings.autoPartitionByLoad = settings.autoPartitionByLoad;
+    }
+
+    if (hasDirtyValue(dirtySettings.autoPartitionMinPartitions)) {
+        nextSettings.autoPartitionMinPartitions = settings.autoPartitionMinPartitions;
+    }
+
+    if (hasDirtyValue(dirtySettings.autoPartitionMaxPartitions)) {
+        nextSettings.autoPartitionMaxPartitions = settings.autoPartitionMaxPartitions;
+    }
+
+    if (hasDirtyValue(dirtySettings.keyBloomFilter)) {
+        nextSettings.keyBloomFilter = settings.keyBloomFilter;
+    }
+
+    if (hasDirtyValue(dirtySettings.ttl)) {
+        nextSettings.ttl = settings.ttl;
+    }
+
+    return Object.keys(nextSettings).length > 0 ? nextSettings : undefined;
+}
+
+export function hasUpdateTableSettings(settings?: Partial<TableSettings>) {
+    return buildSettingsCreateItems(settings).length > 0;
 }
 
 export function buildCreateTableQuery(options: BuildTemplateOptions) {

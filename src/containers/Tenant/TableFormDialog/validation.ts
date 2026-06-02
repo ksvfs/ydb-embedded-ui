@@ -160,7 +160,35 @@ function validatePartitionsAtKeys(data: FormValues, ctx: z.RefinementCtx) {
     }
 }
 
-function validateSettings(
+function validateOptionalPartitionsCount(
+    ctx: z.RefinementCtx,
+    path: 'autoPartitionMinPartitions' | 'autoPartitionMaxPartitions',
+    value: number | undefined,
+    isRequired: boolean | undefined,
+) {
+    if (!isRequired && value === undefined) {
+        return;
+    }
+
+    if (value === undefined) {
+        addIssue(ctx, ['settings', path], i18n('error_required'));
+        return;
+    }
+
+    const parsedValue = Number(value);
+    if (Number.isNaN(parsedValue)) {
+        if (isRequired) {
+            addIssue(ctx, ['settings', path], i18n('error_required'));
+        }
+        return;
+    }
+
+    if (parsedValue < MIN_PARTITIONS_COUNT || parsedValue > MAX_PARTITIONS_COUNT) {
+        addIssue(ctx, ['settings', path], i18n('error_partitions-count'));
+    }
+}
+
+function validateRowSettings(
     data: FormValues,
     ctx: z.RefinementCtx,
     mode: FormMode,
@@ -171,23 +199,17 @@ function validateSettings(
         return;
     }
 
-    if (mode === 'update') {
-        validateTtl(data, ctx);
-        return;
-    }
-
-    if (data.type !== 'row') {
-        validateTtl(data, ctx);
-        return;
-    }
-
-    if (settings.partitionsType === PartitionsType.Uniform) {
-        const value = Number(settings.uniformPartitions);
-        if (settings.uniformPartitions === undefined || Number.isNaN(value)) {
-            addIssue(ctx, ['settings', 'uniformPartitions'], i18n('error_required'));
-        } else if (value < MIN_PARTITIONS_COUNT || value > MAX_PARTITIONS_COUNT) {
-            addIssue(ctx, ['settings', 'uniformPartitions'], i18n('error_partitions-count'));
+    if (mode === 'create') {
+        if (settings.partitionsType === PartitionsType.Uniform) {
+            const value = Number(settings.uniformPartitions);
+            if (settings.uniformPartitions === undefined || Number.isNaN(value)) {
+                addIssue(ctx, ['settings', 'uniformPartitions'], i18n('error_required'));
+            } else if (value < MIN_PARTITIONS_COUNT || value > MAX_PARTITIONS_COUNT) {
+                addIssue(ctx, ['settings', 'uniformPartitions'], i18n('error_partitions-count'));
+            }
         }
+
+        validatePartitionsAtKeys(data, ctx);
     }
 
     if (settings.autoPartitionBySize && settings.autoPartitionBySizeMb !== undefined) {
@@ -199,54 +221,39 @@ function validateSettings(
         }
     }
 
-    if (originalInfo?.hasMinPartitions || settings.autoPartitionMinPartitions !== undefined) {
-        if (settings.autoPartitionMinPartitions !== undefined) {
-            const value = Number(settings.autoPartitionMinPartitions);
-            if (Number.isNaN(value)) {
-                if (originalInfo?.hasMinPartitions) {
-                    addIssue(
-                        ctx,
-                        ['settings', 'autoPartitionMinPartitions'],
-                        i18n('error_required'),
-                    );
-                }
-            } else if (value < MIN_PARTITIONS_COUNT || value > MAX_PARTITIONS_COUNT) {
-                addIssue(
-                    ctx,
-                    ['settings', 'autoPartitionMinPartitions'],
-                    i18n('error_partitions-count'),
-                );
-            }
-        } else if (originalInfo?.hasMinPartitions) {
-            addIssue(ctx, ['settings', 'autoPartitionMinPartitions'], i18n('error_required'));
-        }
+    validateOptionalPartitionsCount(
+        ctx,
+        'autoPartitionMinPartitions',
+        settings.autoPartitionMinPartitions,
+        originalInfo?.hasMinPartitions,
+    );
+    validateOptionalPartitionsCount(
+        ctx,
+        'autoPartitionMaxPartitions',
+        settings.autoPartitionMaxPartitions,
+        originalInfo?.hasMaxPartitions,
+    );
+}
+
+function validateSettings(
+    data: FormValues,
+    ctx: z.RefinementCtx,
+    mode: FormMode,
+    originalInfo?: OriginalTableInfo,
+) {
+    const settings = data.settings;
+    if (!settings) {
+        return;
     }
 
-    if (originalInfo?.hasMaxPartitions || settings.autoPartitionMaxPartitions !== undefined) {
-        if (settings.autoPartitionMaxPartitions !== undefined) {
-            const value = Number(settings.autoPartitionMaxPartitions);
-            if (Number.isNaN(value)) {
-                if (originalInfo?.hasMaxPartitions) {
-                    addIssue(
-                        ctx,
-                        ['settings', 'autoPartitionMaxPartitions'],
-                        i18n('error_required'),
-                    );
-                }
-            } else if (value < MIN_PARTITIONS_COUNT || value > MAX_PARTITIONS_COUNT) {
-                addIssue(
-                    ctx,
-                    ['settings', 'autoPartitionMaxPartitions'],
-                    i18n('error_partitions-count'),
-                );
-            }
-        } else if (originalInfo?.hasMaxPartitions) {
-            addIssue(ctx, ['settings', 'autoPartitionMaxPartitions'], i18n('error_required'));
-        }
+    if (data.type !== 'row') {
+        validateTtl(data, ctx);
+        return;
     }
+
+    validateRowSettings(data, ctx, mode, originalInfo);
 
     validateTtl(data, ctx);
-    validatePartitionsAtKeys(data, ctx);
 }
 
 export function buildTableValidationSchema({

@@ -979,7 +979,6 @@ function TopicForm({
                                                     formatInputValue={(nextValue) =>
                                                         String(fromMbToGb(nextValue))
                                                     }
-                                                    preserveValueOnBlurWithoutChanges
                                                     disabled={isSubmitting}
                                                     endContent={
                                                         <span className={b('input-details')}>
