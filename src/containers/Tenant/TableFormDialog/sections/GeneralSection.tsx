@@ -14,6 +14,7 @@ const b = cn('ydb-table-form-dialog');
 interface GeneralSectionProps {
     mode: FormMode;
     insidePath?: string;
+    nameInputRef?: React.Ref<HTMLInputElement>;
 }
 
 const tableTypeInfo: Record<TableType, string> = {
@@ -21,7 +22,7 @@ const tableTypeInfo: Record<TableType, string> = {
     column: i18n('label_info-table-type_column'),
 };
 
-export function GeneralSection({mode, insidePath}: GeneralSectionProps) {
+export function GeneralSection({mode, insidePath, nameInputRef}: GeneralSectionProps) {
     const {control, formState} = useFormContext<FormValues>();
     const type = useWatch({control, name: 'type'});
 
@@ -52,6 +53,7 @@ export function GeneralSection({mode, insidePath}: GeneralSectionProps) {
                     name="name"
                     render={({field}) => (
                         <TextInput
+                            controlRef={nameInputRef}
                             id="table-form-name"
                             value={field.value ?? ''}
                             onUpdate={field.onChange}

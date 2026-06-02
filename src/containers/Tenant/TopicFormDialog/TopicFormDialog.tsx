@@ -74,6 +74,17 @@ interface TopicFormDialogProps extends CommonDialogProps {
     onClose: () => void;
 }
 
+interface TopicFormProps {
+    mode: TopicFormMode;
+    database: string;
+    databaseFullPath: string;
+    parentPath?: string;
+    initialValues: TopicFormData;
+    onClose: () => void;
+    onSuccess?: (path: string) => void;
+    nameInputRef?: React.Ref<HTMLInputElement>;
+}
+
 const writeQuotaOptions: SelectOption[] = [128, 512, 1024].map((value) => ({
     content: formatBandwidthBytes(value * 1024),
     value: String(value * 1024),
@@ -282,17 +293,31 @@ function SelectNumberField({
     onChange,
     options,
     errorMessage,
+    formatSelectedValue,
 }: {
     value?: number;
     onChange: (value: number | undefined) => void;
     options: SelectOption[];
     errorMessage?: string;
+    formatSelectedValue?: (value: number) => string;
 }) {
     const handleUpdate = React.useCallback(
         ([nextValue]: string[]) => {
             onChange(nextValue ? Number(nextValue) : undefined);
         },
         [onChange],
+    );
+
+    const renderSelectedOption = React.useCallback(
+        (option: SelectOption) => (
+            <React.Fragment>
+                {option.content ??
+                    (formatSelectedValue
+                        ? formatSelectedValue(Number(option.value))
+                        : option.value)}
+            </React.Fragment>
+        ),
+        [formatSelectedValue],
     );
 
     return (
@@ -303,6 +328,7 @@ function SelectNumberField({
                 options={options}
                 onUpdate={handleUpdate}
                 validationState={errorMessage ? 'invalid' : undefined}
+                renderSelectedOption={renderSelectedOption}
             />
             {errorMessage ? (
                 <Text color="danger" variant="body-1">
@@ -332,18 +358,6 @@ function StorageSizeNote({size = 0, shards = 0}: {size?: number; shards?: number
 
 function formatStorageLimitMark(value: number) {
     return `${fromMbToGb(value)} ${i18n('value_gigabyte')}`;
-}
-
-function addCurrentValueOption(
-    options: SelectOption[],
-    value: number | undefined,
-    formatter: (value: number) => string,
-) {
-    if (value === undefined || options.some((option) => option.value === String(value))) {
-        return options;
-    }
-
-    return [{content: formatter(value), value: String(value)}, ...options];
 }
 
 function formatRetentionPeriod(value: number) {
@@ -387,15 +401,8 @@ function TopicForm({
     initialValues,
     onClose,
     onSuccess,
-}: {
-    mode: TopicFormMode;
-    database: string;
-    databaseFullPath: string;
-    parentPath?: string;
-    initialValues: TopicFormData;
-    onClose: () => void;
-    onSuccess?: (path: string) => void;
-}) {
+    nameInputRef,
+}: TopicFormProps) {
     const validationSchema = React.useMemo(
         () => getTopicFormValidationSchema(initialValues.shards),
         [initialValues.shards],
@@ -423,7 +430,6 @@ function TopicForm({
     const retentionType = watch('retentionType');
     const shards = watch('shards');
     const writeQuotaBytes = watch('writeQuotaBytes');
-    const retentionPeriodSeconds = watch('retentionPeriodSeconds');
     const minPartitions = watch('autoPartitioning.minPartitions');
     const maxPartitions = watch('autoPartitioning.maxPartitions');
     const minPartitionsError = errors.autoPartitioning?.minPartitions?.message;
@@ -476,21 +482,6 @@ function TopicForm({
             ...options,
         ];
     }, [autoPartitioningMode, retentionType]);
-
-    const writeQuotaSelectOptions = React.useMemo(
-        () => addCurrentValueOption(writeQuotaOptions, writeQuotaBytes, formatBandwidthBytes),
-        [writeQuotaBytes],
-    );
-
-    const retentionPeriodSelectOptions = React.useMemo(
-        () =>
-            addCurrentValueOption(
-                retentionPeriodOptions,
-                retentionPeriodSeconds,
-                formatRetentionPeriod,
-            ),
-        [retentionPeriodSeconds],
-    );
 
     const throughputInfo = React.useMemo(() => {
         if (autoPartitioningEnabled) {
@@ -601,6 +592,7 @@ function TopicForm({
                                 control={control}
                                 render={({field}) => (
                                     <TextInput
+                                        controlRef={nameInputRef}
                                         id="topicName"
                                         value={field.value ?? ''}
                                         onUpdate={field.onChange}
@@ -608,6 +600,7 @@ function TopicForm({
                                         errorMessage={errors.name?.message}
                                         className={b('control')}
                                         autoComplete={false}
+                                        autoFocus
                                         disabled={isSubmitting}
                                     />
                                 )}
@@ -635,8 +628,9 @@ function TopicForm({
                                             field.onChange(value);
                                             trigger('retentionPeriodSeconds');
                                         }}
-                                        options={writeQuotaSelectOptions}
+                                        options={writeQuotaOptions}
                                         errorMessage={errors.writeQuotaBytes?.message}
+                                        formatSelectedValue={formatBandwidthBytes}
                                     />
                                     <Text color="secondary">{throughputInfo}</Text>
                                 </div>
@@ -1003,8 +997,9 @@ function TopicForm({
                                         <SelectNumberField
                                             value={field.value}
                                             onChange={field.onChange}
-                                            options={retentionPeriodSelectOptions}
+                                            options={retentionPeriodOptions}
                                             errorMessage={errors.retentionPeriodSeconds?.message}
+                                            formatSelectedValue={formatRetentionPeriod}
                                         />
                                     )}
                                 />
@@ -1034,6 +1029,7 @@ function TopicFormDialog({
     onClose,
     onSuccess,
 }: TopicFormDialogProps) {
+    const nameInputRef = React.useRef<HTMLInputElement>(null);
     const useMetaProxy = useClusterWithProxy();
     const topicQuery = topicApi.useGetTopicQuery(
         {path: topicPath ?? '', database, databaseFullPath, useMetaProxy},
@@ -1103,6 +1099,7 @@ function TopicFormDialog({
                 initialValues={initialValues}
                 onClose={onClose}
                 onSuccess={onSuccess}
+                nameInputRef={nameInputRef}
             />
         );
     };
@@ -1112,6 +1109,7 @@ function TopicFormDialog({
             open={open}
             onClose={onClose}
             size="m"
+            initialFocus={mode === 'create' ? nameInputRef : undefined}
             className={b()}
             modalClassName={b('modal')}
             disableHeightTransition

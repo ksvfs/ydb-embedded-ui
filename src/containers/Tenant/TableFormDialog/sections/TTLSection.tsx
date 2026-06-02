@@ -21,24 +21,6 @@ import {
 
 const b = cn('ydb-table-form-dialog');
 
-function addCurrentValueOption(
-    options: SelectOption[],
-    value: string | undefined,
-    formatValue?: (nextValue: string) => string,
-) {
-    if (!value || options.some((option) => option.value === value)) {
-        return options;
-    }
-
-    return [
-        {
-            value,
-            content: formatValue ? formatValue(value) : value,
-        },
-        ...options,
-    ];
-}
-
 function formatEpochModeValue(value: string) {
     const normalized = value
         .replace(/^UNIT_/, '')
@@ -58,7 +40,6 @@ export function TTLSection({originalInfo}: TTLSectionProps) {
     const status = useWatch({control, name: 'settings.ttl.status'});
     const column = useWatch({control, name: 'settings.ttl.column'});
     const columnWithEpochMode = useWatch({control, name: 'settings.ttl.columnWithEpochMode'});
-    const epochMode = useWatch({control, name: 'settings.ttl.epochMode'});
     const formColumns = useWatch({control, name: 'columns'});
     const deletedColumns = useWatch({control, name: 'deletedColumns'});
 
@@ -73,8 +54,8 @@ export function TTLSection({originalInfo}: TTLSectionProps) {
         );
     }, [originalInfo, formColumns, deletedColumns]);
 
-    const columnOptions = React.useMemo<SelectOption[]>(() => {
-        const options =
+    const columnOptions = React.useMemo<SelectOption[]>(
+        () =>
             ttlColumns.length === 0
                 ? [
                       {
@@ -83,14 +64,15 @@ export function TTLSection({originalInfo}: TTLSectionProps) {
                           disabled: true,
                       },
                   ]
-                : ttlColumns.map(({name}) => ({value: name, content: name}));
+                : ttlColumns.map(({name}) => ({value: name, content: name})),
+        [ttlColumns],
+    );
 
-        return addCurrentValueOption(options, column);
-    }, [ttlColumns, column]);
-
-    const epochModeSelectOptions = React.useMemo(
-        () => addCurrentValueOption(epochModeOptions, epochMode, formatEpochModeValue),
-        [epochMode],
+    const renderEpochModeSelectedOption = React.useCallback(
+        (option: SelectOption) => (
+            <React.Fragment>{option.content ?? formatEpochModeValue(option.value)}</React.Fragment>
+        ),
+        [],
     );
 
     React.useEffect(() => {
@@ -174,10 +156,11 @@ export function TTLSection({originalInfo}: TTLSectionProps) {
                                         <Select
                                             className={b('control')}
                                             value={field.value ? [field.value] : []}
-                                            options={epochModeSelectOptions}
+                                            options={epochModeOptions}
                                             onUpdate={([value]) => field.onChange(value)}
                                             width="max"
                                             validationState={epochError ? 'invalid' : undefined}
+                                            renderSelectedOption={renderEpochModeSelectedOption}
                                         />
                                         <FormFieldError message={epochError} />
                                     </div>

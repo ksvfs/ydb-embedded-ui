@@ -71,6 +71,7 @@ interface TableFormProps {
     originalTable?: TEvDescribeSchemeResult;
     onClose: () => void;
     onSuccess?: (path: string) => void;
+    nameInputRef?: React.Ref<HTMLInputElement>;
 }
 
 function buildTablePath(parentPath: string, name: string) {
@@ -100,6 +101,7 @@ function TableForm({
     originalTable,
     onClose,
     onSuccess,
+    nameInputRef,
 }: TableFormProps) {
     const [createTable, createState] = tableApi.useCreateTableMutation();
     const [updateTable, updateState] = tableApi.useUpdateTableMutation();
@@ -230,6 +232,7 @@ function TableForm({
                                 ? transformPath(parentPath ?? databaseFullPath, databaseFullPath)
                                 : undefined
                         }
+                        nameInputRef={nameInputRef}
                     />
                     <YdbColumnsSection
                         mode={mode}
@@ -272,6 +275,7 @@ function TableFormDialog({
     onClose,
     onSuccess,
 }: TableFormDialogInnerProps) {
+    const nameInputRef = React.useRef<HTMLInputElement>(null);
     const tableQuery = tableApi.useGetTableQuery(
         mode === 'update' && path ? {database, path: {path, databaseFullPath}} : skipToken,
         {refetchOnMountOrArgChange: true},
@@ -330,6 +334,7 @@ function TableFormDialog({
                 originalTable={originalTable}
                 onClose={onClose}
                 onSuccess={onSuccess}
+                nameInputRef={nameInputRef}
             />
         );
     };
@@ -339,6 +344,7 @@ function TableFormDialog({
             open={open}
             onClose={onClose}
             size="l"
+            initialFocus={mode === 'create' ? nameInputRef : undefined}
             className={b()}
             modalClassName={b('modal')}
             disableHeightTransition
