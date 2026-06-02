@@ -1,6 +1,27 @@
-import {buildUpdateTableQuery, getUpdateTableSettings} from '../utils';
+import type {TEvDescribeSchemeResult} from '../../../../types/api/schema/schema';
+import {
+    buildCreateTableQuery,
+    buildUpdateTableQuery,
+    getTablePathInfoForUpdate,
+    getUpdateTableSettings,
+} from '../utils';
 
 describe('table update settings helpers', () => {
+    test('keeps create-time secondary index definitions unchanged', () => {
+        const query = buildCreateTableQuery({
+            tableName: '/Root/table',
+            columns: [
+                {name: 'id', type: 'Uint64', key: true, notNull: true},
+                {name: 'value', type: 'Utf8', notNull: false},
+            ],
+            secondaryIndexes: [{name: 'value_idx', key: ['value']}],
+            settings: {ttl: {status: 'disabled'}},
+        });
+
+        expect(query).toContain('INDEX `value_idx` GLOBAL ON (`value`)');
+        expect(query).toContain('PRIMARY KEY (`id`)');
+    });
+
     test('omits hidden settings from update queries when TTL was not edited', () => {
         const settings = {
             ttl: {status: 'disabled' as const},
@@ -44,5 +65,22 @@ describe('table update settings helpers', () => {
 
         expect(query).toContain('SET TTL Interval("PT1S") ON `ttl_col` AS CUSTOM_CYCLES');
         expect(query).not.toContain('AUTO_PARTITIONING_PARTITION_SIZE_MB');
+    });
+
+    test('returns the renamed table path for update flows', () => {
+        const originalTable = {
+            Path: '/Root/dir/old_name',
+            PathDescription: {
+                Self: {
+                    Name: 'old_name',
+                },
+            },
+        } as TEvDescribeSchemeResult;
+
+        expect(getTablePathInfoForUpdate(originalTable, 'new_name')).toEqual({
+            originalName: 'old_name',
+            tablePath: '/Root/dir/old_name',
+            updatedTablePath: '/Root/dir/new_name',
+        });
     });
 });

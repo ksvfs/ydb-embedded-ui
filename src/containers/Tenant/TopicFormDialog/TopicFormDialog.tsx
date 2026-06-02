@@ -1042,7 +1042,7 @@ function TopicFormDialog({
 
     const initialValues = React.useMemo(() => {
         if (mode === 'create') {
-            return getCreateTopicInitialValues({database, databaseFullPath, parentPath});
+            return getCreateTopicInitialValues({databaseFullPath, parentPath});
         }
 
         if (!topicPath || !topicFormData) {
@@ -1050,12 +1050,11 @@ function TopicFormDialog({
         }
 
         return getUpdateTopicInitialValues({
-            database,
             databaseFullPath,
             formData: topicFormData,
             topicPath,
         });
-    }, [database, databaseFullPath, mode, parentPath, topicFormData, topicPath]);
+    }, [databaseFullPath, mode, parentPath, topicFormData, topicPath]);
 
     const renderContent = () => {
         if (mode === 'update' && !topicPath) {

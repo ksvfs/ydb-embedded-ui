@@ -5,7 +5,6 @@ import type {
     SecondaryIndex,
     TTLSettings,
     TableSettings,
-    UpdatedSecondaryIndex,
 } from '../../../store/reducers/table/types';
 import {PartitionsType} from '../../../store/reducers/table/types';
 import type {TEvDescribeSchemeResult} from '../../../types/api/schema/schema';
@@ -13,15 +12,7 @@ import type {TEvDescribeSchemeResult} from '../../../types/api/schema/schema';
 export type FormMode = 'create' | 'update';
 export type TableType = FormValues['type'];
 
-export type {
-    Column,
-    ColumnField,
-    FormValues,
-    SecondaryIndex,
-    TTLSettings,
-    TableSettings,
-    UpdatedSecondaryIndex,
-};
+export type {Column, ColumnField, FormValues, SecondaryIndex, TTLSettings, TableSettings};
 export {PartitionsType};
 
 export interface OriginalTableInfo {

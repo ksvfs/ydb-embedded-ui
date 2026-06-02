@@ -7,7 +7,6 @@ export enum AutoPartitioningStrategy {
 }
 
 export interface TopicFormData {
-    databaseId?: string;
     path?: string;
     name?: string;
     shards: number;

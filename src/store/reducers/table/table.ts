@@ -10,6 +10,7 @@ import {
     buildRenameQuery,
     buildResetQuery,
     buildUpdateTableQuery,
+    getTablePathInfoForUpdate,
     getUpdateTableSettings,
     prepareYdbCreateQueryColumns,
 } from './utils';
@@ -98,22 +99,13 @@ export const tableApi = api.injectEndpoints({
                 shouldUpdateTtl: boolean;
             }) => {
                 try {
-                    const {
-                        name,
-                        columns,
-                        settings,
-                        secondaryIndexes,
-                        deletedColumns,
-                        updatedSecondaryIndexes,
-                    } = formValues;
+                    const {name, columns, settings, deletedColumns} = formValues;
 
                     const pathDesc = originalTable.PathDescription;
-                    const originalName = pathDesc?.Self?.Name;
-                    const tableName = originalTable.Path ?? originalName ?? name;
-                    const newTableName =
-                        originalName && tableName.endsWith(originalName)
-                            ? `${tableName.slice(0, -originalName.length)}${name}`
-                            : name;
+                    const {originalName, tablePath, updatedTablePath} = getTablePathInfoForUpdate(
+                        originalTable,
+                        name,
+                    );
                     const originalHadTtl = Boolean(
                         pathDesc?.Table?.TTLSettings?.Enabled ??
                             pathDesc?.ColumnTableDescription?.TtlSettings?.Enabled,
@@ -123,25 +115,27 @@ export const tableApi = api.injectEndpoints({
                     const queries: string[] = [];
 
                     if (shouldUpdateTtl && settings.ttl.status === 'disabled' && originalHadTtl) {
-                        queries.push(buildResetQuery(tableName, 'TTL'));
+                        queries.push(buildResetQuery(tablePath, 'TTL'));
                     }
 
                     const updateOptions: BuildTemplateOptions = {
-                        tableName,
+                        tableName: tablePath,
                         columns,
-                        secondaryIndexes,
                         deletedColumns,
-                        updatedSecondaryIndexes,
                         settings: updateSettings,
                     };
-                    const updateQuery = buildUpdateTableQuery(updateOptions);
-                    const updateQueryEmpty = buildUpdateTableQuery({tableName});
-                    if (updateQuery !== updateQueryEmpty) {
-                        queries.push(updateQuery);
+
+                    const hasUpdateActions =
+                        deletedColumns.length > 0 ||
+                        columns.length > 0 ||
+                        updateSettings?.ttl.status === 'enabled';
+
+                    if (hasUpdateActions) {
+                        queries.push(buildUpdateTableQuery(updateOptions));
                     }
 
                     if (originalName && name !== originalName) {
-                        queries.push(buildRenameQuery(tableName, newTableName));
+                        queries.push(buildRenameQuery(tablePath, updatedTablePath));
                     }
 
                     if (queries.length === 0) {

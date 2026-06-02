@@ -4,7 +4,6 @@ import type {TColumnTableDescription} from '../../../types/api/schema/columnEnti
 import {EPathType} from '../../../types/api/schema/schema';
 import type {TEvDescribeSchemeResult} from '../../../types/api/schema/schema';
 import {EColumnCodec, EUnit} from '../../../types/api/schema/shared';
-import type {TColumnDescription} from '../../../types/api/schema/shared';
 import type {TTableDescription} from '../../../types/api/schema/table';
 
 import {
@@ -25,7 +24,6 @@ import type {
     SecondaryIndex,
     TTLSettings,
     TableSettings,
-    UpdatedSecondaryIndex,
 } from './types';
 
 function getDurationWithDaysOnly(value: number, unit: 'seconds' | 'minutes' | 'hours' | 'days') {
@@ -254,26 +252,6 @@ const buildAddColumns = (columns: Column[] = [], pad = ' ') =>
 const buildDropColumns = (columns: Column[] = [], pad = ' ') =>
     columns.map(({name}) => `DROP COLUMN ${buildName(name)}`).join(`,${pad}`);
 
-const buildAddSecondaryIndexes = (indexes: SecondaryIndex[] = [], pad = ' ') =>
-    indexes
-        .map(
-            ({name, key}) =>
-                `ADD INDEX ${buildName(name)} GLOBAL ON (${key.map(buildName).join(',')})`,
-        )
-        .join(`,${pad}`);
-
-const buildDropSecondaryIndex = ({name}: UpdatedSecondaryIndex) => `DROP INDEX ${buildName(name)}`;
-
-const buildRenameSecondaryIndex = ({name, newName}: UpdatedSecondaryIndex) =>
-    `RENAME INDEX ${buildName(name)} TO ${buildName(newName)}`;
-
-const buildUpdatedSecondaryIndexes = (indexes: UpdatedSecondaryIndex[] = [], pad = ' ') =>
-    indexes
-        .map((index) =>
-            index.isDeleted ? buildDropSecondaryIndex(index) : buildRenameSecondaryIndex(index),
-        )
-        .join(`,${pad}`);
-
 const convertCompressionCodec = (columnFamilyDescription: ColumnFamilyDescription) => {
     switch (columnFamilyDescription?.compression) {
         case 'COMPRESSION_LZ4': {
@@ -293,11 +271,6 @@ const convertCompressionCodec = (columnFamilyDescription: ColumnFamilyDescriptio
 
 const convertCompressionStorageDeviceType = (columnFamilyDescription: ColumnFamilyDescription) => {
     return columnFamilyDescription?.data?.media || null;
-};
-
-const convertCompressionLevel = (columnFamilyDescription: ColumnFamilyDescription) => {
-    // @ts-expect-error TODO change property
-    return columnFamilyDescription?.data?.level || null;
 };
 
 const buildFamilyGroups = (settings?: TableSettings) => {
@@ -320,11 +293,6 @@ const buildFamilyGroups = (settings?: TableSettings) => {
         const storageDeviceType = convertCompressionStorageDeviceType(columnFamilyDescription);
         if (storageDeviceType) {
             settings.push(`DATA = "${storageDeviceType}"`);
-        }
-
-        const level = convertCompressionLevel(columnFamilyDescription);
-        if (typeof level === 'number') {
-            settings.push(`COMPRESSION_LEVEL = ${level}`);
         }
 
         return `FAMILY ${buildName(columnFamilyDescription.name)} (${settings.join(`, `)})`;
@@ -363,7 +331,6 @@ function buildTemplate(
         columns,
         secondaryIndexes,
         deletedColumns,
-        updatedSecondaryIndexes,
         columnsHash,
         settings,
     }: BuildTemplateOptions,
@@ -387,8 +354,6 @@ function buildTemplate(
                 [
                     buildDropColumns(deletedColumns, pad),
                     buildAddColumns(columns, pad),
-                    buildAddSecondaryIndexes(secondaryIndexes, pad),
-                    buildUpdatedSecondaryIndexes(updatedSecondaryIndexes, pad),
                     buildSettingsUpdateItems(settings, pad),
                 ]
                     .filter(Boolean)
@@ -437,33 +402,6 @@ function formatTtlEpochMode(epochMode: string) {
     return epochMode.startsWith('UNIT_')
         ? epochMode.slice('UNIT_'.length)
         : epochMode.toUpperCase();
-}
-
-function rawColumnToColumnField(
-    col: TColumnDescription,
-    keyColumnNames: string[],
-    index: number,
-): ColumnField {
-    const name = col.Name ?? '';
-    const keyOrder = keyColumnNames.indexOf(name);
-    const literalValue = col.DefaultFromLiteral?.value;
-    const defaultValue = literalValue
-        ? (Object.values(literalValue)[0] as string | number | boolean)
-        : undefined;
-
-    return {
-        _id: String(col.Id ?? index),
-        name,
-        type: col.Type ?? '',
-        notNull: col.NotNull ?? false,
-        key: keyOrder >= 0,
-        keyOrder: keyOrder >= 0 ? keyOrder : undefined,
-        family: col.FamilyName,
-        autoincrement: Boolean(col.DefaultFromSequence),
-        defaultValue,
-        withDefaultValue: defaultValue !== undefined,
-        isDeletable: true,
-    };
 }
 
 function prepareTTLSettings(enabled?: {
@@ -548,17 +486,13 @@ export function prepareFormValues(response: TEvDescribeSchemeResult): FormValues
 
     if (pathType === EPathType.EPathTypeColumnTable && pathDesc?.ColumnTableDescription) {
         const desc = pathDesc.ColumnTableDescription;
-        const keyColumnNames = desc.Schema?.KeyColumnNames ?? [];
 
         return {
             name,
             type: 'column',
-            columns: (desc.Schema?.Columns ?? []).map((col, i) =>
-                rawColumnToColumnField(col as TColumnDescription, keyColumnNames, i),
-            ),
+            columns: [],
             secondaryIndexes: [],
             deletedColumns: [],
-            updatedSecondaryIndexes: [],
             partitionKey: desc.Sharding?.HashSharding?.Columns ?? [],
             partitionCount: desc.ColumnShardCount ?? 64,
             settings: prepareColumnTableSettings(desc),
@@ -566,25 +500,31 @@ export function prepareFormValues(response: TEvDescribeSchemeResult): FormValues
     }
 
     const desc = pathDesc?.Table;
-    const keyColumnNames = desc?.KeyColumnNames ?? [];
 
     return {
         name,
         type: 'row',
-        columns: (desc?.Columns ?? []).map((col, i) =>
-            rawColumnToColumnField(col, keyColumnNames, i),
-        ),
-        secondaryIndexes: (desc?.TableIndexes ?? []).map((idx) => ({
-            name: idx.Name ?? '',
-            key: idx.KeyColumnNames ?? [],
-            cover: idx.DataColumnNames,
-        })),
+        columns: [],
+        secondaryIndexes: [],
         deletedColumns: [],
-        updatedSecondaryIndexes: [],
         partitionKey: [],
         partitionCount: 0,
         settings: desc ? prepareRowTableSettings(desc) : {ttl: {status: 'disabled'}},
     };
+}
+
+export function getTablePathInfoForUpdate(originalTable: TEvDescribeSchemeResult, name: string) {
+    const pathDesc = originalTable.PathDescription;
+    const originalName = pathDesc?.Self?.Name;
+    const tablePath = originalTable.Path ?? originalName ?? name;
+    const updatedTablePath =
+        originalName && name !== originalName
+            ? tablePath.endsWith(originalName)
+                ? `${tablePath.slice(0, -originalName.length)}${name}`
+                : name
+            : tablePath;
+
+    return {originalName, tablePath, updatedTablePath};
 }
 
 export function getUpdateTableSettings(

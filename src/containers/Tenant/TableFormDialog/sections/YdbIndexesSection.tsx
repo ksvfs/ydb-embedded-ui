@@ -1,7 +1,7 @@
 import React from 'react';
 
-import {ArrowUturnCcwLeft, Plus, TrashBin} from '@gravity-ui/icons';
-import {Button, HelpMark, Icon, Text, TextInput} from '@gravity-ui/uikit';
+import {Plus, TrashBin} from '@gravity-ui/icons';
+import {Button, HelpMark, Icon, TextInput} from '@gravity-ui/uikit';
 import {Controller, useFieldArray, useFormContext, useWatch} from 'react-hook-form';
 
 import {cn} from '../../../../utils/cn';
@@ -9,17 +9,12 @@ import {ColumnSelectorField} from '../components/ColumnSelectorField';
 import {FormFieldError, FormSection} from '../components/layout';
 import {YDB_PK_TYPES} from '../constants';
 import i18n from '../i18n';
-import type {Column, FormMode, FormValues, OriginalTableInfo} from '../types';
+import type {Column, FormValues} from '../types';
 
 const b = cn('ydb-table-form-dialog');
 
-interface YdbIndexesSectionProps {
-    mode: FormMode;
-    originalInfo?: OriginalTableInfo;
-}
-
-export function YdbIndexesSection({mode, originalInfo}: YdbIndexesSectionProps) {
-    const {control, setValue, formState} = useFormContext<FormValues>();
+export function YdbIndexesSection() {
+    const {control, formState} = useFormContext<FormValues>();
     const {
         fields: newIndexFields,
         append,
@@ -28,32 +23,13 @@ export function YdbIndexesSection({mode, originalInfo}: YdbIndexesSectionProps) 
         control,
         name: 'secondaryIndexes',
     });
-    const {fields: updatedIndexFields} = useFieldArray({
-        control,
-        name: 'updatedSecondaryIndexes',
-    });
     const formColumns = useWatch({control, name: 'columns'});
-    const deletedColumns = useWatch({control, name: 'deletedColumns'});
 
     const availableColumns = React.useMemo<Column[]>(() => {
-        const deletedNames = new Set(deletedColumns.map(({name}) => name));
-        const merged: Column[] = [];
-        if (originalInfo) {
-            originalInfo.columns.forEach((column) => {
-                if (!deletedNames.has(column.name)) {
-                    merged.push(column);
-                }
-            });
-        }
-        formColumns.forEach((column) => {
-            if (column.name) {
-                merged.push(column);
-            }
-        });
-        return merged.filter(({type}) => YDB_PK_TYPES.has(type));
-    }, [originalInfo, formColumns, deletedColumns]);
+        return formColumns.filter(({name, type}) => Boolean(name) && YDB_PK_TYPES.has(type));
+    }, [formColumns]);
 
-    const hasAnyIndex = newIndexFields.length > 0 || updatedIndexFields.length > 0;
+    const hasAnyIndex = newIndexFields.length > 0;
 
     const handleAddIndex = React.useCallback(() => {
         append({name: '', key: []});
@@ -79,31 +55,6 @@ export function YdbIndexesSection({mode, originalInfo}: YdbIndexesSectionProps) 
                         </div>
                         <div />
                     </div>
-                ) : null}
-
-                {mode === 'update' && updatedIndexFields.length > 0 ? (
-                    <React.Fragment>
-                        {updatedIndexFields.map((field, index) => (
-                            <UpdatedIndexRow
-                                key={field.id}
-                                index={index}
-                                originalInfo={originalInfo}
-                                onMarkDeleted={() =>
-                                    setValue(`updatedSecondaryIndexes.${index}.isDeleted`, true, {
-                                        shouldValidate: true,
-                                    })
-                                }
-                                onUndoDeleted={() =>
-                                    setValue(`updatedSecondaryIndexes.${index}.isDeleted`, false, {
-                                        shouldValidate: true,
-                                    })
-                                }
-                            />
-                        ))}
-                        {newIndexFields.length > 0 ? (
-                            <hr className={b('columns-separator')} />
-                        ) : null}
-                    </React.Fragment>
                 ) : null}
 
                 {newIndexFields.map((field, index) => {
@@ -166,72 +117,5 @@ export function YdbIndexesSection({mode, originalInfo}: YdbIndexesSectionProps) 
                 </div>
             </div>
         </FormSection>
-    );
-}
-
-interface UpdatedIndexRowProps {
-    index: number;
-    originalInfo?: OriginalTableInfo;
-    onMarkDeleted: () => void;
-    onUndoDeleted: () => void;
-}
-
-function UpdatedIndexRow({
-    index,
-    originalInfo,
-    onMarkDeleted,
-    onUndoDeleted,
-}: UpdatedIndexRowProps) {
-    const {control, formState} = useFormContext<FormValues>();
-    const item = useWatch({control, name: `updatedSecondaryIndexes.${index}`});
-    const keyColumns = originalInfo?.indexes.find(({name}) => name === item.name)?.columns ?? [];
-    const nameError = formState.errors.updatedSecondaryIndexes?.[index]?.newName?.message;
-
-    return (
-        <div className={b('indexes-row', {deleting: item.isDeleted})}>
-            <div className={b('indexes-cell', {name: true})}>
-                {item.isDeleted ? (
-                    <Text className={b('readonly-text')}>{item.name}</Text>
-                ) : (
-                    <Controller
-                        control={control}
-                        name={`updatedSecondaryIndexes.${index}.newName`}
-                        render={({field}) => (
-                            <TextInput
-                                className={b('control')}
-                                value={field.value ?? ''}
-                                onUpdate={field.onChange}
-                                validationState={nameError ? 'invalid' : undefined}
-                                errorMessage={nameError}
-                            />
-                        )}
-                    />
-                )}
-            </div>
-            <div className={b('indexes-cell', {key: true})}>
-                <Text className={b('readonly-text')}>{keyColumns.join(', ')}</Text>
-            </div>
-            <div className={b('indexes-cell', {action: true})}>
-                {item.isDeleted ? (
-                    <Button
-                        view="flat"
-                        size="m"
-                        onClick={onUndoDeleted}
-                        title={i18n('action_undo')}
-                    >
-                        <Icon data={ArrowUturnCcwLeft} size={16} />
-                    </Button>
-                ) : (
-                    <Button
-                        view="flat"
-                        size="m"
-                        onClick={onMarkDeleted}
-                        title={i18n('action_delete')}
-                    >
-                        <Icon data={TrashBin} size={16} />
-                    </Button>
-                )}
-            </div>
-        </div>
     );
 }

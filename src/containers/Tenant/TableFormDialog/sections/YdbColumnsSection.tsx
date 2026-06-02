@@ -24,7 +24,7 @@ interface YdbColumnsSectionProps {
     pkTypes: Set<string>;
     keyNullable: boolean;
     originalInfo?: OriginalTableInfo;
-    onRequestTtlColumnDeletion: (columnName: string, onConfirm: () => void) => void;
+    onRequestTtlColumnDeletion: (onConfirm: () => void) => void;
 }
 
 export function YdbColumnsSection({
@@ -118,7 +118,7 @@ export function YdbColumnsSection({
             const doDelete = () => appendDeleted(column);
 
             if (isTtlColumn) {
-                onRequestTtlColumnDeletion(column.name, () => {
+                onRequestTtlColumnDeletion(() => {
                     setValue('settings.ttl.status', 'disabled', {
                         shouldDirty: true,
                         shouldValidate: true,

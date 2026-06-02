@@ -30,7 +30,6 @@ const baseSchema = z
         columns: z.array(z.any()),
         secondaryIndexes: z.array(z.any()),
         deletedColumns: z.array(z.any()),
-        updatedSecondaryIndexes: z.array(z.any()),
         partitionKey: z.array(z.string()),
         partitionCount: z.number().or(z.nan()).optional(),
         settings: z.any(),
@@ -100,17 +99,6 @@ function validateSecondaryIndexes(
             addIssue(ctx, ['secondaryIndexes', i, 'key'], i18n('error_required'));
         } else if (!index.key.every((column: string) => allColumns.has(column))) {
             addIssue(ctx, ['secondaryIndexes', i, 'key'], i18n('error_indexes-key'));
-        }
-    });
-
-    data.updatedSecondaryIndexes.forEach((index, i) => {
-        if (index.isDeleted) {
-            return;
-        }
-        if (!index.newName) {
-            addIssue(ctx, ['updatedSecondaryIndexes', i, 'newName'], i18n('error_required'));
-        } else if (!ENTITY_NAME_REG_EXP.test(index.newName)) {
-            addIssue(ctx, ['updatedSecondaryIndexes', i, 'newName'], i18n('error_name-pattern'));
         }
     });
 }
@@ -184,6 +172,11 @@ function validateSettings(
     }
 
     if (mode === 'update') {
+        validateTtl(data, ctx);
+        return;
+    }
+
+    if (data.type !== 'row') {
         validateTtl(data, ctx);
         return;
     }

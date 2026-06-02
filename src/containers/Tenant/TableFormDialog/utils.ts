@@ -86,7 +86,6 @@ export function getCreateInitialValues(initialType: TableType = 'row'): FormValu
         columns,
         secondaryIndexes: [],
         deletedColumns: [],
-        updatedSecondaryIndexes: [],
         partitionKey: firstName ? [firstName] : [],
         partitionCount: 64,
         settings: {
@@ -103,14 +102,7 @@ export function getCreateInitialValues(initialType: TableType = 'row'): FormValu
 }
 
 export function getUpdateInitialValues(table: TEvDescribeSchemeResult): FormValues {
-    const values = prepareFormValues(table);
-
-    return {
-        ...values,
-        columns: [],
-        secondaryIndexes: [],
-        updatedSecondaryIndexes: [],
-    };
+    return prepareFormValues(table);
 }
 
 type DescribedColumn = Pick<

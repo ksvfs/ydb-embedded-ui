@@ -78,7 +78,6 @@ export function getTopicFormValidationSchema(minPartitions: number) {
     return (
         z
             .object({
-                databaseId: z.string().min(1, i18n('error_required')),
                 path: z.string().optional(),
                 name: topicNameSchema,
                 shards: requiredNumber(

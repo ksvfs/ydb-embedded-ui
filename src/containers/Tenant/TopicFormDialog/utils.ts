@@ -59,7 +59,7 @@ function normalizePath(path: string) {
     return path.replace(/^\/+|\/+$/g, '');
 }
 
-export function getRelativePath(path: string, databaseFullPath: string): string | undefined {
+function getRelativePath(path: string, databaseFullPath: string): string | undefined {
     const normalizedPath = normalizePath(path);
     const normalizedDatabase = normalizePath(databaseFullPath);
 
@@ -74,7 +74,7 @@ export function getRelativePath(path: string, databaseFullPath: string): string 
     return normalizedPath;
 }
 
-export function splitTopicPath(topicPath: string, databaseFullPath: string) {
+function splitTopicPath(topicPath: string, databaseFullPath: string) {
     const relativePath = getRelativePath(topicPath, databaseFullPath);
     const pathSegments = relativePath?.split('/').filter(Boolean) ?? [];
     const name = pathSegments.pop() ?? '';
@@ -93,29 +93,24 @@ export function buildFullTopicPath(formData: TopicFormData, databaseFullPath: st
 }
 
 export function getCreateTopicInitialValues({
-    database,
     databaseFullPath,
     parentPath,
 }: {
-    database: string;
     databaseFullPath: string;
     parentPath?: string;
 }): TopicFormData {
     return {
         ...DEFAULT_TOPIC_FORM_VALUES,
-        databaseId: database,
         path: parentPath ? getRelativePath(parentPath, databaseFullPath) : undefined,
         autoPartitioning: {...DEFAULT_TOPIC_FORM_VALUES.autoPartitioning},
     };
 }
 
 export function getUpdateTopicInitialValues({
-    database,
     databaseFullPath,
     formData,
     topicPath,
 }: {
-    database: string;
     databaseFullPath: string;
     formData: TopicFormData;
     topicPath: string;
@@ -129,7 +124,6 @@ export function getUpdateTopicInitialValues({
     return {
         ...DEFAULT_TOPIC_FORM_VALUES,
         ...formData,
-        databaseId: formData.databaseId ?? database,
         path: topicPathData.path,
         name: topicPathData.name || formData.name,
         retentionType: hasStorageRetention ? 'size' : 'time',

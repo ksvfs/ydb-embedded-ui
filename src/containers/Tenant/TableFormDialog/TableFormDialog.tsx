@@ -3,12 +3,14 @@ import React from 'react';
 import * as NiceModal from '@ebay/nice-modal-react';
 import {Dialog, Text} from '@gravity-ui/uikit';
 import {zodResolver} from '@hookform/resolvers/zod';
+import {skipToken} from '@reduxjs/toolkit/query';
 import {FormProvider, useForm, useWatch} from 'react-hook-form';
 
 import {CONFIRMATION_DIALOG} from '../../../components/ConfirmationDialog/ConfirmationDialog';
 import {ResponseError} from '../../../components/Errors/ResponseError';
 import {Loader} from '../../../components/Loader';
 import {tableApi} from '../../../store/reducers/table/table';
+import {getTablePathInfoForUpdate} from '../../../store/reducers/table/utils';
 import type {TEvDescribeSchemeResult} from '../../../types/api/schema/schema';
 import {cn} from '../../../utils/cn';
 import createToast from '../../../utils/createToast';
@@ -30,12 +32,7 @@ import {TTLSection} from './sections/TTLSection';
 import {YdbColumnsSection} from './sections/YdbColumnsSection';
 import {YdbIndexesSection} from './sections/YdbIndexesSection';
 import type {FormMode, FormValues, OriginalTableInfo, TableType} from './types';
-import {
-    describeOriginalTable,
-    getCreateInitialValues,
-    getInitialColumns,
-    getUpdateInitialValues,
-} from './utils';
+import {describeOriginalTable, getCreateInitialValues, getUpdateInitialValues} from './utils';
 import {buildTableValidationSchema} from './validation';
 
 import './TableFormDialog.scss';
@@ -143,26 +140,25 @@ function TableForm({
         if (type === previousTypeRef.current) {
             return;
         }
+
         previousTypeRef.current = type;
-        const nextColumns = getInitialColumns(type);
-        setValue('columns', nextColumns, {shouldValidate: false});
-        setValue('partitionKey', nextColumns[0]?.name ? [nextColumns[0].name] : [], {
-            shouldValidate: false,
-        });
-        setValue('settings.ttl', {status: 'disabled'}, {shouldValidate: false});
+
+        const nextValues = getCreateInitialValues(type);
+        setValue('columns', nextValues.columns, {shouldValidate: false});
+        setValue('secondaryIndexes', nextValues.secondaryIndexes, {shouldValidate: false});
+        setValue('partitionKey', nextValues.partitionKey, {shouldValidate: false});
+        setValue('partitionCount', nextValues.partitionCount, {shouldValidate: false});
+        setValue('settings', nextValues.settings, {shouldValidate: false});
     }, [mode, type, setValue]);
 
     const isSubmitting = createState.isLoading || updateState.isLoading;
 
-    const handleTtlColumnDeletionRequest = React.useCallback(
-        async (_columnName: string, onConfirm: () => void) => {
-            const confirmed = await confirmTtlColumnDeletion();
-            if (confirmed) {
-                onConfirm();
-            }
-        },
-        [],
-    );
+    const handleTtlColumnDeletionRequest = React.useCallback(async (onConfirm: () => void) => {
+        const confirmed = await confirmTtlColumnDeletion();
+        if (confirmed) {
+            onConfirm();
+        }
+    }, []);
 
     const handleFormSubmit = handleSubmit(async (formValues) => {
         try {
@@ -178,28 +174,38 @@ function TableForm({
                     theme: 'success',
                     autoHiding: 5000,
                 });
-                onSuccess?.(fullName);
-            } else {
-                if (!originalTable || !path) {
-                    throw new Error('Original table is required for update');
+                if (onSuccess) {
+                    onSuccess(fullName);
+                } else {
+                    onClose();
                 }
-                const shouldUpdateTtl = hasDirtyValue(dirtyFields.settings?.ttl);
-
-                await updateTable({
-                    database,
-                    formValues,
-                    originalTable,
-                    shouldUpdateTtl,
-                }).unwrap();
-                createToast({
-                    name: 'table-update-success',
-                    title: i18n('alert_update-success'),
-                    theme: 'success',
-                    autoHiding: 5000,
-                });
-                onSuccess?.(path);
+                return;
             }
-            onClose();
+
+            if (!originalTable || !path) {
+                throw new Error('Original table is required for update');
+            }
+            const shouldUpdateTtl = hasDirtyValue(dirtyFields.settings?.ttl);
+
+            await updateTable({
+                database,
+                formValues,
+                originalTable,
+                shouldUpdateTtl,
+            }).unwrap();
+            createToast({
+                name: 'table-update-success',
+                title: i18n('alert_update-success'),
+                theme: 'success',
+                autoHiding: 5000,
+            });
+
+            const {updatedTablePath} = getTablePathInfoForUpdate(originalTable, formValues.name);
+            if (onSuccess) {
+                onSuccess(updatedTablePath);
+            } else {
+                onClose();
+            }
         } catch (error) {
             createToast({
                 name: `table-${mode}-error`,
@@ -239,9 +245,7 @@ function TableForm({
                         originalInfo={originalInfo}
                         onRequestTtlColumnDeletion={handleTtlColumnDeletionRequest}
                     />
-                    {showIndexes ? (
-                        <YdbIndexesSection mode={mode} originalInfo={originalInfo} />
-                    ) : null}
+                    {showIndexes ? <YdbIndexesSection /> : null}
                     <TTLSection originalInfo={originalInfo} />
                     {showSettings ? <SettingsSection mode={mode} /> : null}
                     {showPartitioning ? <PartitioningSection pkTypes={pkTypes} /> : null}
@@ -275,8 +279,8 @@ function TableFormDialog({
     onSuccess,
 }: TableFormDialogInnerProps) {
     const tableQuery = tableApi.useGetTableQuery(
-        {database, path: {path: path ?? '', databaseFullPath}},
-        {skip: mode !== 'update' || !path, refetchOnMountOrArgChange: true},
+        mode === 'update' && path ? {database, path: {path, databaseFullPath}} : skipToken,
+        {refetchOnMountOrArgChange: true},
     );
 
     const originalTable = mode === 'update' ? tableQuery.data : undefined;

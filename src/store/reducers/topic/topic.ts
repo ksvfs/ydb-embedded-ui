@@ -261,7 +261,6 @@ export const selectTopicFormData = createSelector(
         const partitionWriteSpeed = autoPartitioningSettings?.partition_write_speed;
 
         return {
-            path: undefined,
             name: topicData.self?.name,
             shards: minActivePartitions,
             writeQuotaBytes,

@@ -186,12 +186,6 @@ export interface SecondaryIndex {
     cover?: string[];
 }
 
-export interface UpdatedSecondaryIndex {
-    name: string;
-    newName: string;
-    isDeleted: boolean;
-}
-
 export enum TableFeatureFlag {
     Enabled = 'ENABLED',
     Disabled = 'DISABLED',
@@ -202,7 +196,6 @@ export interface BuildTemplateOptions {
     columns?: Column[];
     secondaryIndexes?: SecondaryIndex[];
     deletedColumns?: Column[];
-    updatedSecondaryIndexes?: UpdatedSecondaryIndex[];
     columnsHash?: string[];
     settings?: TableSettings;
 }
@@ -213,7 +206,6 @@ export interface FormValues {
     columns: ColumnField[];
     secondaryIndexes: SecondaryIndex[];
     deletedColumns: Column[];
-    updatedSecondaryIndexes: UpdatedSecondaryIndex[];
     partitionKey: string[];
     partitionCount: number;
     settings: TableSettings;
