@@ -3,7 +3,6 @@ import {z} from 'zod';
 import type {TopicFormValues} from '../../../store/reducers/topic/utils';
 
 import i18n from './i18n';
-import {formatBandwidthBytes} from './utils';
 
 const NAME_REGEX = /^[a-z](?:[a-z0-9_-]*[a-z0-9_])?$/;
 const MIN_ONE_MESSAGE = i18n('error_min-number', {count: 1});
@@ -111,16 +110,6 @@ export function getTopicFormValidationSchema(minPartitions: number) {
         .superRefine((data, ctx) => {
             if (data.shards < minPartitions) {
                 addIssue(ctx, ['shards'], i18n('error_min-number', {count: minPartitions}));
-            }
-
-            if (data.retentionPeriodSeconds === 60 * 60 && data.writeQuotaBytes !== 128 * 1024) {
-                addIssue(
-                    ctx,
-                    ['retentionPeriodSeconds'],
-                    i18n('error_retention-unavailable', {
-                        speed: formatBandwidthBytes(128 * 1024),
-                    }),
-                );
             }
 
             if (data.retentionType === 'time') {

@@ -71,6 +71,5 @@
   "error_min-number": "Value must be an integer no less than {{count}}",
   "error_max-number": "Value must not be greater than {{count}}",
   "error_less-than-number": "This value must be an integer less than {{count}}",
-  "error_more-than-number": "This value must be an integer greater than {{count}}",
-  "error_retention-unavailable": "Available only with {{speed}} throughput."
+  "error_more-than-number": "This value must be an integer greater than {{count}}"
 }

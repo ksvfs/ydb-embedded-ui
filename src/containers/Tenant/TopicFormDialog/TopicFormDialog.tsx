@@ -624,10 +624,7 @@ function TopicForm({
                                 <div className={b('control-stack')}>
                                     <SelectNumberField
                                         value={field.value}
-                                        onChange={(value) => {
-                                            field.onChange(value);
-                                            trigger('retentionPeriodSeconds');
-                                        }}
+                                        onChange={field.onChange}
                                         options={writeQuotaOptions}
                                         errorMessage={errors.writeQuotaBytes?.message}
                                         formatSelectedValue={formatBandwidthBytes}
