@@ -9,7 +9,7 @@
         position: relative;
         z-index: 1;
 
-        margin-top: -8px;
+        margin-top: calc(-1 * var(--g-spacing-2));
 
         .g-slider__top {
             display: none;

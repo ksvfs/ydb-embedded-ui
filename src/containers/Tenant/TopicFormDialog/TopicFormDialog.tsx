@@ -642,7 +642,7 @@ function TopicForm({
                         title={i18n('field_auto-partitioning')}
                         note={i18n('context_auto-partitioning')}
                     >
-                        <Flex gap={3} alignItems="center" style={{paddingTop: 4}}>
+                        <Flex gap={3} alignItems="center" className={b('switch-row')}>
                             <Controller
                                 name="autoPartitioning.enabled"
                                 control={control}
@@ -712,47 +712,7 @@ function TopicForm({
                             ) : null}
                         </Flex>
                     </FormRow>
-                    {/* eslint-disable-next-line no-negated-condition */}
-                    {!autoPartitioningEnabled ? (
-                        <FormRow
-                            title={i18n('field_shards')}
-                            note={i18n('context_shards')}
-                            htmlFor="shards"
-                        >
-                            <div className={b('control-stack')}>
-                                <Controller
-                                    name="shards"
-                                    control={control}
-                                    render={({field}) => (
-                                        <NumericTextInput
-                                            id="shards"
-                                            value={field.value}
-                                            onChange={(value) => {
-                                                field.onChange(value);
-                                                setValue('autoPartitioning.minPartitions', value);
-
-                                                if (
-                                                    value !== undefined &&
-                                                    maxPartitions !== undefined &&
-                                                    maxPartitions <= value
-                                                ) {
-                                                    setValue(
-                                                        'autoPartitioning.maxPartitions',
-                                                        value + 1,
-                                                    );
-                                                }
-                                                trigger('autoPartitioning.maxPartitions');
-                                            }}
-                                            errorMessage={errors.shards?.message}
-                                            className={b('input-s')}
-                                            disabled={isSubmitting}
-                                        />
-                                    )}
-                                />
-                                <Text color="secondary">{i18n('context_shards-info')}</Text>
-                            </div>
-                        </FormRow>
-                    ) : (
+                    {autoPartitioningEnabled ? (
                         <React.Fragment>
                             <FormRow title={i18n('field_shards')} note={i18n('context_shards')}>
                                 <div className={b('control-stack')}>
@@ -903,6 +863,45 @@ function TopicForm({
                                 </Disclosure.Details>
                             </Disclosure>
                         </React.Fragment>
+                    ) : (
+                        <FormRow
+                            title={i18n('field_shards')}
+                            note={i18n('context_shards')}
+                            htmlFor="shards"
+                        >
+                            <div className={b('control-stack')}>
+                                <Controller
+                                    name="shards"
+                                    control={control}
+                                    render={({field}) => (
+                                        <NumericTextInput
+                                            id="shards"
+                                            value={field.value}
+                                            onChange={(value) => {
+                                                field.onChange(value);
+                                                setValue('autoPartitioning.minPartitions', value);
+
+                                                if (
+                                                    value !== undefined &&
+                                                    maxPartitions !== undefined &&
+                                                    maxPartitions <= value
+                                                ) {
+                                                    setValue(
+                                                        'autoPartitioning.maxPartitions',
+                                                        value + 1,
+                                                    );
+                                                }
+                                                trigger('autoPartitioning.maxPartitions');
+                                            }}
+                                            errorMessage={errors.shards?.message}
+                                            className={b('input-s')}
+                                            disabled={isSubmitting}
+                                        />
+                                    )}
+                                />
+                                <Text color="secondary">{i18n('context_shards-info')}</Text>
+                            </div>
+                        </FormRow>
                     )}
                     <Divider className={b('divider')} />
                     <FormRow

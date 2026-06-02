@@ -128,10 +128,13 @@ const buildType = (column: Column) => {
 
 const buildNonNull = (column: Column) => (column.notNull ? 'NOT NULL' : '');
 
-const buildDefaultValue = (column: Column) =>
-    typeof column.defaultValue !== 'undefined'
-        ? `DEFAULT ${prepareColumnValue(column, String(column.defaultValue))}`
-        : '';
+const buildDefaultValue = (column: Column) => {
+    if (typeof column.defaultValue === 'undefined') {
+        return '';
+    }
+
+    return `DEFAULT ${prepareColumnValue(column, String(column.defaultValue))}`;
+};
 
 const buildFamily = (column: Column) => {
     return column.family ? `FAMILY ${buildName(column.family)}` : '';
@@ -234,9 +237,9 @@ const buildSettingsCreateItems = (settings?: Partial<TableSettings>) => {
         !Number.isNaN(settings.ttl.lifetime)
     ) {
         const {column, lifetime, unit = 'seconds', epochMode} = settings.ttl;
-        const duration = getDurationWithDaysOnly(lifetime, unit);
+        const ttlDuration = getDurationWithDaysOnly(lifetime, unit);
         items.push(
-            `TTL = Interval("${duration}") ON ${buildName(column)}${
+            `TTL = Interval("${ttlDuration}") ON ${buildName(column)}${
                 epochMode ? ` AS ${formatTtlEpochMode(epochMode)}` : ''
             }`,
         );
@@ -296,19 +299,19 @@ const buildFamilyGroups = (settings?: Partial<TableSettings>) => {
     }
 
     return columnFamilies.map((columnFamilyDescription) => {
-        const settings: Array<string> = [];
+        const familySettings: Array<string> = [];
 
         const codec = convertCompressionCodec(columnFamilyDescription);
         if (codec) {
-            settings.push(`COMPRESSION = "${codec}"`);
+            familySettings.push(`COMPRESSION = "${codec}"`);
         }
 
         const storageDeviceType = convertCompressionStorageDeviceType(columnFamilyDescription);
         if (storageDeviceType) {
-            settings.push(`DATA = "${storageDeviceType}"`);
+            familySettings.push(`DATA = "${storageDeviceType}"`);
         }
 
-        return `FAMILY ${buildName(columnFamilyDescription.name)} (${settings.join(`, `)})`;
+        return `FAMILY ${buildName(columnFamilyDescription.name)} (${familySettings.join(`, `)})`;
     });
 };
 
@@ -459,15 +462,21 @@ function prepareRowTableSettings(table: TTableDescription): TableSettings {
     }
 
     const rawFamilies = table.PartitionConfig?.ColumnFamilies ?? [];
-    const columnFamilies: ColumnFamilyDescription[] = rawFamilies
-        .filter((fam) => fam.Name)
-        .map((fam) => ({
-            name: fam.Name!,
-            compression: mapColumnCodec(fam.ColumnCodec),
-            data: fam.StorageConfig?.Data?.PreferredPoolKind
-                ? {media: fam.StorageConfig.Data.PreferredPoolKind}
+    const columnFamilies = rawFamilies.reduce<ColumnFamilyDescription[]>((result, family) => {
+        if (!family.Name) {
+            return result;
+        }
+
+        result.push({
+            name: family.Name,
+            compression: mapColumnCodec(family.ColumnCodec),
+            data: family.StorageConfig?.Data?.PreferredPoolKind
+                ? {media: family.StorageConfig.Data.PreferredPoolKind}
                 : undefined,
-        }));
+        });
+
+        return result;
+    }, []);
 
     return {
         partitionsType,
@@ -530,12 +539,13 @@ export function getTablePathInfoForUpdate(originalTable: TEvDescribeSchemeResult
     const pathDesc = originalTable.PathDescription;
     const originalName = pathDesc?.Self?.Name;
     const tablePath = originalTable.Path ?? originalName ?? name;
-    const updatedTablePath =
-        originalName && name !== originalName
-            ? tablePath.endsWith(originalName)
-                ? `${tablePath.slice(0, -originalName.length)}${name}`
-                : name
-            : tablePath;
+    let updatedTablePath = tablePath;
+
+    if (originalName && name !== originalName) {
+        updatedTablePath = tablePath.endsWith(originalName)
+            ? `${tablePath.slice(0, -originalName.length)}${name}`
+            : name;
+    }
 
     return {originalName, tablePath, updatedTablePath};
 }

@@ -9,7 +9,7 @@
         display: flex;
         overflow: hidden;
         align-items: center;
-        gap: 4px;
+        gap: var(--g-spacing-1);
 
         box-sizing: border-box;
         width: 100%;
@@ -97,7 +97,7 @@
     }
 
     &__panels {
-        --g-list-item-padding: 4px 16px;
+        --g-list-item-padding: var(--g-spacing-1) var(--g-spacing-4);
         display: flex;
 
         min-height: 200px;
@@ -107,7 +107,7 @@
         overflow: hidden;
         flex: 0 0 50%;
 
-        padding-block-start: 8px;
+        padding-block-start: var(--g-spacing-2);
 
         &:not(:last-child) {
             border-inline-end: 1px solid var(--g-color-line-generic);
@@ -120,8 +120,8 @@
         align-items: center;
 
         min-height: 24px;
-        margin-block-end: 8px;
-        padding: var(--g-list-item-padding, 4px 8px);
+        margin-block-end: var(--g-spacing-2);
+        padding: var(--g-list-item-padding, var(--g-spacing-1) var(--g-spacing-2));
     }
 
     &__panel-title {
@@ -132,7 +132,7 @@
         display: flex;
         overflow: hidden;
         align-items: center;
-        gap: 4px;
+        gap: var(--g-spacing-1);
 
         width: 100%;
 
@@ -170,7 +170,7 @@
         justify-content: flex-end;
         gap: var(--g-spacing-2);
 
-        padding: 16px;
+        padding: var(--g-spacing-4);
 
         border-top: 1px solid var(--g-color-line-generic);
     }

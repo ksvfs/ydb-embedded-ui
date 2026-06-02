@@ -262,7 +262,11 @@ function formatDefaultValue(column: Column) {
         return i18n('label_autoincrement');
     }
 
-    return column.defaultValue !== undefined ? String(column.defaultValue) : '';
+    if (typeof column.defaultValue === 'undefined') {
+        return '';
+    }
+
+    return String(column.defaultValue);
 }
 
 function PrimaryColumnRow({column}: {column: Column}) {
@@ -347,6 +351,59 @@ function EditableColumnRow({
     const notNullDisabledMessage = getNotNullDisabledMessage(column, keyNullable);
     const autoincrementDisabledMessage = getAutoincrementDisabledMessage(column);
     const keyDisabled = !pkTypes.has(column.type);
+    let defaultValueControl: React.ReactNode = null;
+
+    if (mode === 'create') {
+        if (column.key) {
+            defaultValueControl = (
+                <Controller
+                    control={control}
+                    name={`columns.${index}.autoincrement`}
+                    render={({field}) => (
+                        <Checkbox
+                            size="l"
+                            checked={Boolean(field.value)}
+                            disabled={Boolean(autoincrementDisabledMessage)}
+                            title={autoincrementDisabledMessage}
+                            onUpdate={(value) => {
+                                field.onChange(value);
+                                onAutoincrementChange(value);
+                            }}
+                        >
+                            <Text variant="body-1">{i18n('label_autoincrement')}</Text>
+                        </Checkbox>
+                    )}
+                />
+            );
+        } else {
+            defaultValueControl = (
+                <div className={b('default-row')}>
+                    <Controller
+                        control={control}
+                        name={`columns.${index}.withDefaultValue`}
+                        render={({field}) => (
+                            <Checkbox
+                                size="l"
+                                checked={Boolean(field.value)}
+                                onUpdate={field.onChange}
+                            />
+                        )}
+                    />
+                    <Controller
+                        control={control}
+                        name={`columns.${index}.defaultValue`}
+                        render={({field}) => (
+                            <TextInput
+                                value={field.value === undefined ? '' : String(field.value)}
+                                onUpdate={field.onChange}
+                                disabled={!column.withDefaultValue}
+                            />
+                        )}
+                    />
+                </div>
+            );
+        }
+    }
 
     return (
         <div className={b('columns-row')}>
@@ -420,55 +477,7 @@ function EditableColumnRow({
                     />
                 ) : null}
             </div>
-            <div className={b('columns-cell', {default: true})}>
-                {mode === 'create' ? (
-                    column.key ? (
-                        <Controller
-                            control={control}
-                            name={`columns.${index}.autoincrement`}
-                            render={({field}) => (
-                                <Checkbox
-                                    size="l"
-                                    checked={Boolean(field.value)}
-                                    disabled={Boolean(autoincrementDisabledMessage)}
-                                    title={autoincrementDisabledMessage}
-                                    onUpdate={(value) => {
-                                        field.onChange(value);
-                                        onAutoincrementChange(value);
-                                    }}
-                                >
-                                    <Text variant="body-1">{i18n('label_autoincrement')}</Text>
-                                </Checkbox>
-                            )}
-                        />
-                    ) : (
-                        <div className={b('default-row')}>
-                            <Controller
-                                control={control}
-                                name={`columns.${index}.withDefaultValue`}
-                                render={({field}) => (
-                                    <Checkbox
-                                        size="l"
-                                        checked={Boolean(field.value)}
-                                        onUpdate={field.onChange}
-                                    />
-                                )}
-                            />
-                            <Controller
-                                control={control}
-                                name={`columns.${index}.defaultValue`}
-                                render={({field}) => (
-                                    <TextInput
-                                        value={field.value === undefined ? '' : String(field.value)}
-                                        onUpdate={field.onChange}
-                                        disabled={!column.withDefaultValue}
-                                    />
-                                )}
-                            />
-                        </div>
-                    )
-                ) : null}
-            </div>
+            <div className={b('columns-cell', {default: true})}>{defaultValueControl}</div>
             <div className={b('columns-cell', {action: true})}>
                 <Button view="flat" size="m" onClick={onRemove} title={i18n('action_delete')}>
                     <Icon data={TrashBin} size={16} />

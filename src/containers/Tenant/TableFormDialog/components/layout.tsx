@@ -61,19 +61,24 @@ export function FormRow({
             {required ? <RequiredMark /> : null}
         </React.Fragment>
     ) : null;
+    let labelTitleNode: React.ReactNode = null;
+
+    if (title) {
+        if (htmlFor) {
+            labelTitleNode = (
+                <label className={b('label-title')} htmlFor={htmlFor}>
+                    {labelTitle}
+                </label>
+            );
+        } else {
+            labelTitleNode = <span className={b('label-title')}>{labelTitle}</span>;
+        }
+    }
 
     return (
         <div className={b('row')}>
             <div className={b('label')}>
-                {title ? (
-                    htmlFor ? (
-                        <label className={b('label-title')} htmlFor={htmlFor}>
-                            {labelTitle}
-                        </label>
-                    ) : (
-                        <span className={b('label-title')}>{labelTitle}</span>
-                    )
-                ) : null}
+                {labelTitleNode}
                 {note ? (
                     <HelpMark
                         className={b('help-mark')}

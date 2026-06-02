@@ -303,11 +303,6 @@
         align-items: start;
         grid-template-columns: minmax(0, 160px) minmax(0, 1fr);
         gap: var(--g-spacing-4);
-
-        @media (max-width: 767px) {
-            grid-template-columns: minmax(0, 1fr);
-            gap: var(--g-spacing-2);
-        }
     }
 
     &__split-point-meta {
