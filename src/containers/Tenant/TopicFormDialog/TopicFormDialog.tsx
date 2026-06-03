@@ -31,7 +31,6 @@ import type {TopicFormValues} from '../../../store/reducers/topic/utils';
 import {AutoPartitioningStrategy} from '../../../store/reducers/topic/utils';
 import {cn} from '../../../utils/cn';
 import createToast from '../../../utils/createToast';
-import {formatDurationSeconds} from '../../../utils/dataFormatters/dataFormatters';
 import {prepareCommonErrorMessage} from '../../../utils/errors';
 import {useTypedSelector} from '../../../utils/hooks';
 import {transformPath} from '../ObjectSummary/transformPath';
@@ -43,6 +42,8 @@ import {
     buildFullTopicPath,
     formatBandwidthBytes,
     formatNumberInput,
+    formatRetentionPeriodSelectValue,
+    formatWriteQuotaSelectValue,
     fromMbToGb,
     getCreateTopicInitialValues,
     getUpdateTopicInitialValues,
@@ -360,22 +361,6 @@ function formatStorageLimitMark(value: number) {
     return `${fromMbToGb(value)} ${i18n('value_gigabyte')}`;
 }
 
-function formatRetentionPeriod(value: number) {
-    if (value % (24 * 60 * 60) === 0) {
-        const days = value / (24 * 60 * 60);
-        if (days === 1) {
-            return `1 ${i18n('value_day')}`;
-        }
-    }
-
-    if (value % (60 * 60) === 0) {
-        const hours = value / (60 * 60);
-        return `${hours} ${i18n(hours === 1 ? 'value_hour' : 'value_hours')}`;
-    }
-
-    return formatDurationSeconds(value) ?? `${value} ${i18n('value_seconds')}`;
-}
-
 function formatAutoPartitioningMode(mode: string) {
     switch (mode) {
         case AutoPartitioningStrategy.ScaleUp:
@@ -627,7 +612,7 @@ function TopicForm({
                                         onChange={field.onChange}
                                         options={writeQuotaOptions}
                                         errorMessage={errors.writeQuotaBytes?.message}
-                                        formatSelectedValue={formatBandwidthBytes}
+                                        formatSelectedValue={formatWriteQuotaSelectValue}
                                     />
                                     <Text color="secondary">{throughputInfo}</Text>
                                 </div>
@@ -995,7 +980,7 @@ function TopicForm({
                                             onChange={field.onChange}
                                             options={retentionPeriodOptions}
                                             errorMessage={errors.retentionPeriodSeconds?.message}
-                                            formatSelectedValue={formatRetentionPeriod}
+                                            formatSelectedValue={formatRetentionPeriodSelectValue}
                                         />
                                     )}
                                 />

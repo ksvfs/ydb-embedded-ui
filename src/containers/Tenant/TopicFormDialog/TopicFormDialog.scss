@@ -75,9 +75,13 @@
         max-width: 100%;
     }
 
-    &__input-s,
-    &__select-s {
+    &__input-s {
         width: 120px;
+    }
+
+    &__select-s {
+        width: 180px;
+        max-width: 100%;
     }
 
     &__dual-inputs {

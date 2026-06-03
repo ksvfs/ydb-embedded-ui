@@ -2,6 +2,8 @@ import type {TopicFormValues} from '../../../store/reducers/topic/utils';
 import {AutoPartitioningStrategy} from '../../../store/reducers/topic/utils';
 import {UNBREAKABLE_GAP} from '../../../utils/constants';
 
+import i18n from './i18n';
+
 export const TOPIC_FORM_DIALOG = 'topic-form-dialog';
 
 const KILOBYTE = 1024;
@@ -53,6 +55,49 @@ export function formatBandwidthBytes(value: number | undefined) {
     }
 
     return `${value}${UNBREAKABLE_GAP}byte/s`;
+}
+
+export function formatWriteQuotaSelectValue(value: number | undefined) {
+    if (typeof value !== 'number' || Number.isNaN(value)) {
+        return '';
+    }
+
+    if (value >= MEGABYTE && value % MEGABYTE === 0) {
+        return `${value / MEGABYTE}${UNBREAKABLE_GAP}MB/s`;
+    }
+
+    if (value >= KILOBYTE && value % KILOBYTE === 0) {
+        return `${value / KILOBYTE}${UNBREAKABLE_GAP}KB/s`;
+    }
+
+    return `${value}${UNBREAKABLE_GAP}byte/s`;
+}
+
+export function formatRetentionPeriodSelectValue(value: number | undefined) {
+    if (typeof value !== 'number' || Number.isNaN(value)) {
+        return '';
+    }
+
+    const day = 24 * 60 * 60;
+    const hour = 60 * 60;
+    const minute = 60;
+
+    if (value >= day && value % day === 0) {
+        const days = value / day;
+        return `${days} ${i18n(days === 1 ? 'value_day' : 'value_days')}`;
+    }
+
+    if (value >= hour && value % hour === 0) {
+        const hours = value / hour;
+        return `${hours} ${i18n(hours === 1 ? 'value_hour' : 'value_hours')}`;
+    }
+
+    if (value >= minute && value % minute === 0) {
+        const minutes = value / minute;
+        return `${minutes} ${i18n(minutes === 1 ? 'value_minute' : 'value_minutes')}`;
+    }
+
+    return `${value} ${i18n(value === 1 ? 'value_second' : 'value_seconds')}`;
 }
 
 function normalizePath(path: string) {
