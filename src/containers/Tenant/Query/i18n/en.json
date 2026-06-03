@@ -50,8 +50,6 @@
   "action.stop": "Stop",
   "action.run": "Run",
   "action.explain": "Explain",
-  "action.create-table": "Create table",
-  "action.create-topic": "Create topic",
   "action.edit": "Edit",
   "action.expand": "Expand",
   "action.collapse": "Collapse",
