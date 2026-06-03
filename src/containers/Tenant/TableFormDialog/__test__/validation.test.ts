@@ -63,13 +63,12 @@ describe('TableFormDialog validation', () => {
         expect(getIssuePaths(result)).toEqual(expect.arrayContaining(['name', 'columns']));
     });
 
-    test('update mode rejects slash-separated names', () => {
+    test('update mode accepts slash-separated names for row-table moves', () => {
         const schema = buildTableValidationSchema({mode: 'update'});
 
-        const result = schema.safeParse(createValues({name: 'dir/table'}));
+        const result = schema.safeParse(createValues({name: 'archive/orders'}));
 
-        expect(result.success).toBe(false);
-        expect(getIssuePaths(result)).toContain('name');
+        expect(result.success).toBe(true);
     });
 
     test('secondary indexes cannot reference deleted columns', () => {

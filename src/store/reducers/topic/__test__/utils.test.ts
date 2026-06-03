@@ -54,7 +54,7 @@ describe('topic utils', () => {
         expect(query).toContain('PARTITION_COUNT_LIMIT = 10');
         expect(query).toContain("RETENTION_PERIOD = Interval('PT7200S')");
         expect(query).toContain('RETENTION_STORAGE_MB = 1024');
-        expect(query).toContain("AUTO_PARTITIONING_STRATEGY = 'disabled'");
+        expect(query).not.toContain('AUTO_PARTITIONING_STRATEGY =');
         expect(query).not.toContain('MAX_ACTIVE_PARTITIONS =');
     });
 });

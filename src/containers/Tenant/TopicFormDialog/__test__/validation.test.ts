@@ -34,13 +34,21 @@ describe('TopicFormDialog validation', () => {
         return result.error.issues.map(({path}) => path.join('.'));
     }
 
-    test('rejects invalid topic names', () => {
+    test('rejects topic names with empty path segments', () => {
         const schema = getTopicFormValidationSchema(2);
 
-        const result = schema.safeParse(createValidValues({name: 'BadTopic'}));
+        const result = schema.safeParse(createValidValues({name: 'folder//topic'}));
 
         expect(result.success).toBe(false);
         expect(getIssuePaths(result)).toContain('name');
+    });
+
+    test('accepts uppercase topic names', () => {
+        const schema = getTopicFormValidationSchema(2);
+
+        const result = schema.safeParse(createValidValues({name: 'Folder/Topic'}));
+
+        expect(result.success).toBe(true);
     });
 
     test('requires size retention value when size retention is selected', () => {

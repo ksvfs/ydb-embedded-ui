@@ -4,7 +4,7 @@ import type {TopicFormValues} from '../../../store/reducers/topic/utils';
 
 import i18n from './i18n';
 
-const NAME_REGEX = /^[a-z](?:[a-z0-9_-]*[a-z0-9_])?$/;
+const NAME_REGEX = /^[A-Za-z](?:[A-Za-z0-9_-]*[A-Za-z0-9_])?$/;
 const MIN_ONE_MESSAGE = i18n('error_min-number', {count: 1});
 const MAX_HUNDRED_MESSAGE = i18n('error_max-number', {count: 100});
 
@@ -41,11 +41,6 @@ const topicNameSchema = z
     .string({required_error: i18n('error_required'), invalid_type_error: i18n('error_required')})
     .min(1, i18n('error_required'))
     .superRefine((value, ctx) => {
-        if (value !== value.toLowerCase()) {
-            addIssue(ctx, [], i18n('error_lowercase'));
-            return;
-        }
-
         const segments = value.split('/');
         if (segments.some((segment) => !segment)) {
             addIssue(ctx, [], i18n('error_name-regex'));

@@ -60,7 +60,12 @@ function formatAutoPartitioningStrategy(strategy: string) {
     );
 }
 
-function buildTopicSettings(formData: TopicFormValues): string[] {
+function buildTopicSettings(
+    formData: TopicFormValues,
+    {
+        includeDisabledAutoPartitioningStrategy = true,
+    }: {includeDisabledAutoPartitioningStrategy?: boolean} = {},
+): string[] {
     const {
         shards,
         writeQuotaBytes,
@@ -105,10 +110,12 @@ function buildTopicSettings(formData: TopicFormValues): string[] {
 
     settings.push(`PARTITION_WRITE_SPEED_BYTES_PER_SECOND = ${writeQuotaBytes}`);
 
-    const strategy = autoPartitioning.enabled
-        ? formatAutoPartitioningStrategy(autoPartitioning.mode)
-        : formatAutoPartitioningStrategy(AutoPartitioningStrategy.Disabled);
-    settings.push(`AUTO_PARTITIONING_STRATEGY = '${strategy}'`);
+    if (autoPartitioning.enabled || includeDisabledAutoPartitioningStrategy) {
+        const strategy = autoPartitioning.enabled
+            ? formatAutoPartitioningStrategy(autoPartitioning.mode)
+            : formatAutoPartitioningStrategy(AutoPartitioningStrategy.Disabled);
+        settings.push(`AUTO_PARTITIONING_STRATEGY = '${strategy}'`);
+    }
 
     if (autoPartitioning.enabled) {
         if (autoPartitioning.stabilizationWindow !== undefined) {
@@ -134,6 +141,8 @@ export function buildCreateTopicQuery(formData: TopicFormValues): string {
 
 export function buildAlterTopicQuery(formData: TopicFormValues): string {
     const topicRef = buildTopicPath(formData.path, formData.name);
-    const settings = buildTopicSettings(formData);
+    const settings = buildTopicSettings(formData, {
+        includeDisabledAutoPartitioningStrategy: false,
+    });
     return `ALTER TOPIC ${topicRef} SET (\n    ${settings.join(',\n    ')}\n);`;
 }

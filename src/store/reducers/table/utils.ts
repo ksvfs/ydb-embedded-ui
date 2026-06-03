@@ -539,9 +539,9 @@ export function getTablePathInfoForUpdate(originalTable: TEvDescribeSchemeResult
     const pathDesc = originalTable.PathDescription;
     const originalName = pathDesc?.Self?.Name;
     const tablePath = originalTable.Path ?? originalName ?? name;
-    let updatedTablePath = tablePath;
+    let updatedTablePath = name.startsWith('/') ? name : tablePath;
 
-    if (originalName && name !== originalName) {
+    if (!name.startsWith('/') && originalName && name !== originalName) {
         updatedTablePath = tablePath.endsWith(originalName)
             ? `${tablePath.slice(0, -originalName.length)}${name}`
             : name;

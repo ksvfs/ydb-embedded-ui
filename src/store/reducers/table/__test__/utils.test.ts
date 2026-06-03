@@ -5,6 +5,7 @@ import {
     buildCreateColumnTableQuery,
     buildCreateTableQuery,
     buildUpdateTableQuery,
+    getTablePathInfoForUpdate,
     getUpdateTableSettings,
     prepareColumnValue,
     prepareFormValues,
@@ -147,6 +148,42 @@ describe('table utils', () => {
                 lifetime: 3600,
                 unit: 'seconds',
             },
+        });
+    });
+
+    test('getTablePathInfoForUpdate supports renames into nested directories', () => {
+        const result = getTablePathInfoForUpdate(
+            {
+                Path: '/Root/orders',
+                PathDescription: {
+                    Self: {Name: 'orders'},
+                },
+            } as never,
+            'archive/orders',
+        );
+
+        expect(result).toEqual({
+            originalName: 'orders',
+            tablePath: '/Root/orders',
+            updatedTablePath: '/Root/archive/orders',
+        });
+    });
+
+    test('getTablePathInfoForUpdate preserves absolute rename targets', () => {
+        const result = getTablePathInfoForUpdate(
+            {
+                Path: '/Root/orders',
+                PathDescription: {
+                    Self: {Name: 'orders'},
+                },
+            } as never,
+            '/backup/orders',
+        );
+
+        expect(result).toEqual({
+            originalName: 'orders',
+            tablePath: '/Root/orders',
+            updatedTablePath: '/backup/orders',
         });
     });
 

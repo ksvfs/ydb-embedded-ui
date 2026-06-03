@@ -4,6 +4,7 @@ import {
     COLUMN_NAME_REG_EXP,
     ENTITY_NAME_REG_EXP,
     ENTITY_PATH_REG_EXP,
+    ENTITY_RENAME_PATH_REG_EXP,
     MAX_COLUMN_PARTITION_COUNT,
     MAX_PARTITIONS_COUNT,
     MAX_PARTITION_SIZE_MB,
@@ -46,7 +47,12 @@ function validateName(data: FormValues, ctx: z.RefinementCtx, mode: FormMode) {
         addIssue(ctx, ['name'], i18n('error_required'));
         return;
     }
-    const namePattern = mode === 'create' ? ENTITY_PATH_REG_EXP : ENTITY_NAME_REG_EXP;
+    const namePattern =
+        mode === 'create'
+            ? ENTITY_PATH_REG_EXP
+            : data.type === 'row'
+              ? ENTITY_RENAME_PATH_REG_EXP
+              : ENTITY_NAME_REG_EXP;
     if (!namePattern.test(data.name)) {
         addIssue(
             ctx,
