@@ -24,7 +24,9 @@ import {getStringifiedData} from '../../../../utils/dataFormatters/dataFormatter
 import {useTypedDispatch, useTypedSelector} from '../../../../utils/hooks';
 import {getConfirmation} from '../../../../utils/hooks/withConfirmation/useChangeInputWithConfirmation';
 import {canShowTenantMonitoringTab} from '../../../../utils/monitoringVisibility';
+import {openTableFormDialog} from '../../TableFormDialog/TableFormDialog';
 import {useTenantPage} from '../../TenantNavigation/useTenantNavigation';
+import {openTopicFormDialog} from '../../TopicFormDialog/TopicFormDialog';
 import {getSchemaControls} from '../../utils/controls';
 import {
     isChildlessPathType,
@@ -154,6 +156,70 @@ export function SchemaTree(props: SchemaTreeProps) {
         setCreateDirectoryOpen(true);
     };
 
+    const handleOpenCreateTopicDialog = React.useCallback(
+        (nextParentPath: string) => {
+            openTopicFormDialog({
+                mode: 'create',
+                database,
+                databaseFullPath,
+                parentPath: nextParentPath,
+                onSuccess: (createdPath) => {
+                    onActivePathUpdate(createdPath);
+                    setSchemaTreeKey(createdPath);
+                },
+            });
+        },
+        [database, databaseFullPath, onActivePathUpdate, setSchemaTreeKey],
+    );
+
+    const handleOpenCreateTableDialog = React.useCallback(
+        (nextParentPath: string) => {
+            openTableFormDialog({
+                mode: 'create',
+                database,
+                databaseFullPath,
+                parentPath: nextParentPath,
+                onSuccess: (createdPath) => {
+                    onActivePathUpdate(createdPath);
+                    setSchemaTreeKey(createdPath);
+                },
+            });
+        },
+        [database, databaseFullPath, onActivePathUpdate, setSchemaTreeKey],
+    );
+
+    const handleOpenUpdateTopicDialog = React.useCallback(
+        (topicPath: string) => {
+            openTopicFormDialog({
+                mode: 'update',
+                database,
+                databaseFullPath,
+                topicPath,
+                onSuccess: (updatedPath) => {
+                    onActivePathUpdate(updatedPath);
+                    setSchemaTreeKey(updatedPath);
+                },
+            });
+        },
+        [database, databaseFullPath, onActivePathUpdate, setSchemaTreeKey],
+    );
+
+    const handleOpenUpdateTableDialog = React.useCallback(
+        (tablePath: string) => {
+            openTableFormDialog({
+                mode: 'update',
+                database,
+                databaseFullPath,
+                path: tablePath,
+                onSuccess: (updatedPath) => {
+                    onActivePathUpdate(updatedPath);
+                    setSchemaTreeKey(updatedPath);
+                },
+            });
+        },
+        [database, databaseFullPath, onActivePathUpdate, setSchemaTreeKey],
+    );
+
     const {monitoring: clusterMonitoring} = useClusterBaseInfo();
     const {controlPlane} = useTenantBaseInfo(database);
     const getTreeNodeActions = React.useMemo(() => {
@@ -166,6 +232,10 @@ export function SchemaTree(props: SchemaTreeProps) {
                 showCreateDirectoryDialog: createDirectoryFeatureAvailable
                     ? handleOpenCreateDirectoryDialog
                     : undefined,
+                showCreateTableDialog: handleOpenCreateTableDialog,
+                showCreateTopicDialog: handleOpenCreateTopicDialog,
+                showUpdateTableDialog: handleOpenUpdateTableDialog,
+                showUpdateTopicDialog: handleOpenUpdateTopicDialog,
                 isMultiTabEnabled,
                 getConfirmation:
                     input && isDirty && !isMultiTabEnabled ? getConfirmation : undefined,
@@ -188,6 +258,10 @@ export function SchemaTree(props: SchemaTreeProps) {
         onActivePathUpdate,
         handleTenantPageChange,
         createDirectoryFeatureAvailable,
+        handleOpenCreateTableDialog,
+        handleOpenCreateTopicDialog,
+        handleOpenUpdateTableDialog,
+        handleOpenUpdateTopicDialog,
         input,
         isDirty,
         isMultiTabEnabled,
