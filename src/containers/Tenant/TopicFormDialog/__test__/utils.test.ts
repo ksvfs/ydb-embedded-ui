@@ -16,6 +16,7 @@ describe('TopicFormDialog utils', () => {
     test('formats retention values using day hour minute and second units', () => {
         expect(formatRetentionPeriodSelectValue(2 * 24 * 60 * 60)).toBe('2 days');
         expect(formatRetentionPeriodSelectValue(12 * 60 * 60)).toBe('12 hours');
+        expect(formatRetentionPeriodSelectValue(18 * 60 * 60)).toBe('18 hours');
         expect(formatRetentionPeriodSelectValue(90 * 60)).toBe('90 minutes');
         expect(formatRetentionPeriodSelectValue(45)).toBe('45 seconds');
         expect(formatRetentionPeriodSelectValue(1)).toBe('1 second');

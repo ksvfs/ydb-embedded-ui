@@ -95,6 +95,7 @@ const retentionPeriodOptions: SelectOption[] = [
     {content: `1 ${i18n('value_hour')}`, value: String(60 * 60)},
     {content: `4 ${i18n('value_hours')}`, value: String(4 * 60 * 60)},
     {content: `12 ${i18n('value_hours')}`, value: String(12 * 60 * 60)},
+    {content: `18 ${i18n('value_hours')}`, value: String(18 * 60 * 60)},
     {content: `1 ${i18n('value_day')}`, value: String(24 * 60 * 60)},
 ];
 
