@@ -82,9 +82,6 @@ export function getTopicFormValidationSchema(minPartitions: number) {
                     .min(1, MIN_ONE_MESSAGE),
             ),
             writeQuotaBytes: requiredNumber(),
-            retentionPeriodSeconds: optionalNumber(),
-            storageLimitMb: optionalNumber(),
-            retentionType: z.enum(['size', 'time']),
             autoPartitioning: z.object({
                 enabled: z.boolean(),
                 mode: z.string().min(1, i18n('error_required')),
@@ -105,16 +102,6 @@ export function getTopicFormValidationSchema(minPartitions: number) {
         .superRefine((data, ctx) => {
             if (data.shards < minPartitions) {
                 addIssue(ctx, ['shards'], i18n('error_min-number', {count: minPartitions}));
-            }
-
-            if (data.retentionType === 'time') {
-                validateRequiredNumber(
-                    ctx,
-                    ['retentionPeriodSeconds'],
-                    data.retentionPeriodSeconds,
-                );
-            } else if (data.retentionType === 'size') {
-                validateRequiredNumber(ctx, ['storageLimitMb'], data.storageLimitMb);
             }
 
             const {autoPartitioning} = data;

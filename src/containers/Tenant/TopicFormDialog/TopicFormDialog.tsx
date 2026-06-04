@@ -1,7 +1,6 @@
 import React from 'react';
 
 import * as NiceModal from '@ebay/nice-modal-react';
-import {TriangleExclamationFill} from '@gravity-ui/icons';
 import type {SelectOption} from '@gravity-ui/uikit';
 import {
     Dialog,
@@ -9,7 +8,6 @@ import {
     Divider,
     Flex,
     HelpMark,
-    Icon,
     Link,
     Popover,
     SegmentedRadioGroup,
@@ -24,7 +22,6 @@ import {Controller, useForm} from 'react-hook-form';
 import {CONFIRMATION_DIALOG} from '../../../components/ConfirmationDialog/ConfirmationDialog';
 import {ResponseError} from '../../../components/Errors/ResponseError';
 import {Loader} from '../../../components/Loader';
-import {RangeInputPicker} from '../../../components/RangeInputPicker';
 import {useClusterWithProxy} from '../../../store/reducers/cluster/cluster';
 import {selectTopicFormValues, topicApi} from '../../../store/reducers/topic/topic';
 import type {TopicFormValues} from '../../../store/reducers/topic/utils';
@@ -42,9 +39,7 @@ import {
     buildFullTopicPath,
     formatBandwidthBytes,
     formatNumberInput,
-    formatRetentionPeriodSelectValue,
     formatWriteQuotaSelectValue,
-    fromMbToGb,
     getCreateTopicInitialValues,
     getUpdateTopicInitialValues,
     parseNumberInput,
@@ -90,19 +85,6 @@ const writeQuotaOptions: SelectOption[] = [128, 512, 1024].map((value) => ({
     content: formatBandwidthBytes(value * 1024),
     value: String(value * 1024),
 }));
-
-const retentionPeriodOptions: SelectOption[] = [
-    {content: `1 ${i18n('value_hour')}`, value: String(60 * 60)},
-    {content: `4 ${i18n('value_hours')}`, value: String(4 * 60 * 60)},
-    {content: `12 ${i18n('value_hours')}`, value: String(12 * 60 * 60)},
-    {content: `18 ${i18n('value_hours')}`, value: String(18 * 60 * 60)},
-    {content: `1 ${i18n('value_day')}`, value: String(24 * 60 * 60)},
-];
-
-const STORAGE_LIMIT_MIN_MB = 50 * 1024;
-const STORAGE_LIMIT_MAX_MB = 400 * 1024;
-const STORAGE_LIMIT_STEP_MB = 1024;
-const SWITCHED_TIME_RETENTION_SECONDS = 24 * 60 * 60;
 
 function isEditableAutoPartitioningMode(mode?: string) {
     return mode === AutoPartitioningStrategy.ScaleUp || mode === AutoPartitioningStrategy.Paused;
@@ -224,26 +206,10 @@ function FixedValue({value}: {value?: string | number}) {
     );
 }
 
-function IncompatiblePopover({
-    content,
-    children,
-}: {
-    content: string;
-    children?: React.ReactElement;
-}) {
+function IncompatiblePopover({content, children}: {content: string; children: React.ReactElement}) {
     return (
         <Popover content={content} placement="top" hasArrow className={b('incompatible-popover')}>
-            {children ?? (
-                <Text
-                    as="div"
-                    color="warning"
-                    variant="body-short"
-                    tabIndex={0}
-                    className={b('warning-icon')}
-                >
-                    <Icon data={TriangleExclamationFill} size={16} />
-                </Text>
-            )}
+            {children}
         </Popover>
     );
 }
@@ -341,27 +307,6 @@ function SelectNumberField({
     );
 }
 
-function StorageSizeNote({size = 0, shards = 0}: {size?: number; shards?: number}) {
-    const validSize = Number.isNaN(size) ? 0 : size;
-    const validShards = Number.isNaN(shards) ? 0 : shards;
-    const key =
-        validShards === 1 ? 'context_data-storage-note-one' : 'context_data-storage-note-many';
-
-    return (
-        <Text color="secondary">
-            {i18n(key, {
-                total: fromMbToGb(validSize * validShards),
-                size: fromMbToGb(validSize),
-                count: validShards,
-            })}
-        </Text>
-    );
-}
-
-function formatStorageLimitMark(value: number) {
-    return `${fromMbToGb(value)} ${i18n('value_gigabyte')}`;
-}
-
 function formatAutoPartitioningMode(mode: string) {
     switch (mode) {
         case AutoPartitioningStrategy.ScaleUp:
@@ -413,7 +358,6 @@ function TopicForm({
 
     const autoPartitioningEnabled = watch('autoPartitioning.enabled');
     const autoPartitioningMode = watch('autoPartitioning.mode');
-    const retentionType = watch('retentionType');
     const shards = watch('shards');
     const writeQuotaBytes = watch('writeQuotaBytes');
     const minPartitions = watch('autoPartitioning.minPartitions');
@@ -429,29 +373,15 @@ function TopicForm({
         trigger(['autoPartitioning.minPartitions', 'autoPartitioning.maxPartitions']);
     }, [autoPartitioningEnabled, minPartitions, maxPartitions, trigger]);
 
-    const retentionTypeOptions = React.useMemo(
-        () => [
-            {content: i18n('value_data-storage-time-limit'), value: 'time'},
-            {
-                content: i18n('value_data-storage-size-limit'),
-                value: 'size',
-                disabled: autoPartitioningEnabled,
-            },
-        ],
-        [autoPartitioningEnabled],
-    );
-
     const autoPartitioningModeOptions = React.useMemo(() => {
         const options = [
             {
                 content: i18n('value_auto-partitioning-scale-up'),
                 value: AutoPartitioningStrategy.ScaleUp,
-                disabled: retentionType === 'size',
             },
             {
                 content: i18n('value_auto-partitioning-paused'),
                 value: AutoPartitioningStrategy.Paused,
-                disabled: retentionType === 'size',
             },
         ];
 
@@ -463,11 +393,10 @@ function TopicForm({
             {
                 content: formatAutoPartitioningMode(autoPartitioningMode),
                 value: autoPartitioningMode,
-                disabled: retentionType === 'size',
             },
             ...options,
         ];
-    }, [autoPartitioningMode, retentionType]);
+    }, [autoPartitioningMode]);
 
     const throughputInfo = React.useMemo(() => {
         if (autoPartitioningEnabled) {
@@ -483,11 +412,6 @@ function TopicForm({
     }, [autoPartitioningEnabled, maxPartitions, minPartitions, shards, writeQuotaBytes]);
 
     const handleTopicSubmit = handleSubmit(async (data) => {
-        const preserveRawRetentionSettings =
-            mode === 'update' &&
-            !dirtyFields.retentionType &&
-            !dirtyFields.retentionPeriodSeconds &&
-            !dirtyFields.storageLimitMb;
         const preservePartitionCountLimit =
             mode === 'update' &&
             !data.autoPartitioning.enabled &&
@@ -497,7 +421,6 @@ function TopicForm({
         const preparedData = {
             ...data,
             partitionCountLimit: initialValues.partitionCountLimit,
-            ...(preserveRawRetentionSettings ? {preserveRawRetentionSettings} : {}),
             ...(preservePartitionCountLimit ? {preservePartitionCountLimit} : {}),
         };
 
@@ -529,7 +452,6 @@ function TopicForm({
 
     const autoPartitioningCannotBeDisabled =
         mode === 'update' && initialValues.autoPartitioning.enabled;
-    const autoPartitioningRestricted = retentionType === 'size';
     const autoPartitioningDisabledReason = autoPartitioningCannotBeDisabled
         ? i18n('context_auto-partitioning-mode-disabled')
         : undefined;
@@ -537,25 +459,6 @@ function TopicForm({
         mode === 'create'
             ? transformPath(parentPath ?? databaseFullPath, databaseFullPath)
             : undefined;
-
-    const handleRetentionTypeUpdate = React.useCallback(
-        (nextRetentionType: TopicFormValues['retentionType']) => {
-            setValue('retentionType', nextRetentionType, {
-                shouldDirty: true,
-                shouldTouch: true,
-            });
-
-            if (nextRetentionType === 'time' && retentionType === 'size') {
-                setValue('retentionPeriodSeconds', SWITCHED_TIME_RETENTION_SECONDS, {
-                    shouldDirty: true,
-                    shouldTouch: true,
-                });
-            }
-
-            trigger(nextRetentionType === 'time' ? 'retentionPeriodSeconds' : 'storageLimitMb');
-        },
-        [retentionType, setValue, trigger],
-    );
 
     return (
         <form onSubmit={handleTopicSubmit} className={b('form')}>
@@ -634,9 +537,7 @@ function TopicForm({
                                         <Switch
                                             checked={field.value}
                                             disabled={
-                                                isSubmitting ||
-                                                autoPartitioningRestricted ||
-                                                autoPartitioningCannotBeDisabled
+                                                isSubmitting || autoPartitioningCannotBeDisabled
                                             }
                                             onUpdate={async (enabled) => {
                                                 if (
@@ -688,11 +589,6 @@ function TopicForm({
                                     );
                                 }}
                             />
-                            {autoPartitioningRestricted ? (
-                                <IncompatiblePopover
-                                    content={i18n('context_auto-partitioning-mode-restricted')}
-                                />
-                            ) : null}
                         </Flex>
                     </FormRow>
                     {autoPartitioningEnabled ? (
@@ -776,7 +672,6 @@ function TopicForm({
                                                                 <SegmentedRadioGroup.Option
                                                                     key={option.value}
                                                                     value={option.value}
-                                                                    disabled={option.disabled}
                                                                 >
                                                                     {option.content}
                                                                 </SegmentedRadioGroup.Option>
@@ -886,108 +781,6 @@ function TopicForm({
                             </div>
                         </FormRow>
                     )}
-                    <Divider className={b('divider')} />
-                    <FormRow
-                        title={i18n('field_data-storage-options')}
-                        note={i18n('context_data-storage-options')}
-                    >
-                        <div className={b('control-stack')}>
-                            <Flex gap={3} alignItems="center">
-                                <Controller
-                                    name="retentionType"
-                                    control={control}
-                                    render={({field}) => (
-                                        <SegmentedRadioGroup
-                                            value={field.value}
-                                            onUpdate={handleRetentionTypeUpdate}
-                                            disabled={isSubmitting}
-                                        >
-                                            {retentionTypeOptions.map((option) => (
-                                                <SegmentedRadioGroup.Option
-                                                    key={option.value}
-                                                    value={option.value}
-                                                    disabled={option.disabled}
-                                                >
-                                                    {option.content}
-                                                </SegmentedRadioGroup.Option>
-                                            ))}
-                                        </SegmentedRadioGroup>
-                                    )}
-                                />
-                                {autoPartitioningEnabled ? (
-                                    <IncompatiblePopover
-                                        content={i18n('context_data-storage-options-restricted')}
-                                    />
-                                ) : null}
-                            </Flex>
-                            {retentionType === 'size' ? (
-                                <Controller
-                                    key="storage-limit"
-                                    name="storageLimitMb"
-                                    control={control}
-                                    render={({field}) => {
-                                        const value =
-                                            typeof field.value === 'number' &&
-                                            !Number.isNaN(field.value)
-                                                ? field.value
-                                                : undefined;
-
-                                        return (
-                                            <div className={b('storage-control')}>
-                                                <RangeInputPicker
-                                                    value={value}
-                                                    min={STORAGE_LIMIT_MIN_MB}
-                                                    max={STORAGE_LIMIT_MAX_MB}
-                                                    step={STORAGE_LIMIT_STEP_MB}
-                                                    marks={[
-                                                        STORAGE_LIMIT_MIN_MB,
-                                                        STORAGE_LIMIT_MAX_MB,
-                                                    ]}
-                                                    markFormat={formatStorageLimitMark}
-                                                    onUpdate={field.onChange}
-                                                    acceptInputValue={acceptNumber}
-                                                    parseInputValue={(nextValue) => {
-                                                        const parsed = parseNumberInput(nextValue);
-                                                        return Number.isNaN(parsed)
-                                                            ? Number.NaN
-                                                            : parsed * 1024;
-                                                    }}
-                                                    formatInputValue={(nextValue) =>
-                                                        String(fromMbToGb(nextValue))
-                                                    }
-                                                    disabled={isSubmitting}
-                                                    endContent={
-                                                        <span className={b('input-details')}>
-                                                            {i18n('value_gigabyte')}
-                                                        </span>
-                                                    }
-                                                />
-                                                <StorageSizeNote
-                                                    size={value ?? 0}
-                                                    shards={shards}
-                                                />
-                                            </div>
-                                        );
-                                    }}
-                                />
-                            ) : (
-                                <Controller
-                                    key="retention-period"
-                                    name="retentionPeriodSeconds"
-                                    control={control}
-                                    render={({field}) => (
-                                        <SelectNumberField
-                                            value={field.value}
-                                            onChange={field.onChange}
-                                            options={retentionPeriodOptions}
-                                            errorMessage={errors.retentionPeriodSeconds?.message}
-                                            formatSelectedValue={formatRetentionPeriodSelectValue}
-                                        />
-                                    )}
-                                />
-                            )}
-                        </div>
-                    </FormRow>
                 </FormSection>
             </Dialog.Body>
             <Dialog.Footer

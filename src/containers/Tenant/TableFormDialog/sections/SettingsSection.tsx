@@ -12,10 +12,10 @@ import {
 } from '@gravity-ui/uikit';
 import {Controller, useFormContext, useWatch} from 'react-hook-form';
 
-import {RangeInputPicker} from '../../../../components/RangeInputPicker';
 import type {ColumnValueField} from '../../../../store/reducers/table/types';
 import {prepareColumnValue} from '../../../../store/reducers/table/utils';
 import {cn} from '../../../../utils/cn';
+import {RangeInputPicker} from '../components/RangeInputPicker';
 import {FormFieldError, FormRow, FormSection} from '../components/layout';
 import {MAX_PARTITION_SIZE_MB, MIN_PARTITION_SIZE_MB} from '../constants';
 import i18n from '../i18n';

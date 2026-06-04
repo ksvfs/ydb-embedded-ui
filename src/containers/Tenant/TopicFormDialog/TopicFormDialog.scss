@@ -117,20 +117,6 @@
         padding: var(--g-spacing-3);
     }
 
-    &__storage-control {
-        display: flex;
-        flex-direction: column;
-        gap: var(--g-spacing-1);
-
-        width: 100%;
-        max-width: 320px;
-    }
-
-    &__warning-icon {
-        display: inline-flex;
-        align-items: center;
-    }
-
     &__popover-target {
         display: inline-flex;
     }
