@@ -543,14 +543,16 @@ function TopicForm({
                                     }}
                                 />
                             </Flex>
-                            {autoPartitioningEnabled ? (
-                                <Alert
-                                    theme="warning"
-                                    message={i18n('confirm_auto-partitioning-message')}
-                                />
-                            ) : null}
                         </div>
                     </FormRow>
+                    {autoPartitioningEnabled ? (
+                        <div className={b('full-width-alert')}>
+                            <Alert
+                                theme="warning"
+                                message={i18n('confirm_auto-partitioning-message')}
+                            />
+                        </div>
+                    ) : null}
                     {autoPartitioningEnabled ? (
                         <React.Fragment>
                             <FormRow title={i18n('field_shards')} note={i18n('context_shards')}>
