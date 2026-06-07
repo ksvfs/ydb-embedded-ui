@@ -50,7 +50,6 @@
   "field_autopartition-min": "Minimum number of partitions",
   "field_explicit-partitions": "Split points",
   "field_key-bloom-filter": "Bloom filter for primary key",
-  "field_inside": "Inside",
   "field_name": "Name",
   "field_partition-count": "Partition count",
   "field_partition-key": "Partition key",

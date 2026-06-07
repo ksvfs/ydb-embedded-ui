@@ -3,6 +3,7 @@ import React from 'react';
 import * as NiceModal from '@ebay/nice-modal-react';
 import type {SelectOption} from '@gravity-ui/uikit';
 import {
+    Alert,
     Dialog,
     Disclosure,
     Divider,
@@ -19,7 +20,6 @@ import {
 import {zodResolver} from '@hookform/resolvers/zod';
 import {Controller, useForm} from 'react-hook-form';
 
-import {CONFIRMATION_DIALOG} from '../../../components/ConfirmationDialog/ConfirmationDialog';
 import {ResponseError} from '../../../components/Errors/ResponseError';
 import {Loader} from '../../../components/Loader';
 import {useClusterWithProxy} from '../../../store/reducers/cluster/cluster';
@@ -30,7 +30,6 @@ import {cn} from '../../../utils/cn';
 import createToast from '../../../utils/createToast';
 import {prepareCommonErrorMessage} from '../../../utils/errors';
 import {useTypedSelector} from '../../../utils/hooks';
-import {transformPath} from '../ObjectSummary/transformPath';
 
 import i18n from './i18n';
 import {
@@ -74,7 +73,6 @@ interface TopicFormProps {
     mode: TopicFormMode;
     database: string;
     databaseFullPath: string;
-    parentPath?: string;
     initialValues: TopicFormValues;
     onClose: () => void;
     onSuccess?: (path: string) => void;
@@ -88,17 +86,6 @@ const writeQuotaOptions: SelectOption[] = [128, 512, 1024].map((value) => ({
 
 function isEditableAutoPartitioningMode(mode?: string) {
     return mode === AutoPartitioningStrategy.ScaleUp || mode === AutoPartitioningStrategy.Paused;
-}
-
-function showAutoPartitioningConfirmation() {
-    return NiceModal.show(CONFIRMATION_DIALOG, {
-        id: CONFIRMATION_DIALOG,
-        caption: i18n('confirm_auto-partitioning-title'),
-        children: i18n('confirm_auto-partitioning-message'),
-        textButtonApply: i18n('action_enable'),
-        buttonApplyView: 'action',
-        disableOutsideClick: false,
-    }) as Promise<boolean>;
 }
 
 function MarkdownNote({text}: {text: string}) {
@@ -136,16 +123,14 @@ function MarkdownNote({text}: {text: string}) {
     );
 }
 
-function RequiredMark() {
-    return <span className={b('required')}> *</span>;
-}
-
-function FormSection({title, children}: {title: string; children: React.ReactNode}) {
+function FormSection({title, children}: {title?: string; children: React.ReactNode}) {
     return (
         <section className={b('section')}>
-            <Text as="div" variant="subheader-2" className={b('section-title')}>
-                {title}
-            </Text>
+            {title ? (
+                <Text as="div" variant="subheader-2" className={b('section-title')}>
+                    {title}
+                </Text>
+            ) : null}
             {children}
         </section>
     );
@@ -154,32 +139,23 @@ function FormSection({title, children}: {title: string; children: React.ReactNod
 function FormRow({
     title,
     note,
-    required,
     htmlFor,
     children,
 }: {
     title: string;
     note?: string;
-    required?: boolean;
     htmlFor?: string;
     children: React.ReactNode;
 }) {
-    const labelTitle = (
-        <React.Fragment>
-            <span>{title}</span>
-            {required ? <RequiredMark /> : null}
-        </React.Fragment>
-    );
-
     return (
         <div className={b('row')}>
             <div className={b('label')}>
                 {htmlFor ? (
                     <label className={b('label-title')} htmlFor={htmlFor}>
-                        {labelTitle}
+                        {title}
                     </label>
                 ) : (
-                    <span className={b('label-title')}>{labelTitle}</span>
+                    <span className={b('label-title')}>{title}</span>
                 )}
                 {note ? (
                     <HelpMark
@@ -328,7 +304,6 @@ function TopicForm({
     mode,
     database,
     databaseFullPath,
-    parentPath,
     initialValues,
     onClose,
     onSuccess,
@@ -455,25 +430,15 @@ function TopicForm({
     const autoPartitioningDisabledReason = autoPartitioningCannotBeDisabled
         ? i18n('context_auto-partitioning-mode-disabled')
         : undefined;
-    const insidePath =
-        mode === 'create'
-            ? transformPath(parentPath ?? databaseFullPath, databaseFullPath)
-            : undefined;
 
     return (
         <form onSubmit={handleTopicSubmit} className={b('form')}>
             <Dialog.Body className={b('body')}>
-                <FormSection title={i18n('title_general-parameters')}>
-                    {insidePath ? (
-                        <FormRow title={i18n('field_inside')}>
-                            <FixedValue value={`${insidePath}/`} />
-                        </FormRow>
-                    ) : null}
+                <FormSection>
                     {mode === 'create' ? (
                         <FormRow
                             title={i18n('field_name')}
                             note={i18n('context_field-name')}
-                            required
                             htmlFor="topicName"
                         >
                             <Controller
@@ -528,68 +493,63 @@ function TopicForm({
                         title={i18n('field_auto-partitioning')}
                         note={i18n('context_auto-partitioning')}
                     >
-                        <Flex gap={3} alignItems="center" className={b('switch-row')}>
-                            <Controller
-                                name="autoPartitioning.enabled"
-                                control={control}
-                                render={({field}) => {
-                                    const switchControl = (
-                                        <Switch
-                                            checked={field.value}
-                                            disabled={
-                                                isSubmitting || autoPartitioningCannotBeDisabled
-                                            }
-                                            onUpdate={async (enabled) => {
-                                                if (
-                                                    enabled &&
-                                                    autoPartitioningMode !==
-                                                        AutoPartitioningStrategy.Paused &&
-                                                    mode !== 'update'
-                                                ) {
-                                                    const confirmed =
-                                                        await showAutoPartitioningConfirmation();
-                                                    if (!confirmed) {
-                                                        return;
+                        <div className={b('control-stack')}>
+                            <Flex gap={3} alignItems="center" className={b('switch-row')}>
+                                <Controller
+                                    name="autoPartitioning.enabled"
+                                    control={control}
+                                    render={({field}) => {
+                                        const switchControl = (
+                                            <Switch
+                                                checked={field.value}
+                                                disabled={
+                                                    isSubmitting || autoPartitioningCannotBeDisabled
+                                                }
+                                                onUpdate={(enabled) => {
+                                                    if (
+                                                        enabled &&
+                                                        !isEditableAutoPartitioningMode(
+                                                            autoPartitioningMode,
+                                                        )
+                                                    ) {
+                                                        setValue(
+                                                            'autoPartitioning.mode',
+                                                            AutoPartitioningStrategy.ScaleUp,
+                                                            {
+                                                                shouldDirty: true,
+                                                                shouldTouch: true,
+                                                            },
+                                                        );
                                                     }
-                                                }
 
-                                                if (
-                                                    enabled &&
-                                                    !isEditableAutoPartitioningMode(
-                                                        autoPartitioningMode,
-                                                    )
-                                                ) {
-                                                    setValue(
-                                                        'autoPartitioning.mode',
-                                                        AutoPartitioningStrategy.ScaleUp,
-                                                        {
-                                                            shouldDirty: true,
-                                                            shouldTouch: true,
-                                                        },
-                                                    );
-                                                }
+                                                    field.onChange(enabled);
+                                                }}
+                                            />
+                                        );
 
-                                                field.onChange(enabled);
-                                            }}
-                                        />
-                                    );
+                                        if (!autoPartitioningDisabledReason) {
+                                            return switchControl;
+                                        }
 
-                                    if (!autoPartitioningDisabledReason) {
-                                        return switchControl;
-                                    }
-
-                                    return (
-                                        <IncompatiblePopover
-                                            content={autoPartitioningDisabledReason}
-                                        >
-                                            <span className={b('popover-target')} tabIndex={0}>
-                                                {switchControl}
-                                            </span>
-                                        </IncompatiblePopover>
-                                    );
-                                }}
-                            />
-                        </Flex>
+                                        return (
+                                            <IncompatiblePopover
+                                                content={autoPartitioningDisabledReason}
+                                            >
+                                                <span className={b('popover-target')} tabIndex={0}>
+                                                    {switchControl}
+                                                </span>
+                                            </IncompatiblePopover>
+                                        );
+                                    }}
+                                />
+                            </Flex>
+                            {autoPartitioningEnabled ? (
+                                <Alert
+                                    theme="warning"
+                                    message={i18n('confirm_auto-partitioning-message')}
+                                />
+                            ) : null}
+                        </div>
                     </FormRow>
                     {autoPartitioningEnabled ? (
                         <React.Fragment>
@@ -870,7 +830,6 @@ function TopicFormDialog({
                 mode={mode}
                 database={database}
                 databaseFullPath={databaseFullPath}
-                parentPath={parentPath}
                 initialValues={initialValues}
                 onClose={onClose}
                 onSuccess={onSuccess}

@@ -18,7 +18,6 @@ import type {TEvDescribeSchemeResult} from '../../../types/api/schema/schema';
 import {cn} from '../../../utils/cn';
 import createToast from '../../../utils/createToast';
 import {prepareCommonErrorMessage} from '../../../utils/errors';
-import {transformPath} from '../ObjectSummary/transformPath';
 
 import {
     TABLE_FORM_DIALOG,
@@ -225,15 +224,7 @@ function TableForm({
         <FormProvider {...methods}>
             <form onSubmit={handleFormSubmit} className={b('form')}>
                 <Dialog.Body className={b('body')}>
-                    <GeneralSection
-                        mode={mode}
-                        insidePath={
-                            mode === 'create'
-                                ? transformPath(parentPath ?? databaseFullPath, databaseFullPath)
-                                : undefined
-                        }
-                        nameInputRef={nameInputRef}
-                    />
+                    <GeneralSection mode={mode} nameInputRef={nameInputRef} />
                     <YdbColumnsSection
                         mode={mode}
                         types={columnTypes}

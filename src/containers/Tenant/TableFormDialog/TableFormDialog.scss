@@ -56,10 +56,6 @@
         max-width: 300px;
     }
 
-    &__required {
-        color: var(--g-color-text-danger);
-    }
-
     &__field-error {
         color: var(--g-color-text-danger);
     }
@@ -84,8 +80,16 @@
         gap: var(--g-spacing-2);
     }
 
-    &__table-type-info {
-        max-width: 320px;
+    &__type-select-row {
+        display: flex;
+        align-items: center;
+        gap: var(--g-spacing-2);
+    }
+
+    &__type-select-control,
+    &__type-select-control.g-select {
+        width: 320px;
+        max-width: 100%;
     }
 
     &__special-columns {
