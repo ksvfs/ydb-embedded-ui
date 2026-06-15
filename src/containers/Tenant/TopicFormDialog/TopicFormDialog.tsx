@@ -289,8 +289,6 @@ function formatAutoPartitioningMode(mode: string) {
             return i18n('value_auto-partitioning-scale-up');
         case AutoPartitioningStrategy.Paused:
             return i18n('value_auto-partitioning-paused');
-        case AutoPartitioningStrategy.ScaleUpAndDown:
-            return i18n('value_auto-partitioning-scale-up-and-down');
         default:
             return mode
                 .replace(/^AUTO_PARTITIONING_STRATEGY_/, '')

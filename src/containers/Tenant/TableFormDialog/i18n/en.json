@@ -36,10 +36,10 @@
   "button_add-index": "Add index",
   "button_add-split-point": "Add split point",
 
-  "column_default": "Default value",
+  "column_default": "Default",
   "column_index-key": "Key",
   "column_name": "Name",
-  "column_not-null": "NOT NULL constraint",
+  "column_not-null": "NotNull",
   "column_primary-key": "Primary key",
   "column_type": "Type",
 
