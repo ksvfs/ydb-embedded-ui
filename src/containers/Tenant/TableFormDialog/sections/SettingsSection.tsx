@@ -3,10 +3,10 @@ import React from 'react';
 import {Key, Plus, TrashBin} from '@gravity-ui/icons';
 import {
     Button,
-    Checkbox,
     Disclosure,
     Icon,
     SegmentedRadioGroup,
+    Switch,
     Text,
     TextInput,
 } from '@gravity-ui/uikit';
@@ -119,6 +119,24 @@ export function SettingsSection({mode}: SettingsSectionProps) {
             const current = (getValues('settings.partitionsAtKeys') ?? []) as ColumnValueField[][];
             const next = current.map((row, i) => (i === index ? values : row));
             setValue('settings.partitionsAtKeys', next, {shouldValidate: true});
+        },
+        [getValues, setValue],
+    );
+
+    const handleAutoPartitionBySizeUpdate = React.useCallback(
+        (enabled: boolean, onChange: (value: boolean) => void) => {
+            if (enabled) {
+                const currentSize = getValues('settings.autoPartitionBySizeMb');
+
+                if (typeof currentSize !== 'number' || Number.isNaN(currentSize)) {
+                    setValue('settings.autoPartitionBySizeMb', MAX_PARTITION_SIZE_MB, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                    });
+                }
+            }
+
+            onChange(enabled);
         },
         [getValues, setValue],
     );
@@ -240,9 +258,12 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                         name="settings.autoPartitionBySize"
                         render={({field}) => (
                             <div className={b('checkbox-control')}>
-                                <Checkbox checked={Boolean(field.value)} onUpdate={field.onChange}>
-                                    {i18n('label_enable')}
-                                </Checkbox>
+                                <Switch
+                                    checked={Boolean(field.value)}
+                                    onUpdate={(value) => {
+                                        handleAutoPartitionBySizeUpdate(value, field.onChange);
+                                    }}
+                                />
                             </div>
                         )}
                     />
@@ -256,9 +277,7 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                         name="settings.autoPartitionByLoad"
                         render={({field}) => (
                             <div className={b('checkbox-control')}>
-                                <Checkbox checked={Boolean(field.value)} onUpdate={field.onChange}>
-                                    {i18n('label_enable')}
-                                </Checkbox>
+                                <Switch checked={Boolean(field.value)} onUpdate={field.onChange} />
                             </div>
                         )}
                     />
@@ -366,12 +385,10 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                 name="settings.keyBloomFilter"
                                 render={({field}) => (
                                     <div className={b('checkbox-control')}>
-                                        <Checkbox
+                                        <Switch
                                             checked={Boolean(field.value)}
                                             onUpdate={field.onChange}
-                                        >
-                                            {i18n('label_enable')}
-                                        </Checkbox>
+                                        />
                                     </div>
                                 )}
                             />

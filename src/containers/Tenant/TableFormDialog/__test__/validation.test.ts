@@ -31,7 +31,7 @@ describe('TableFormDialog validation', () => {
                 partitionsAtKeys: [],
                 autoPartitionBySize: true,
                 autoPartitionByLoad: false,
-                autoPartitionBySizeMb: 2048,
+                autoPartitionBySizeMb: 2000,
                 keyBloomFilter: false,
                 ttl: {status: 'disabled'},
             },

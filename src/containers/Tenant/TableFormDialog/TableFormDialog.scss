@@ -118,7 +118,7 @@
 
         font-weight: 500;
 
-        color: var(--g-color-text-secondary);
+        color: var(--g-color-text-primary);
     }
 
     &__columns-head-cell {
@@ -379,6 +379,10 @@
         align-items: center;
 
         min-height: 28px;
+    }
+
+    &__columns-type-popup.g-select-popup {
+        max-height: 350px;
     }
 
     &__input-suffix {
