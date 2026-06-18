@@ -113,10 +113,8 @@
     &__columns-head {
         display: grid;
         align-items: center;
-        grid-template-columns:
-            minmax(160px, 1.2fr) minmax(140px, 0.8fr) 105px 145px minmax(160px, 1.2fr)
-            28px;
-        gap: var(--g-spacing-3);
+        grid-template-columns: 180px 180px 100px 100px 170px 28px;
+        gap: var(--g-spacing-4);
 
         font-weight: 500;
 
@@ -133,18 +131,14 @@
 
     &__columns-table_update &__columns-head,
     &__columns-table_update &__columns-row {
-        grid-template-columns:
-            minmax(160px, 1.2fr) minmax(140px, 0.8fr) 145px minmax(160px, 1.2fr)
-            28px;
+        grid-template-columns: 205px 180px 180px 180px 28px;
     }
 
     &__columns-row {
         display: grid;
         align-items: start;
-        grid-template-columns:
-            minmax(160px, 1.2fr) minmax(140px, 0.8fr) 105px 145px minmax(160px, 1.2fr)
-            28px;
-        gap: var(--g-spacing-3);
+        grid-template-columns: 180px 180px 100px 100px 170px 28px;
+        gap: var(--g-spacing-4);
     }
 
     &__columns-row_readonly {
