@@ -1,10 +1,10 @@
 import {z} from 'zod';
 
 import type {TopicFormValues} from '../../../store/reducers/topic/utils';
+import {isValidEntityPath} from '../utils/pathSegmentValidation';
 
 import i18n from './i18n';
 
-const NAME_REGEX = /^[A-Za-z](?:[A-Za-z0-9_-]*[A-Za-z0-9_])?$/;
 const MIN_ONE_MESSAGE = i18n('error_min-number', {count: 1});
 const MAX_HUNDRED_MESSAGE = i18n('error_max-number', {count: 100});
 
@@ -41,17 +41,8 @@ const topicNameSchema = z
     .string({required_error: i18n('error_required'), invalid_type_error: i18n('error_required')})
     .min(1, i18n('error_required'))
     .superRefine((value, ctx) => {
-        const segments = value.split('/');
-        if (segments.some((segment) => !segment)) {
+        if (!isValidEntityPath(value)) {
             addIssue(ctx, [], i18n('error_name-regex'));
-            return;
-        }
-
-        for (const segment of segments) {
-            if (!NAME_REGEX.test(segment)) {
-                addIssue(ctx, [], i18n('error_name-regex'));
-                return;
-            }
         }
     });
 

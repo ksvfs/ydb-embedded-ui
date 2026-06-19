@@ -19,10 +19,13 @@
   "alert_update-success": "Table updated",
   "alert_update-error": "Failed to update table",
 
+  "context_field-name": "Use slash-separated path segments. Each segment may contain Latin letters (A-Z, a-z), numbers (0-9), and special characters: ., -, _. Maximum segment length is 255 characters.",
+
   "error_load-table": "Failed to load table",
   "error_required": "Required field",
   "error_name-pattern": "Can only contain Latin letters, numbers, underscores, dashes, and dots.",
-  "error_name-path-pattern": "Can only contain Latin letters, numbers, underscores, dashes, dots, and slashes between path segments.",
+  "error_name-segment-pattern": "Can only contain Latin letters (A-Z, a-z), numbers (0-9), and special characters: ., -, _. Maximum length is 255 characters.",
+  "error_name-path-pattern": "Use slash-separated path segments. Each segment may contain Latin letters (A-Z, a-z), numbers (0-9), and special characters: ., -, _. Maximum segment length is 255 characters.",
   "error_column-name-pattern": "Only word characters, underscores and dashes are allowed",
   "error_partition-size": "Value must be between 10 and 2000 MB",
   "error_partitions-count": "Value must be between 1 and 35000",

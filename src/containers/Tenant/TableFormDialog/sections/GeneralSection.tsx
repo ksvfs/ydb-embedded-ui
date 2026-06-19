@@ -37,10 +37,11 @@ export function GeneralSection({mode, nameInputRef}: GeneralSectionProps) {
     const nameDisabled = mode === 'update' && type === 'column';
     const typeDisabled = mode === 'update';
     const tableTypeHelpText = mode === 'create' && type ? tableTypeInfo[type] : undefined;
+    const nameHelpText = nameDisabled ? undefined : i18n('context_field-name');
 
     return (
         <FormSection>
-            <FormRow title={i18n('field_name')} htmlFor="table-form-name">
+            <FormRow title={i18n('field_name')} note={nameHelpText} htmlFor="table-form-name">
                 <Controller
                     control={control}
                     name="name"

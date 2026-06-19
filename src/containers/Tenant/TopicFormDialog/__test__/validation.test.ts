@@ -43,9 +43,18 @@ describe('TopicFormDialog validation', () => {
     test('accepts uppercase topic names', () => {
         const schema = getTopicFormValidationSchema(2);
 
-        const result = schema.safeParse(createValidValues({name: 'Folder/Topic'}));
+        const result = schema.safeParse(createValidValues({name: 'Folder.v1/Topic-name_2'}));
 
         expect(result.success).toBe(true);
+    });
+
+    test('rejects topic names with path segments longer than 255 characters', () => {
+        const schema = getTopicFormValidationSchema(2);
+
+        const result = schema.safeParse(createValidValues({name: `${'a'.repeat(256)}/topic`}));
+
+        expect(result.success).toBe(false);
+        expect(getIssuePaths(result)).toContain('name');
     });
 
     test('validates auto-partitioning bounds and required fields', () => {
