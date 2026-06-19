@@ -39,7 +39,7 @@ export function GeneralSection({mode, nameInputRef}: GeneralSectionProps) {
     const tableTypeHelpText = mode === 'create' && type ? tableTypeInfo[type] : undefined;
 
     return (
-        <FormSection title={i18n('label_section-general')}>
+        <FormSection>
             <FormRow title={i18n('field_name')} htmlFor="table-form-name">
                 <Controller
                     control={control}

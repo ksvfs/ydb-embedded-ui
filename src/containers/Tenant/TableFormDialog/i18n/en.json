@@ -20,7 +20,7 @@
   "alert_update-error": "Failed to update table",
 
   "error_load-table": "Failed to load table",
-  "error_required": "Empty field",
+  "error_required": "Required field",
   "error_name-pattern": "Can only contain Latin letters, numbers, underscores, dashes, and dots.",
   "error_name-path-pattern": "Can only contain Latin letters, numbers, underscores, dashes, dots, and slashes between path segments.",
   "error_column-name-pattern": "Only word characters, underscores and dashes are allowed",
@@ -45,7 +45,7 @@
 
   "field_autopartition-by-load": "By load",
   "field_autopartition-by-size": "By size",
-  "field_autopartition-by-size-mb": "Auto-partitioning by size in MB",
+  "field_autopartition-by-size-mb": "Autopartitioning by size",
   "field_autopartition-max": "Maximum number of partitions",
   "field_autopartition-min": "Minimum number of partitions",
   "field_explicit-partitions": "Split points",
@@ -58,7 +58,7 @@
   "field_ttl-lifetime": "Lifetime",
   "field_ttl-status": "Status",
   "field_ttl-unit": "Unit",
-  "field_type": "Table type",
+  "field_type": "Type",
   "field_uniform-partitions": "Count",
 
   "label_autoincrement": "Autoincrement",
@@ -75,9 +75,8 @@
   "label_row-table": "Row table",
   "label_section-advanced": "Advanced settings",
   "label_section-autopartition": "Autopartitioning",
-  "label_section-general": "General",
   "label_section-partition-policy": "Partition policy",
-  "label_section-ttl": "TTL Settings",
+  "label_section-ttl": "TTL settings",
   "label_search": "Search",
   "label_select-columns": "Select 1 or more columns",
   "label_selected": "Selected",
@@ -121,7 +120,7 @@
   "tooltip_section-autopartition": "Automatically split shards when the size or load increases and merge them when the size or load decreases",
   "tooltip_section-ttl": "Automatically delete expired rows from a table.",
   "tooltip_ttl-column": "Date, Datetime, Timestamp, Uint32, Uint64 columns are supported.",
-  "tooltip_ttl-lifetime": "The row will be considered as expired at the moment of time, when the value stored in column is less than or equal to the current time, and lifetime has passed.",
+  "tooltip_ttl-lifetime": "The row will be considered expired when the value stored in the column is less than or equal to the current time and the lifetime has passed.",
   "tooltip_ttl-unit": "The numbers in the column are interpreted as values from the Unix epoch with a given unit.",
 
   "value_disabled": "Disabled",

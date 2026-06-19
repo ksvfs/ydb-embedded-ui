@@ -20,15 +20,15 @@
   "context_shards-write-quota": "The maximum allowed write speed per partition. [Read more](https://ydb.tech/docs/en/concepts/datamodel/topic#partitioning) about partition throughput",
   "context_throughput-info": "Total throughput: up to {{speed}} (calculated using the formula: partition throughput * number of partitions)",
   "context_throughput-info-range": "Total throughput: from {{from}} to {{to}} (calculated using the formula: partition throughput * number of partitions)",
-  "context_auto-partitioning": "Dynamic scaling of the topic depending on the write speed. [Documentation](https://ydb.tech/docs/en/concepts/datamodel/topic#partitioning)",
+  "context_auto-partitioning": "Dynamic scaling of the topic depending on the write speed. [Documentation](https://ydb.tech/docs/en/concepts/datamodel/topic#autopartitioning)",
   "context_auto-partitioning-mode-disabled": "Autopartitioning cannot be disabled",
   "context_shards": "Number of [partitions](https://ydb.tech/docs/en/concepts/datamodel/topic#partitioning) in the topic",
   "context_shards-info": "The number of shards cannot be reduced",
-  "context_auto-partitioning-mode": "Autopartitioning mode for the topic. [Read more](https://ydb.tech/docs/en/concepts/datamodel/topic#partitioning) ",
+  "context_auto-partitioning-mode": "Autopartitioning mode for the topic. [Read more](https://ydb.tech/docs/en/concepts/datamodel/topic#autopartitioning_strategies) ",
   "context_auto-partitioning-stabilization-window": "The period of time after a load change when the number of partitions will change",
   "context_auto-partitioning-up-utilization": "The threshold at which the number of partitions increases",
 
-  "confirm_auto-partitioning-message": "The Kafka protocol does not support topic auto-partitioning. If you enable auto-partitioning, you will not be able to work with the topics you create using the Kafka protocol. You can not disabling auto-partitioning for a specific topic.",
+  "confirm_auto-partitioning-message": "The Kafka protocol does not support topic autopartitioning. If you enable autopartitioning, you will not be able to work with the topics you create using the Kafka protocol. You can not disabling autopartitioning for a specific topic.",
 
   "value_auto-partitioning-scale-up": "Scale up",
   "value_auto-partitioning-paused": "Paused",
@@ -44,7 +44,7 @@
 
   "error_load-topic": "Unable to load topic settings",
   "error_topic-path-required": "Topic path is not specified",
-  "error_required": "Empty field",
+  "error_required": "Required field",
   "error_number": "Value must be a number",
   "error_int": "Value must be an integer",
   "error_lowercase": "Value must be lowercase",
