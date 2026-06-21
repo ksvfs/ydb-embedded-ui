@@ -206,12 +206,13 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                             key={`split-${index}`}
                                             className={b('split-point-row')}
                                         >
-                                            <TextInput
-                                                className={b('control')}
-                                                value={display ? `(${display})` : ''}
-                                                placeholder={splitPointPlaceholder}
-                                                controlProps={{readOnly: true}}
-                                            />
+                                            <Text
+                                                as="span"
+                                                color="secondary"
+                                                className={b('split-point-index')}
+                                            >
+                                                {`${index + 1}.`}
+                                            </Text>
                                             <Button
                                                 view="outlined"
                                                 onClick={() => openSplitDialog(index)}
@@ -219,7 +220,12 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                                             >
                                                 <Icon data={Key} size={16} />
                                             </Button>
-                                            <Text color="secondary">{`#${index + 1}`}</Text>
+                                            <TextInput
+                                                className={b('split-point-display')}
+                                                value={display ? `(${display})` : ''}
+                                                placeholder={splitPointPlaceholder}
+                                                controlProps={{readOnly: true}}
+                                            />
                                             {splitPoints.length > 1 ? (
                                                 <Button
                                                     view="flat"

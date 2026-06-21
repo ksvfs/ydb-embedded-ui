@@ -83,6 +83,8 @@
   "label_search": "Search",
   "label_select-columns": "Select 1 or more columns",
   "label_selected": "Selected",
+  "label_selected-count": "Selected: {{count}}",
+  "label_non-null": "NonNull",
   "label_ttl-remove-column-text": "Your table will stop clearing.",
   "label_ttl-remove-column-warning": "This is a TTL-column. Do you really want to delete it?",
   "label_ttl-warning": "You don't have columns with the right type",

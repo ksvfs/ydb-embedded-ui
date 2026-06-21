@@ -13,6 +13,9 @@
 
     &__section + &__section {
         margin-top: var(--g-spacing-6);
+        padding-top: var(--g-spacing-6);
+
+        border-top: 1px solid var(--g-color-line-generic);
     }
 
     &__section-title {
@@ -276,6 +279,21 @@
         gap: var(--g-spacing-2);
     }
 
+    &__split-point-index {
+        flex: 0 0 auto;
+
+        min-width: 20px;
+    }
+
+    &__split-point-display,
+    &__split-point-display.g-text-input {
+        flex: 1 1 auto;
+
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
+
     &__split-point-body {
         display: flex;
         flex-direction: column;
@@ -308,12 +326,17 @@
     }
 
     &__split-point-control {
-        display: flex;
-        flex-direction: column;
-        gap: var(--g-spacing-2);
+        display: grid;
+        align-items: start;
+        grid-template-columns: minmax(0, 1fr);
 
         width: 100%;
         min-width: 0;
+
+        &_with-toggle {
+            grid-template-columns: auto minmax(0, 1fr);
+            gap: var(--g-spacing-3);
+        }
     }
 
     &__split-point-toggle {
@@ -321,6 +344,14 @@
         align-items: center;
 
         min-height: 28px;
+    }
+
+    &__split-point-value {
+        min-width: 0;
+
+        &_full-width {
+            grid-column: 1 / -1;
+        }
     }
 
     &__split-point-input,
@@ -342,6 +373,7 @@
 
     &__split-point-type {
         font-weight: 400;
+        cursor: help;
 
         color: var(--g-color-text-secondary);
     }

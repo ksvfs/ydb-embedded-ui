@@ -151,10 +151,6 @@
             text-overflow: ellipsis;
         }
 
-        &-type {
-            color: var(--g-color-text-secondary);
-        }
-
         &-action {
             visibility: hidden;
             flex-shrink: 0;
