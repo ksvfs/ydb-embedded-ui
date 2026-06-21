@@ -30,6 +30,7 @@ import {cn} from '../../../utils/cn';
 import createToast from '../../../utils/createToast';
 import {prepareCommonErrorMessage} from '../../../utils/errors';
 import {useTypedSelector} from '../../../utils/hooks';
+import {useFooterDividerVisibility} from '../utils/useFooterDividerVisibility';
 
 import i18n from './i18n';
 import {
@@ -307,6 +308,8 @@ function TopicForm({
     onSuccess,
     nameInputRef,
 }: TopicFormProps) {
+    const {handleScroll, isFooterDividerVisible, scrollContainerRef, scrollContentRef} =
+        useFooterDividerVisibility();
     const validationSchema = React.useMemo(
         () => getTopicFormValidationSchema(initialValues.shards),
         [initialValues.shards],
@@ -432,317 +435,355 @@ function TopicForm({
     return (
         <form onSubmit={handleTopicSubmit} className={b('form')}>
             <Dialog.Body className={b('body')}>
-                <FormSection>
-                    {mode === 'create' ? (
-                        <FormRow
-                            title={i18n('field_name')}
-                            note={i18n('context_field-name')}
-                            htmlFor="topicName"
-                        >
-                            <Controller
-                                name="name"
-                                control={control}
-                                render={({field}) => (
-                                    <TextInput
-                                        controlRef={nameInputRef}
-                                        id="topicName"
-                                        value={field.value ?? ''}
-                                        onUpdate={field.onChange}
-                                        validationState={errors.name ? 'invalid' : undefined}
-                                        errorMessage={errors.name?.message}
-                                        className={b('control')}
-                                        autoComplete={false}
-                                        autoFocus
-                                        disabled={isSubmitting}
-                                    />
-                                )}
-                            />
-                        </FormRow>
-                    ) : (
-                        <FormRow title={i18n('field_name')}>
-                            <FixedValue value={initialValues.name} />
-                        </FormRow>
-                    )}
-                </FormSection>
-                <FormSection title={i18n('title_topic-parameters')}>
-                    <FormRow
-                        title={i18n('field_shard-write-quota')}
-                        note={i18n('context_shards-write-quota')}
-                    >
-                        <Controller
-                            name="writeQuotaBytes"
-                            control={control}
-                            render={({field}) => (
-                                <div className={b('control-stack')}>
-                                    <SelectNumberField
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                        options={writeQuotaOptions}
-                                        errorMessage={errors.writeQuotaBytes?.message}
-                                        formatSelectedValue={formatWriteQuotaSelectValue}
-                                    />
-                                    <Text color="secondary">{throughputInfo}</Text>
-                                </div>
-                            )}
-                        />
-                    </FormRow>
-                    <Divider className={b('divider')} />
-                    <FormRow
-                        title={i18n('field_auto-partitioning')}
-                        note={i18n('context_auto-partitioning')}
-                    >
-                        <div className={b('control-stack')}>
-                            <Flex gap={3} alignItems="center" className={b('switch-row')}>
-                                <Controller
-                                    name="autoPartitioning.enabled"
-                                    control={control}
-                                    render={({field}) => {
-                                        const switchControl = (
-                                            <Switch
-                                                checked={field.value}
-                                                disabled={
-                                                    isSubmitting || autoPartitioningCannotBeDisabled
+                <div
+                    ref={scrollContainerRef}
+                    className={b('scroll-container')}
+                    onScroll={handleScroll}
+                >
+                    <div ref={scrollContentRef} className={b('scroll-content')}>
+                        <FormSection>
+                            {mode === 'create' ? (
+                                <FormRow
+                                    title={i18n('field_name')}
+                                    note={i18n('context_field-name')}
+                                    htmlFor="topicName"
+                                >
+                                    <Controller
+                                        name="name"
+                                        control={control}
+                                        render={({field}) => (
+                                            <TextInput
+                                                controlRef={nameInputRef}
+                                                id="topicName"
+                                                value={field.value ?? ''}
+                                                onUpdate={field.onChange}
+                                                validationState={
+                                                    errors.name ? 'invalid' : undefined
                                                 }
-                                                onUpdate={(enabled) => {
-                                                    if (
-                                                        enabled &&
-                                                        !isEditableAutoPartitioningMode(
-                                                            autoPartitioningMode,
-                                                        )
-                                                    ) {
-                                                        setValue(
-                                                            'autoPartitioning.mode',
-                                                            AutoPartitioningStrategy.ScaleUp,
-                                                            {
-                                                                shouldDirty: true,
-                                                                shouldTouch: true,
-                                                            },
-                                                        );
-                                                    }
-
-                                                    field.onChange(enabled);
-                                                }}
+                                                errorMessage={errors.name?.message}
+                                                className={b('control')}
+                                                autoComplete={false}
+                                                autoFocus
+                                                disabled={isSubmitting}
                                             />
-                                        );
-
-                                        if (!autoPartitioningDisabledReason) {
-                                            return switchControl;
-                                        }
-
-                                        return (
-                                            <IncompatiblePopover
-                                                content={autoPartitioningDisabledReason}
-                                            >
-                                                <span className={b('popover-target')} tabIndex={0}>
-                                                    {switchControl}
-                                                </span>
-                                            </IncompatiblePopover>
-                                        );
-                                    }}
+                                        )}
+                                    />
+                                </FormRow>
+                            ) : (
+                                <FormRow title={i18n('field_name')}>
+                                    <FixedValue value={initialValues.name} />
+                                </FormRow>
+                            )}
+                        </FormSection>
+                        <FormSection title={i18n('title_topic-parameters')}>
+                            <FormRow
+                                title={i18n('field_shard-write-quota')}
+                                note={i18n('context_shards-write-quota')}
+                            >
+                                <Controller
+                                    name="writeQuotaBytes"
+                                    control={control}
+                                    render={({field}) => (
+                                        <div className={b('control-stack')}>
+                                            <SelectNumberField
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                                options={writeQuotaOptions}
+                                                errorMessage={errors.writeQuotaBytes?.message}
+                                                formatSelectedValue={formatWriteQuotaSelectValue}
+                                            />
+                                            <Text color="secondary">{throughputInfo}</Text>
+                                        </div>
+                                    )}
                                 />
-                            </Flex>
-                        </div>
-                    </FormRow>
-                    {autoPartitioningEnabled ? (
-                        <div className={b('full-width-alert')}>
-                            <Alert
-                                theme="warning"
-                                message={i18n('confirm_auto-partitioning-message')}
-                            />
-                        </div>
-                    ) : null}
-                    {autoPartitioningEnabled ? (
-                        <React.Fragment>
-                            <FormRow title={i18n('field_shards')} note={i18n('context_shards')}>
+                            </FormRow>
+                            <Divider className={b('divider')} />
+                            <FormRow
+                                title={i18n('field_auto-partitioning')}
+                                note={i18n('context_auto-partitioning')}
+                            >
                                 <div className={b('control-stack')}>
-                                    <div className={b('dual-inputs')}>
+                                    <Flex gap={3} alignItems="center" className={b('switch-row')}>
                                         <Controller
-                                            name="autoPartitioning.minPartitions"
+                                            name="autoPartitioning.enabled"
+                                            control={control}
+                                            render={({field}) => {
+                                                const switchControl = (
+                                                    <Switch
+                                                        checked={field.value}
+                                                        disabled={
+                                                            isSubmitting ||
+                                                            autoPartitioningCannotBeDisabled
+                                                        }
+                                                        onUpdate={(enabled) => {
+                                                            if (
+                                                                enabled &&
+                                                                !isEditableAutoPartitioningMode(
+                                                                    autoPartitioningMode,
+                                                                )
+                                                            ) {
+                                                                setValue(
+                                                                    'autoPartitioning.mode',
+                                                                    AutoPartitioningStrategy.ScaleUp,
+                                                                    {
+                                                                        shouldDirty: true,
+                                                                        shouldTouch: true,
+                                                                    },
+                                                                );
+                                                            }
+
+                                                            field.onChange(enabled);
+                                                        }}
+                                                    />
+                                                );
+
+                                                if (!autoPartitioningDisabledReason) {
+                                                    return switchControl;
+                                                }
+
+                                                return (
+                                                    <IncompatiblePopover
+                                                        content={autoPartitioningDisabledReason}
+                                                    >
+                                                        <span
+                                                            className={b('popover-target')}
+                                                            tabIndex={0}
+                                                        >
+                                                            {switchControl}
+                                                        </span>
+                                                    </IncompatiblePopover>
+                                                );
+                                            }}
+                                        />
+                                    </Flex>
+                                </div>
+                            </FormRow>
+                            {autoPartitioningEnabled ? (
+                                <div className={b('full-width-alert')}>
+                                    <Alert
+                                        theme="warning"
+                                        message={i18n('confirm_auto-partitioning-message')}
+                                    />
+                                </div>
+                            ) : null}
+                            {autoPartitioningEnabled ? (
+                                <React.Fragment>
+                                    <FormRow
+                                        title={i18n('field_shards')}
+                                        note={i18n('context_shards')}
+                                    >
+                                        <div className={b('control-stack')}>
+                                            <div className={b('dual-inputs')}>
+                                                <Controller
+                                                    name="autoPartitioning.minPartitions"
+                                                    control={control}
+                                                    render={({field}) => (
+                                                        <NumericTextInput
+                                                            value={field.value}
+                                                            onChange={(value) => {
+                                                                field.onChange(value);
+                                                                setValue('shards', value || 0);
+                                                            }}
+                                                            invalid={Boolean(minPartitionsError)}
+                                                            className={b('input-s')}
+                                                            disabled={isSubmitting}
+                                                            endContent={
+                                                                <span
+                                                                    className={b('input-details')}
+                                                                >
+                                                                    {i18n('value_min')}
+                                                                </span>
+                                                            }
+                                                        />
+                                                    )}
+                                                />
+                                                <Controller
+                                                    name="autoPartitioning.maxPartitions"
+                                                    control={control}
+                                                    render={({field}) => (
+                                                        <NumericTextInput
+                                                            value={field.value}
+                                                            onChange={field.onChange}
+                                                            invalid={Boolean(maxPartitionsError)}
+                                                            className={b('input-s')}
+                                                            disabled={isSubmitting}
+                                                            endContent={
+                                                                <span
+                                                                    className={b('input-details')}
+                                                                >
+                                                                    {i18n('value_max')}
+                                                                </span>
+                                                            }
+                                                        />
+                                                    )}
+                                                />
+                                            </div>
+                                            {autoPartitioningRangeError ? (
+                                                <Text color="danger" variant="body-1">
+                                                    {autoPartitioningRangeError}
+                                                </Text>
+                                            ) : null}
+                                        </div>
+                                    </FormRow>
+                                    <Disclosure
+                                        className={b('disclosure')}
+                                        arrowPosition="end"
+                                        summary={
+                                            <Text variant="subheader-1">
+                                                {i18n('title_auto-partitioning-settings')}
+                                            </Text>
+                                        }
+                                    >
+                                        <Disclosure.Details>
+                                            <div className={b('settings-content')}>
+                                                <FormRow
+                                                    title={i18n('field_auto-partitioning-mode')}
+                                                    note={i18n('context_auto-partitioning-mode')}
+                                                >
+                                                    <Controller
+                                                        name="autoPartitioning.mode"
+                                                        control={control}
+                                                        render={({field}) => (
+                                                            <SegmentedRadioGroup
+                                                                value={field.value}
+                                                                onUpdate={field.onChange}
+                                                                disabled={isSubmitting}
+                                                            >
+                                                                {autoPartitioningModeOptions.map(
+                                                                    (option) => (
+                                                                        <SegmentedRadioGroup.Option
+                                                                            key={option.value}
+                                                                            value={option.value}
+                                                                        >
+                                                                            {option.content}
+                                                                        </SegmentedRadioGroup.Option>
+                                                                    ),
+                                                                )}
+                                                            </SegmentedRadioGroup>
+                                                        )}
+                                                    />
+                                                </FormRow>
+                                                <FormRow
+                                                    title={i18n(
+                                                        'field_auto-partitioning-stabilization-window',
+                                                    )}
+                                                    note={i18n(
+                                                        'context_auto-partitioning-stabilization-window',
+                                                    )}
+                                                >
+                                                    <Controller
+                                                        name="autoPartitioning.stabilizationWindow"
+                                                        control={control}
+                                                        render={({field}) => (
+                                                            <NumericTextInput
+                                                                value={field.value}
+                                                                onChange={field.onChange}
+                                                                errorMessage={
+                                                                    errors.autoPartitioning
+                                                                        ?.stabilizationWindow
+                                                                        ?.message
+                                                                }
+                                                                className={b('input-s')}
+                                                                disabled={isSubmitting}
+                                                                endContent={
+                                                                    <span
+                                                                        className={b(
+                                                                            'input-details',
+                                                                        )}
+                                                                    >
+                                                                        {i18n('value_seconds')}
+                                                                    </span>
+                                                                }
+                                                            />
+                                                        )}
+                                                    />
+                                                </FormRow>
+                                                <FormRow
+                                                    title={i18n(
+                                                        'field_auto-partitioning-up-utilization',
+                                                    )}
+                                                    note={i18n(
+                                                        'context_auto-partitioning-up-utilization',
+                                                    )}
+                                                >
+                                                    <Controller
+                                                        name="autoPartitioning.upUtilization"
+                                                        control={control}
+                                                        render={({field}) => (
+                                                            <NumericTextInput
+                                                                value={field.value}
+                                                                onChange={field.onChange}
+                                                                errorMessage={
+                                                                    errors.autoPartitioning
+                                                                        ?.upUtilization?.message
+                                                                }
+                                                                className={b('input-s')}
+                                                                disabled={isSubmitting}
+                                                                endContent={
+                                                                    <span
+                                                                        className={b(
+                                                                            'input-details',
+                                                                        )}
+                                                                    >
+                                                                        %
+                                                                    </span>
+                                                                }
+                                                            />
+                                                        )}
+                                                    />
+                                                </FormRow>
+                                            </div>
+                                        </Disclosure.Details>
+                                    </Disclosure>
+                                </React.Fragment>
+                            ) : (
+                                <FormRow
+                                    title={i18n('field_shards')}
+                                    note={i18n('context_shards')}
+                                    htmlFor="shards"
+                                >
+                                    <div className={b('control-stack')}>
+                                        <Controller
+                                            name="shards"
                                             control={control}
                                             render={({field}) => (
                                                 <NumericTextInput
+                                                    id="shards"
                                                     value={field.value}
                                                     onChange={(value) => {
                                                         field.onChange(value);
-                                                        setValue('shards', value || 0);
-                                                    }}
-                                                    invalid={Boolean(minPartitionsError)}
-                                                    className={b('input-s')}
-                                                    disabled={isSubmitting}
-                                                    endContent={
-                                                        <span className={b('input-details')}>
-                                                            {i18n('value_min')}
-                                                        </span>
-                                                    }
-                                                />
-                                            )}
-                                        />
-                                        <Controller
-                                            name="autoPartitioning.maxPartitions"
-                                            control={control}
-                                            render={({field}) => (
-                                                <NumericTextInput
-                                                    value={field.value}
-                                                    onChange={field.onChange}
-                                                    invalid={Boolean(maxPartitionsError)}
-                                                    className={b('input-s')}
-                                                    disabled={isSubmitting}
-                                                    endContent={
-                                                        <span className={b('input-details')}>
-                                                            {i18n('value_max')}
-                                                        </span>
-                                                    }
-                                                />
-                                            )}
-                                        />
-                                    </div>
-                                    {autoPartitioningRangeError ? (
-                                        <Text color="danger" variant="body-1">
-                                            {autoPartitioningRangeError}
-                                        </Text>
-                                    ) : null}
-                                </div>
-                            </FormRow>
-                            <Disclosure
-                                className={b('disclosure')}
-                                arrowPosition="end"
-                                summary={
-                                    <Text variant="subheader-1">
-                                        {i18n('title_auto-partitioning-settings')}
-                                    </Text>
-                                }
-                            >
-                                <Disclosure.Details>
-                                    <div className={b('settings-content')}>
-                                        <FormRow
-                                            title={i18n('field_auto-partitioning-mode')}
-                                            note={i18n('context_auto-partitioning-mode')}
-                                        >
-                                            <Controller
-                                                name="autoPartitioning.mode"
-                                                control={control}
-                                                render={({field}) => (
-                                                    <SegmentedRadioGroup
-                                                        value={field.value}
-                                                        onUpdate={field.onChange}
-                                                        disabled={isSubmitting}
-                                                    >
-                                                        {autoPartitioningModeOptions.map(
-                                                            (option) => (
-                                                                <SegmentedRadioGroup.Option
-                                                                    key={option.value}
-                                                                    value={option.value}
-                                                                >
-                                                                    {option.content}
-                                                                </SegmentedRadioGroup.Option>
-                                                            ),
-                                                        )}
-                                                    </SegmentedRadioGroup>
-                                                )}
-                                            />
-                                        </FormRow>
-                                        <FormRow
-                                            title={i18n(
-                                                'field_auto-partitioning-stabilization-window',
-                                            )}
-                                            note={i18n(
-                                                'context_auto-partitioning-stabilization-window',
-                                            )}
-                                        >
-                                            <Controller
-                                                name="autoPartitioning.stabilizationWindow"
-                                                control={control}
-                                                render={({field}) => (
-                                                    <NumericTextInput
-                                                        value={field.value}
-                                                        onChange={field.onChange}
-                                                        errorMessage={
-                                                            errors.autoPartitioning
-                                                                ?.stabilizationWindow?.message
-                                                        }
-                                                        className={b('input-s')}
-                                                        disabled={isSubmitting}
-                                                        endContent={
-                                                            <span className={b('input-details')}>
-                                                                {i18n('value_seconds')}
-                                                            </span>
-                                                        }
-                                                    />
-                                                )}
-                                            />
-                                        </FormRow>
-                                        <FormRow
-                                            title={i18n('field_auto-partitioning-up-utilization')}
-                                            note={i18n('context_auto-partitioning-up-utilization')}
-                                        >
-                                            <Controller
-                                                name="autoPartitioning.upUtilization"
-                                                control={control}
-                                                render={({field}) => (
-                                                    <NumericTextInput
-                                                        value={field.value}
-                                                        onChange={field.onChange}
-                                                        errorMessage={
-                                                            errors.autoPartitioning?.upUtilization
-                                                                ?.message
-                                                        }
-                                                        className={b('input-s')}
-                                                        disabled={isSubmitting}
-                                                        endContent={
-                                                            <span className={b('input-details')}>
-                                                                %
-                                                            </span>
-                                                        }
-                                                    />
-                                                )}
-                                            />
-                                        </FormRow>
-                                    </div>
-                                </Disclosure.Details>
-                            </Disclosure>
-                        </React.Fragment>
-                    ) : (
-                        <FormRow
-                            title={i18n('field_shards')}
-                            note={i18n('context_shards')}
-                            htmlFor="shards"
-                        >
-                            <div className={b('control-stack')}>
-                                <Controller
-                                    name="shards"
-                                    control={control}
-                                    render={({field}) => (
-                                        <NumericTextInput
-                                            id="shards"
-                                            value={field.value}
-                                            onChange={(value) => {
-                                                field.onChange(value);
-                                                setValue('autoPartitioning.minPartitions', value);
+                                                        setValue(
+                                                            'autoPartitioning.minPartitions',
+                                                            value,
+                                                        );
 
-                                                if (
-                                                    value !== undefined &&
-                                                    maxPartitions !== undefined &&
-                                                    maxPartitions <= value
-                                                ) {
-                                                    setValue(
-                                                        'autoPartitioning.maxPartitions',
-                                                        value + 1,
-                                                    );
-                                                }
-                                                trigger('autoPartitioning.maxPartitions');
-                                            }}
-                                            errorMessage={errors.shards?.message}
-                                            className={b('input-s')}
-                                            disabled={isSubmitting}
+                                                        if (
+                                                            value !== undefined &&
+                                                            maxPartitions !== undefined &&
+                                                            maxPartitions <= value
+                                                        ) {
+                                                            setValue(
+                                                                'autoPartitioning.maxPartitions',
+                                                                value + 1,
+                                                            );
+                                                        }
+                                                        trigger('autoPartitioning.maxPartitions');
+                                                    }}
+                                                    errorMessage={errors.shards?.message}
+                                                    className={b('input-s')}
+                                                    disabled={isSubmitting}
+                                                />
+                                            )}
                                         />
-                                    )}
-                                />
-                                <Text color="secondary">{i18n('context_shards-info')}</Text>
-                            </div>
-                        </FormRow>
-                    )}
-                </FormSection>
+                                        <Text color="secondary">{i18n('context_shards-info')}</Text>
+                                    </div>
+                                </FormRow>
+                            )}
+                        </FormSection>
+                    </div>
+                </div>
             </Dialog.Body>
+            {isFooterDividerVisible ? <Dialog.Divider className={b('footer-divider')} /> : null}
             <Dialog.Footer
                 textButtonApply={mode === 'create' ? i18n('action_create') : i18n('action_update')}
                 textButtonCancel={i18n('action_cancel')}

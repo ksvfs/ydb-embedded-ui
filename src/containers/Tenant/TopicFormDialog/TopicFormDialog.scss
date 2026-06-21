@@ -2,16 +2,43 @@
     --topic-form-control-width: 320px;
     --topic-form-input-gap: var(--g-spacing-4);
 
+    max-height: 90vh;
+
     &__modal {
         overscroll-behavior: none;
     }
 
     &__body {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+
+        min-height: 0;
         padding-top: var(--g-spacing-5);
     }
 
     &__form {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+
         width: 100%;
+        min-height: 0;
+    }
+
+    &__scroll-container {
+        overflow-y: auto;
+        flex: 1 1 auto;
+
+        min-height: 0;
+    }
+
+    &__scroll-content {
+        padding-bottom: var(--g-spacing-2);
+    }
+
+    &__footer-divider {
+        flex-shrink: 0;
     }
 
     &__section + &__section {
@@ -41,6 +68,8 @@
         padding-top: 7px;
 
         font-weight: 500;
+
+        color: var(--g-color-text-secondary);
     }
 
     &__label-title {
