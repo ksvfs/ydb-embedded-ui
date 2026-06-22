@@ -147,7 +147,13 @@ export function SplitPointDialog({state, onClose, onSubmit}: SplitPointDialogPro
     const primaryKeyNames = state.columns.map((column) => column.name).join(', ');
 
     return (
-        <Dialog open={state.open} onClose={onClose} size="m" disableHeightTransition>
+        <Dialog
+            open={state.open}
+            onClose={onClose}
+            size="s"
+            className={b('split-point-dialog')}
+            disableHeightTransition
+        >
             <Dialog.Header caption={i18n('title_split-point')} />
             <Dialog.Body className={b('split-point-body')}>
                 {primaryKeyNames ? (
