@@ -43,7 +43,10 @@ export function YdbColumnsSection({
         remove: removeDeleted,
     } = useFieldArray({control, name: 'deletedColumns', keyName: 'rhfKey'});
 
-    const columnsError = formState.errors.columns?.message;
+    const columnsFieldError = formState.errors.columns as
+        | {message?: string; root?: {message?: string}}
+        | undefined;
+    const columnsError = columnsFieldError?.root?.message ?? columnsFieldError?.message;
 
     const originalColumns = React.useMemo(
         () => originalInfo?.columns ?? [],
