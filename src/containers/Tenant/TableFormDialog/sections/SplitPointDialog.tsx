@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {Checkbox, Dialog, Label, TextArea, TextInput, Tooltip} from '@gravity-ui/uikit';
+import {Checkbox, Dialog, Label, Popover, TextArea, TextInput} from '@gravity-ui/uikit';
 
 import type {ColumnValueField} from '../../../../store/reducers/table/types';
 import {cn} from '../../../../utils/cn';
@@ -173,13 +173,14 @@ export function SplitPointDialog({state, onClose, onSubmit}: SplitPointDialogPro
                         const invalid = Boolean(touched[row.id]) && isRowInvalid(row);
                         const errorMessage = invalid ? i18n('error_value-invalid') : undefined;
                         const typeLabel = typeDescription ? (
-                            <Tooltip
+                            <Popover
                                 content={typeDescription}
-                                placement={['top-start', 'bottom-start']}
-                                openDelay={0}
+                                placement="top"
+                                hasArrow
+                                className={b('split-point-type-popover')}
                             >
                                 <span className={b('split-point-type')}>{type}</span>
-                            </Tooltip>
+                            </Popover>
                         ) : (
                             <span className={b('split-point-type')}>{type}</span>
                         );
@@ -201,13 +202,9 @@ export function SplitPointDialog({state, onClose, onSubmit}: SplitPointDialogPro
                                         ) : null}
                                     </div>
                                 </div>
-                                <div
-                                    className={b('split-point-control', {
-                                        'with-toggle': showDefinedToggle,
-                                    })}
-                                >
-                                    {showDefinedToggle ? (
-                                        <div className={b('split-point-toggle')}>
+                                <div className={b('split-point-control')}>
+                                    <div className={b('split-point-toggle')}>
+                                        {showDefinedToggle ? (
                                             <Checkbox
                                                 checked={row.isDefined}
                                                 title={i18n('action_set-value')}
@@ -215,13 +212,9 @@ export function SplitPointDialog({state, onClose, onSubmit}: SplitPointDialogPro
                                                     handleToggleDefined(row.id, checked)
                                                 }
                                             />
-                                        </div>
-                                    ) : null}
-                                    <div
-                                        className={b('split-point-value', {
-                                            'full-width': !showDefinedToggle,
-                                        })}
-                                    >
+                                        ) : null}
+                                    </div>
+                                    <div className={b('split-point-value')}>
                                         <SplitPointValueControl
                                             row={row}
                                             invalid={invalid}

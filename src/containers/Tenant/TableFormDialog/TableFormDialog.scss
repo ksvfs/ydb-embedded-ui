@@ -350,10 +350,21 @@
     }
 
     &__split-point-dialog {
+        --split-point-dialog-min-width: 460px;
+        --split-point-dialog-max-width: 720px;
+        --split-point-column-gap: var(--g-spacing-4);
+        --split-point-inner-gap: var(--g-spacing-3);
+        --split-point-input-width: 248px;
+        --split-point-toggle-width: 28px;
+        --split-point-control-width: calc(
+            var(--split-point-toggle-width) + var(--split-point-inner-gap) +
+                var(--split-point-input-width)
+        );
+
         box-sizing: border-box;
         width: fit-content;
-        min-width: min(460px, calc(100vw - var(--g-spacing-8)));
-        max-width: min(720px, calc(100vw - var(--g-spacing-8)));
+        min-width: min(var(--split-point-dialog-min-width), calc(100vw - var(--g-spacing-8)));
+        max-width: min(var(--split-point-dialog-max-width), calc(100vw - var(--g-spacing-8)));
     }
 
     &__split-point-body {
@@ -371,16 +382,30 @@
     }
 
     &__split-point-fields {
-        display: flex;
-        flex-direction: column;
-        gap: var(--g-spacing-3);
+        display: grid;
+        align-items: start;
+        grid-template-columns:
+            minmax(
+                calc(
+                    var(--split-point-dialog-min-width) - var(--split-point-control-width) - var(
+                            --split-point-column-gap
+                        )
+                ),
+                calc(
+                    var(--split-point-dialog-max-width) - var(--split-point-control-width) - var(
+                            --split-point-column-gap
+                        )
+                )
+            )
+            var(--split-point-control-width);
+        gap: var(--g-spacing-3) var(--split-point-column-gap);
+
+        width: fit-content;
+        max-width: 100%;
     }
 
     &__split-point-dialog-row {
-        display: grid;
-        align-items: start;
-        grid-template-columns: fit-content(320px) minmax(260px, 1fr);
-        gap: var(--g-spacing-4);
+        display: contents;
     }
 
     &__split-point-meta {
@@ -391,19 +416,16 @@
     &__split-point-control {
         display: grid;
         align-items: start;
-        grid-template-columns: minmax(0, 1fr);
+        grid-template-columns: var(--split-point-toggle-width) var(--split-point-input-width);
+        gap: var(--split-point-inner-gap);
 
         width: 100%;
         min-width: 0;
-
-        &_with-toggle {
-            grid-template-columns: auto minmax(0, 1fr);
-            gap: var(--g-spacing-3);
-        }
     }
 
     &__split-point-toggle {
         display: flex;
+        justify-content: flex-start;
         align-items: center;
 
         min-height: 28px;
@@ -411,10 +433,6 @@
 
     &__split-point-value {
         min-width: 0;
-
-        &_full-width {
-            grid-column: 1 / -1;
-        }
     }
 
     &__split-point-input,
@@ -442,6 +460,10 @@
         cursor: help;
 
         color: var(--g-color-text-secondary);
+    }
+
+    &__split-point-type-popover {
+        max-width: 300px;
     }
 
     &__not-null-label {
