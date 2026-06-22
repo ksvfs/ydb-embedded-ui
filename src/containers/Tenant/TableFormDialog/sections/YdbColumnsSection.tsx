@@ -343,8 +343,11 @@ function EditableColumnRow({
     onAutoincrementChange,
     onRemove,
 }: EditableColumnRowProps) {
-    const {control, formState} = useFormContext<FormValues>();
+    const {control, formState, trigger} = useFormContext<FormValues>();
     const column = useWatch({control, name: `columns.${index}`});
+    const revalidateColumns = React.useCallback(() => {
+        trigger('columns').catch(() => undefined);
+    }, [trigger]);
 
     const columnErrors = formState.errors.columns?.[index] as
         | {name?: {message?: string}; type?: {message?: string}}
@@ -439,6 +442,7 @@ function EditableColumnRow({
                             onUpdate={([value]) => {
                                 field.onChange(value);
                                 onTypeChange(value);
+                                revalidateColumns();
                             }}
                             validationState={typeError ? 'invalid' : undefined}
                         />
@@ -458,6 +462,7 @@ function EditableColumnRow({
                                 onUpdate={(value) => {
                                     field.onChange(value);
                                     onKeyChange(value);
+                                    revalidateColumns();
                                 }}
                             />
                         )}
@@ -483,7 +488,15 @@ function EditableColumnRow({
             </div>
             <div className={b('columns-cell', {default: true})}>{defaultValueControl}</div>
             <div className={b('columns-cell', {action: true})}>
-                <Button view="flat" size="m" onClick={onRemove} title={i18n('action_delete')}>
+                <Button
+                    view="flat"
+                    size="m"
+                    onClick={() => {
+                        onRemove();
+                        revalidateColumns();
+                    }}
+                    title={i18n('action_delete')}
+                >
                     <Icon data={TrashBin} size={16} />
                 </Button>
             </div>
