@@ -123,6 +123,7 @@ function TableForm({
         control,
         handleSubmit,
         setValue,
+        trigger,
         formState: {dirtyFields},
     } = methods;
     const type: TableType = useWatch({control, name: 'type'});
@@ -144,7 +145,14 @@ function TableForm({
         setValue('partitionKey', nextValues.partitionKey, {shouldValidate: false});
         setValue('partitionCount', nextValues.partitionCount, {shouldValidate: false});
         setValue('settings', nextValues.settings, {shouldValidate: false});
-    }, [mode, type, setValue]);
+        trigger([
+            'columns',
+            'secondaryIndexes',
+            'partitionKey',
+            'partitionCount',
+            'settings',
+        ]).catch(() => undefined);
+    }, [mode, type, setValue, trigger]);
 
     const isSubmitting = createState.isLoading || updateState.isLoading;
 
