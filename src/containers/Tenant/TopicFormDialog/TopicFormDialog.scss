@@ -4,10 +4,6 @@
 
     max-height: 90vh;
 
-    &__modal {
-        overscroll-behavior: none;
-    }
-
     &__body {
         display: flex;
         flex: 1 1 auto;
@@ -29,6 +25,7 @@
 
     &__scroll-container {
         overflow: hidden auto;
+        overscroll-behavior: none;
         flex: 1 1 auto;
 
         min-height: 0;
@@ -36,7 +33,7 @@
         padding-inline: var(--_--side-padding);
 
         background:
-            linear-gradient(var(--g-color-base-modal), var(--g-color-base-modal)) bottom / 100% 2px
+            linear-gradient(var(--g-color-base-modal), var(--g-color-base-modal)) bottom / 100% 5px
                 no-repeat local,
             linear-gradient(var(--g-color-line-generic), var(--g-color-line-generic)) bottom / 100%
                 1px no-repeat scroll;
