@@ -172,6 +172,7 @@ export function SplitPointDialog({state, onClose, onSubmit}: SplitPointDialogPro
                         const showDefinedToggle = !isColumnValueMustBeDefined(row.column);
                         const invalid = Boolean(touched[row.id]) && isRowInvalid(row);
                         const errorMessage = invalid ? i18n('error_value-invalid') : undefined;
+                        const typeText = `(${type})`;
                         const typeLabel = typeDescription ? (
                             <Popover
                                 content={typeDescription}
@@ -179,10 +180,10 @@ export function SplitPointDialog({state, onClose, onSubmit}: SplitPointDialogPro
                                 hasArrow
                                 className={b('split-point-type-popover')}
                             >
-                                <span className={b('split-point-type')}>{type}</span>
+                                <span className={b('split-point-type')}>{typeText}</span>
                             </Popover>
                         ) : (
-                            <span className={b('split-point-type')}>{type}</span>
+                            <span className={b('split-point-type')}>{typeText}</span>
                         );
 
                         return (
