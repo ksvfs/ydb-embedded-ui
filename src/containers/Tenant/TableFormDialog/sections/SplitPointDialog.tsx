@@ -204,8 +204,8 @@ export function SplitPointDialog({state, onClose, onSubmit}: SplitPointDialogPro
                                     </div>
                                 </div>
                                 <div className={b('split-point-control')}>
-                                    <div className={b('split-point-toggle')}>
-                                        {showDefinedToggle ? (
+                                    {showDefinedToggle ? (
+                                        <div className={b('split-point-toggle')}>
                                             <Checkbox
                                                 checked={row.isDefined}
                                                 title={i18n('action_set-value')}
@@ -213,8 +213,8 @@ export function SplitPointDialog({state, onClose, onSubmit}: SplitPointDialogPro
                                                     handleToggleDefined(row.id, checked)
                                                 }
                                             />
-                                        ) : null}
-                                    </div>
+                                        </div>
+                                    ) : null}
                                     <div className={b('split-point-value')}>
                                         <SplitPointValueControl
                                             row={row}

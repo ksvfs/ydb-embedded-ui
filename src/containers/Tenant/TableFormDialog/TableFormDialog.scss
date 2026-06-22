@@ -354,12 +354,7 @@
         --split-point-dialog-max-width: 720px;
         --split-point-column-gap: var(--g-spacing-4);
         --split-point-inner-gap: var(--g-spacing-3);
-        --split-point-input-width: 248px;
-        --split-point-toggle-width: 28px;
-        --split-point-control-width: calc(
-            var(--split-point-toggle-width) + var(--split-point-inner-gap) +
-                var(--split-point-input-width)
-        );
+        --split-point-input-min-width: 248px;
 
         box-sizing: border-box;
         width: fit-content;
@@ -387,15 +382,16 @@
         grid-template-columns:
             fit-content(
                 calc(
-                    var(--split-point-dialog-max-width) - var(--split-point-control-width) - var(
+                    var(--split-point-dialog-max-width) - var(--split-point-input-min-width) - var(
                             --split-point-column-gap
                         )
                 )
             )
-            var(--split-point-control-width);
+            minmax(var(--split-point-input-min-width), 1fr);
         gap: var(--g-spacing-3) var(--split-point-column-gap);
 
-        width: fit-content;
+        width: 100%;
+        min-width: 0;
         max-width: 100%;
     }
 
@@ -409,9 +405,8 @@
     }
 
     &__split-point-control {
-        display: grid;
-        align-items: start;
-        grid-template-columns: var(--split-point-toggle-width) var(--split-point-input-width);
+        display: flex;
+        align-items: flex-start;
         gap: var(--split-point-inner-gap);
 
         width: 100%;
@@ -420,6 +415,7 @@
 
     &__split-point-toggle {
         display: flex;
+        flex: 0 0 auto;
         justify-content: flex-start;
         align-items: center;
 
@@ -427,6 +423,8 @@
     }
 
     &__split-point-value {
+        flex: 1 1 auto;
+
         min-width: 0;
     }
 
@@ -463,6 +461,8 @@
     }
 
     &__not-null-label {
+        margin-inline-start: var(--g-spacing-1);
+
         cursor: default;
         user-select: none;
     }
