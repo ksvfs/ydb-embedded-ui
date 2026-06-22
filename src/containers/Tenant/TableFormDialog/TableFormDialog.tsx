@@ -41,22 +41,25 @@ import './TableFormDialog.scss';
 
 const b = cn('ydb-table-form-dialog');
 
+type DialogSuccessHandler = (path: string) => void;
+
 interface CommonDialogProps {
     mode: FormMode;
     database: string;
     databaseFullPath: string;
     parentPath?: string;
     path?: string;
-    onSuccess?: (path: string) => void;
+    onSuccess?: DialogSuccessHandler;
 }
 
 interface TableFormDialogNiceModalProps extends CommonDialogProps {
     onClose?: () => void;
 }
 
-interface TableFormDialogInnerProps extends CommonDialogProps {
+interface TableFormDialogInnerProps extends Omit<CommonDialogProps, 'onSuccess'> {
     open: boolean;
     onClose: () => void;
+    onSuccess: DialogSuccessHandler;
 }
 
 interface TableFormProps {
@@ -69,7 +72,7 @@ interface TableFormProps {
     originalInfo?: OriginalTableInfo;
     originalTable?: TEvDescribeSchemeResult;
     onClose: () => void;
-    onSuccess?: (path: string) => void;
+    onSuccess: DialogSuccessHandler;
     nameInputRef?: React.Ref<HTMLInputElement>;
 }
 
@@ -166,11 +169,7 @@ function TableForm({
                     theme: 'success',
                     autoHiding: 5000,
                 });
-                if (onSuccess) {
-                    onSuccess(fullName);
-                } else {
-                    onClose();
-                }
+                onSuccess(fullName);
                 return;
             }
 
@@ -196,11 +195,7 @@ function TableForm({
             });
 
             const {updatedTablePath} = getTablePathInfoForUpdate(originalTable, formValues.name);
-            if (onSuccess) {
-                onSuccess(updatedTablePath);
-            } else {
-                onClose();
-            }
+            onSuccess(updatedTablePath);
         } catch (error) {
             createToast({
                 name: `table-${mode}-error`,
