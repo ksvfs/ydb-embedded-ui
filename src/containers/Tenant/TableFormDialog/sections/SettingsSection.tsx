@@ -4,6 +4,7 @@ import {Key, Plus, TrashBin} from '@gravity-ui/icons';
 import {
     Button,
     Disclosure,
+    HelpMark,
     Icon,
     SegmentedRadioGroup,
     Switch,
@@ -192,61 +193,80 @@ export function SettingsSection({mode}: SettingsSectionProps) {
                         </FormRow>
                     ) : null}
                     {partitionsType === PartitionsType.Explicit ? (
-                        <FormRow
-                            title={i18n('field_explicit-partitions')}
-                            note={i18n('tooltip_explicit-partitions')}
-                        >
-                            <div className={b('split-points')}>
-                                {splitPoints.map((row, index) => {
-                                    const display = row
-                                        .map((column) => prepareColumnValue(column, column.value))
-                                        .join(', ');
-                                    return (
-                                        <div
-                                            key={`split-${index}`}
-                                            className={b('split-point-row')}
-                                        >
-                                            <Text
-                                                as="span"
-                                                color="secondary"
-                                                className={b('split-point-index')}
+                        <div className={b('split-points-field')}>
+                            <div className={b('split-points-header')}>
+                                <Text
+                                    as="span"
+                                    variant="body-1"
+                                    className={b('split-points-title')}
+                                >
+                                    {i18n('field_explicit-partitions')}
+                                </Text>
+                                <HelpMark
+                                    className={b('help-mark')}
+                                    popoverProps={{
+                                        placement: ['bottom', 'right'],
+                                        className: b('help-mark-popup'),
+                                    }}
+                                >
+                                    {i18n('tooltip_explicit-partitions')}
+                                </HelpMark>
+                            </div>
+                            <div className={b('split-points-content')}>
+                                <div className={b('split-points')}>
+                                    {splitPoints.map((row, index) => {
+                                        const display = row
+                                            .map((column) =>
+                                                prepareColumnValue(column, column.value),
+                                            )
+                                            .join(', ');
+                                        return (
+                                            <div
+                                                key={`split-${index}`}
+                                                className={b('split-point-row')}
                                             >
-                                                {`${index + 1}.`}
-                                            </Text>
-                                            <Button
-                                                view="outlined"
-                                                onClick={() => openSplitDialog(index)}
-                                                title={i18n('title_split-point')}
-                                            >
-                                                <Icon data={Key} size={16} />
-                                            </Button>
-                                            <TextInput
-                                                className={b('split-point-display')}
-                                                value={display ? `(${display})` : ''}
-                                                placeholder={splitPointPlaceholder}
-                                                controlProps={{readOnly: true}}
-                                            />
-                                            {splitPoints.length > 1 ? (
-                                                <Button
-                                                    view="flat"
-                                                    onClick={() => removeSplit(index)}
-                                                    title={i18n('action_delete')}
+                                                <Text
+                                                    as="span"
+                                                    color="secondary"
+                                                    className={b('split-point-index')}
                                                 >
-                                                    <Icon data={TrashBin} size={16} />
+                                                    {`${index + 1}.`}
+                                                </Text>
+                                                <Button
+                                                    view="outlined"
+                                                    onClick={() => openSplitDialog(index)}
+                                                    title={i18n('title_split-point')}
+                                                >
+                                                    <Icon data={Key} size={16} />
                                                 </Button>
-                                            ) : null}
-                                        </div>
-                                    );
-                                })}
-                                <FormFieldError message={partitionsAtKeysError} />
-                                <div>
-                                    <Button onClick={appendSplit}>
-                                        <Icon data={Plus} size={16} />
-                                        {i18n('button_add-split-point')}
-                                    </Button>
+                                                <TextInput
+                                                    className={b('split-point-display')}
+                                                    value={display ? `(${display})` : ''}
+                                                    placeholder={splitPointPlaceholder}
+                                                    controlProps={{readOnly: true}}
+                                                />
+                                                {splitPoints.length > 1 ? (
+                                                    <Button
+                                                        view="flat"
+                                                        onClick={() => removeSplit(index)}
+                                                        title={i18n('action_delete')}
+                                                    >
+                                                        <Icon data={TrashBin} size={16} />
+                                                    </Button>
+                                                ) : null}
+                                            </div>
+                                        );
+                                    })}
+                                    <FormFieldError message={partitionsAtKeysError} />
+                                    <div>
+                                        <Button onClick={appendSplit}>
+                                            <Icon data={Plus} size={16} />
+                                            {i18n('button_add-split-point')}
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
-                        </FormRow>
+                        </div>
                     ) : null}
                 </FormSection>
             ) : null}
