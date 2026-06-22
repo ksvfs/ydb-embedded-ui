@@ -30,7 +30,6 @@ import {cn} from '../../../utils/cn';
 import createToast from '../../../utils/createToast';
 import {prepareCommonErrorMessage} from '../../../utils/errors';
 import {useTypedSelector} from '../../../utils/hooks';
-import {useFooterDividerVisibility} from '../utils/useFooterDividerVisibility';
 
 import i18n from './i18n';
 import {
@@ -308,8 +307,6 @@ function TopicForm({
     onSuccess,
     nameInputRef,
 }: TopicFormProps) {
-    const {handleScroll, isFooterDividerVisible, scrollContainerRef, scrollContentRef} =
-        useFooterDividerVisibility();
     const validationSchema = React.useMemo(
         () => getTopicFormValidationSchema(initialValues.shards),
         [initialValues.shards],
@@ -435,12 +432,8 @@ function TopicForm({
     return (
         <form onSubmit={handleTopicSubmit} className={b('form')}>
             <Dialog.Body className={b('body')}>
-                <div
-                    ref={scrollContainerRef}
-                    className={b('scroll-container')}
-                    onScroll={handleScroll}
-                >
-                    <div ref={scrollContentRef} className={b('scroll-content')}>
+                <div className={b('scroll-container')}>
+                    <div className={b('scroll-content')}>
                         <FormSection>
                             {mode === 'create' ? (
                                 <FormRow
@@ -783,7 +776,6 @@ function TopicForm({
                     </div>
                 </div>
             </Dialog.Body>
-            {isFooterDividerVisible ? <Dialog.Divider className={b('footer-divider')} /> : null}
             <Dialog.Footer
                 textButtonApply={mode === 'create' ? i18n('action_create') : i18n('action_update')}
                 textButtonCancel={i18n('action_cancel')}

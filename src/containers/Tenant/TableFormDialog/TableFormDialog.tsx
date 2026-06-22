@@ -18,7 +18,6 @@ import type {TEvDescribeSchemeResult} from '../../../types/api/schema/schema';
 import {cn} from '../../../utils/cn';
 import createToast from '../../../utils/createToast';
 import {prepareCommonErrorMessage} from '../../../utils/errors';
-import {useFooterDividerVisibility} from '../utils/useFooterDividerVisibility';
 
 import {
     TABLE_FORM_DIALOG,
@@ -105,8 +104,6 @@ function TableForm({
 }: TableFormProps) {
     const [createTable, createState] = tableApi.useCreateTableMutation();
     const [updateTable, updateState] = tableApi.useUpdateTableMutation();
-    const {handleScroll, isFooterDividerVisible, scrollContainerRef, scrollContentRef} =
-        useFooterDividerVisibility();
 
     const validationSchema = React.useMemo(
         () => buildTableValidationSchema({mode, originalInfo}),
@@ -227,12 +224,8 @@ function TableForm({
         <FormProvider {...methods}>
             <form onSubmit={handleFormSubmit} className={b('form')}>
                 <Dialog.Body className={b('body')}>
-                    <div
-                        ref={scrollContainerRef}
-                        className={b('scroll-container')}
-                        onScroll={handleScroll}
-                    >
-                        <div ref={scrollContentRef} className={b('scroll-content')}>
+                    <div className={b('scroll-container')}>
+                        <div className={b('scroll-content')}>
                             <GeneralSection mode={mode} nameInputRef={nameInputRef} />
                             <YdbColumnsSection
                                 mode={mode}
@@ -249,7 +242,6 @@ function TableForm({
                         </div>
                     </div>
                 </Dialog.Body>
-                {isFooterDividerVisible ? <Dialog.Divider className={b('footer-divider')} /> : null}
                 <Dialog.Footer
                     textButtonApply={
                         mode === 'create' ? i18n('action_create') : i18n('action_update')

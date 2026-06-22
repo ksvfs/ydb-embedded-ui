@@ -12,6 +12,7 @@
 
         min-height: 0;
         padding-top: var(--g-spacing-5);
+        padding-bottom: 0;
     }
 
     &__form {
@@ -28,14 +29,19 @@
         flex: 1 1 auto;
 
         min-height: 0;
+        margin-inline: calc(-1 * var(--_--side-padding));
+        padding-inline: var(--_--side-padding);
+
+        background:
+            linear-gradient(var(--g-color-base-modal), var(--g-color-base-modal)) bottom / 100% 2px
+                no-repeat local,
+            linear-gradient(var(--g-color-line-generic), var(--g-color-line-generic)) bottom / 100%
+                1px no-repeat scroll;
+        background-color: var(--g-color-base-modal);
     }
 
     &__scroll-content {
         padding-bottom: var(--g-spacing-2);
-    }
-
-    &__footer-divider {
-        flex-shrink: 0;
     }
 
     &__section + &__section {
