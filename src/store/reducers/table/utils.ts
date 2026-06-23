@@ -77,6 +77,18 @@ function prepareEntityName(name: string) {
         : `\`${name.replaceAll('\\', '\\\\').replaceAll('`', '\\`')}\``;
 }
 
+function prepareStringLiteralValue(value: string) {
+    const escapedValue = value
+        .replaceAll('\\', '\\\\')
+        // eslint-disable-next-line no-control-regex
+        .replace(/[\u0000-\u001F\u007F]/g, (controlCharacters) => {
+            return '\\u' + controlCharacters.charCodeAt(0).toString(16).padStart(4, '0');
+        })
+        .replace(/"/g, '\\"');
+
+    return `"${escapedValue}"`;
+}
+
 export function prepareColumnValue(column: Column, value: string | null) {
     if (value === null) {
         return 'null';
@@ -90,16 +102,10 @@ export function prepareColumnValue(column: Column, value: string | null) {
         case 'String':
         case 'Utf8':
         case 'Json': {
-            const escapedValue = value
-                .replaceAll('\\', '\\\\')
-                // eslint-disable-next-line no-control-regex
-                .replace(/[\u0000-\u001F\u007F]/g, (controlCharacters) => {
-                    return '\\u' + controlCharacters.charCodeAt(0).toString(16).padStart(4, '0');
-                })
-                .replace(/"/g, '\\"');
-
-            return `"${escapedValue}"`;
+            return prepareStringLiteralValue(value);
         }
+        case 'JsonDocument':
+            return `JsonDocument(${prepareStringLiteralValue(value)})`;
         case 'Date':
         case 'Date32':
         case 'Datetime':
