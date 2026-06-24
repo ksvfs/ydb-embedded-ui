@@ -13,6 +13,7 @@ import {tableApi} from '../../../store/reducers/table/table';
 import {
     getTablePathInfoForUpdate,
     getUpdateTableSettings,
+    hasUpdateTableSettings,
 } from '../../../store/reducers/table/utils';
 import type {TEvDescribeSchemeResult} from '../../../types/api/schema/schema';
 import {cn} from '../../../utils/cn';
@@ -76,6 +77,48 @@ interface TableFormProps {
     nameInputRef?: React.Ref<HTMLInputElement>;
 }
 
+function hasRenameConflict({
+    mode,
+    type,
+    originalName,
+    originalTable,
+    name,
+    addedColumnsCount,
+    deletedColumnsCount,
+    updateSettings,
+}: {
+    mode: FormMode;
+    type: TableType;
+    originalName?: string;
+    originalTable?: TEvDescribeSchemeResult;
+    name: string;
+    addedColumnsCount: number;
+    deletedColumnsCount: number;
+    updateSettings: ReturnType<typeof getUpdateTableSettings>;
+}) {
+    if (
+        mode !== 'update' ||
+        type !== 'row' ||
+        !originalTable ||
+        !originalName ||
+        name === originalName
+    ) {
+        return false;
+    }
+
+    const originalHadTtl = Boolean(
+        originalTable.PathDescription?.Table?.TTLSettings?.Enabled ??
+            originalTable.PathDescription?.ColumnTableDescription?.TtlSettings?.Enabled,
+    );
+
+    return (
+        deletedColumnsCount > 0 ||
+        addedColumnsCount > 0 ||
+        hasUpdateTableSettings(updateSettings) ||
+        (updateSettings?.ttl?.status === 'disabled' && originalHadTtl)
+    );
+}
+
 function buildTablePath(parentPath: string, name: string) {
     const trimmedParentPath = parentPath.replace(/\/+$/, '');
     const trimmedName = name.replace(/^\/+|\/+$/g, '');
@@ -109,8 +152,8 @@ function TableForm({
     const [updateTable, updateState] = tableApi.useUpdateTableMutation();
 
     const validationSchema = React.useMemo(
-        () => buildTableValidationSchema({mode, originalInfo, initialValues}),
-        [mode, originalInfo, initialValues],
+        () => buildTableValidationSchema({mode, originalInfo}),
+        [mode, originalInfo],
     );
 
     const methods = useForm<FormValues>({
@@ -122,11 +165,17 @@ function TableForm({
     const {
         control,
         handleSubmit,
+        clearErrors,
         setValue,
+        setError,
         trigger,
-        formState: {dirtyFields},
+        formState: {dirtyFields, errors},
     } = methods;
+    const name = useWatch({control, name: 'name'});
     const type: TableType = useWatch({control, name: 'type'});
+    const columns = useWatch({control, name: 'columns'});
+    const deletedColumns = useWatch({control, name: 'deletedColumns'});
+    const settings = useWatch({control, name: 'settings'});
 
     const previousTypeRef = React.useRef<TableType>(initialValues.type);
     React.useEffect(() => {
@@ -155,6 +204,29 @@ function TableForm({
     }, [mode, type, setValue, trigger]);
 
     const isSubmitting = createState.isLoading || updateState.isLoading;
+    const renameConflictMessage = i18n('error_rename-with-other-changes');
+    const updateSettings = getUpdateTableSettings(settings, dirtyFields.settings);
+    const hasNameConflict = hasRenameConflict({
+        mode,
+        type,
+        originalName: originalInfo?.name,
+        originalTable,
+        name,
+        addedColumnsCount: columns.length,
+        deletedColumnsCount: deletedColumns.length,
+        updateSettings,
+    });
+
+    React.useEffect(() => {
+        if (hasNameConflict) {
+            setError('name', {type: 'manual', message: renameConflictMessage});
+            return;
+        }
+
+        if (errors.name?.message === renameConflictMessage) {
+            clearErrors('name');
+        }
+    }, [clearErrors, errors.name?.message, hasNameConflict, renameConflictMessage, setError]);
 
     const handleTtlColumnDeletionRequest = React.useCallback(async (onConfirm: () => void) => {
         const confirmed = await confirmTtlColumnDeletion();
@@ -164,6 +236,11 @@ function TableForm({
     }, []);
 
     const handleFormSubmit = handleSubmit(async (formValues) => {
+        if (hasNameConflict) {
+            setError('name', {type: 'manual', message: renameConflictMessage});
+            return;
+        }
+
         try {
             if (mode === 'create') {
                 const fullName = buildTablePath(parentPath ?? databaseFullPath, formValues.name);
@@ -184,7 +261,7 @@ function TableForm({
             if (!originalTable || !path) {
                 throw new Error('Original table is required for update');
             }
-            const updateSettings = getUpdateTableSettings(
+            const nextUpdateSettings = getUpdateTableSettings(
                 formValues.settings,
                 dirtyFields.settings,
             );
@@ -193,7 +270,7 @@ function TableForm({
                 database,
                 formValues,
                 originalTable,
-                updateSettings,
+                updateSettings: nextUpdateSettings,
             }).unwrap();
             createToast({
                 name: 'table-update-success',

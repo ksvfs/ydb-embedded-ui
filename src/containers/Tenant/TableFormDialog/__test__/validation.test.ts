@@ -49,17 +49,6 @@ describe('TableFormDialog validation', () => {
         return result.error.issues.map(({path}) => path.join('.'));
     }
 
-    function getIssueMessage(
-        result: ReturnType<ReturnType<typeof buildTableValidationSchema>['safeParse']>,
-        path: string,
-    ) {
-        if (result.success) {
-            return undefined;
-        }
-
-        return result.error.issues.find((issue) => issue.path.join('.') === path)?.message;
-    }
-
     test('create mode requires a valid path-like name and at least one column', () => {
         const schema = buildTableValidationSchema({mode: 'create'});
 
@@ -103,42 +92,11 @@ describe('TableFormDialog validation', () => {
     });
 
     test('update mode accepts slash-separated names for row-table moves', () => {
-        const initialValues = createValues({
-            name: 'orders',
-            columns: [],
-            secondaryIndexes: [],
-            deletedColumns: [],
-        });
-        const schema = buildTableValidationSchema({mode: 'update', initialValues});
+        const schema = buildTableValidationSchema({mode: 'update'});
 
-        const result = schema.safeParse({...initialValues, name: 'archive/orders'});
+        const result = schema.safeParse(createValues({name: 'archive/orders'}));
 
         expect(result.success).toBe(true);
-    });
-
-    test('update mode rejects rename combined with other row-table changes', () => {
-        const initialValues = createValues({
-            name: 'orders',
-            columns: [],
-            secondaryIndexes: [],
-            deletedColumns: [],
-        });
-        const schema = buildTableValidationSchema({mode: 'update', initialValues});
-
-        const result = schema.safeParse({
-            ...initialValues,
-            name: 'archive/orders',
-            settings: {
-                ...initialValues.settings,
-                keyBloomFilter: true,
-            },
-        });
-
-        expect(result.success).toBe(false);
-        expect(getIssuePaths(result)).toContain('name');
-        expect(getIssueMessage(result, 'name')).toBe(
-            'Rename cannot be submitted together with other table changes. Apply the rename separately, or undo the other changes.',
-        );
     });
 
     test('rejects table names with path segments longer than 255 characters', () => {
