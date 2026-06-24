@@ -109,8 +109,8 @@ function TableForm({
     const [updateTable, updateState] = tableApi.useUpdateTableMutation();
 
     const validationSchema = React.useMemo(
-        () => buildTableValidationSchema({mode, originalInfo}),
-        [mode, originalInfo],
+        () => buildTableValidationSchema({mode, originalInfo, initialValues}),
+        [mode, originalInfo, initialValues],
     );
 
     const methods = useForm<FormValues>({

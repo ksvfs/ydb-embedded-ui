@@ -1,3 +1,4 @@
+import isEqual from 'lodash/isEqual';
 import {z} from 'zod';
 
 import {isValidEntityPath, isValidEntityPathSegment} from '../utils/pathSegmentValidation';
@@ -39,6 +40,7 @@ const baseSchema = z
 
 interface SchemaContext {
     mode: FormMode;
+    initialValues?: FormValues;
     originalInfo?: OriginalTableInfo;
 }
 
@@ -61,6 +63,22 @@ function validateName(data: FormValues, ctx: z.RefinementCtx, mode: FormMode) {
             ['name'],
             hasPathSegments ? i18n('error_name-path-pattern') : i18n('error_name-segment-pattern'),
         );
+    }
+}
+
+function validateRename(data: FormValues, ctx: z.RefinementCtx, initialValues?: FormValues) {
+    if (!initialValues || data.type !== 'row' || data.name === initialValues.name) {
+        return;
+    }
+
+    const hasOtherChanges =
+        data.columns.length > 0 ||
+        data.deletedColumns.length > 0 ||
+        !isEqual(data.secondaryIndexes, initialValues.secondaryIndexes) ||
+        !isEqual(data.settings, initialValues.settings);
+
+    if (hasOtherChanges) {
+        addIssue(ctx, ['name'], i18n('error_rename-with-other-changes'));
     }
 }
 
@@ -275,12 +293,16 @@ function validateSettings(
 }
 
 export function buildTableValidationSchema({
+    initialValues,
     mode,
     originalInfo,
 }: SchemaContext): z.ZodType<FormValues> {
     return baseSchema.superRefine((raw, ctx) => {
         const data = raw as FormValues;
         validateName(data, ctx, mode);
+        if (mode === 'update') {
+            validateRename(data, ctx, initialValues);
+        }
         validateColumns(data, ctx, mode);
         validatePrimaryKey(data, ctx, mode);
         validateSecondaryIndexes(data, ctx, originalInfo);
