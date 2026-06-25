@@ -1,13 +1,28 @@
 .ydb-schema-create-directory-dialog {
     &__label {
-        display: flex;
-        flex-direction: column;
+        display: block;
 
-        margin-bottom: 8px;
+        margin-bottom: 16px;
+
+        .g-breadcrumbs__link_is-disabled {
+            color: inherit;
+        }
     }
-    &__description {
+
+    &__breadcrumb-content {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    &__breadcrumb-icon {
         color: var(--g-color-text-secondary);
     }
+
+    &__directory-path {
+        font-weight: 600;
+    }
+
     &__input-wrapper {
         min-height: 48px;
     }
