@@ -236,26 +236,21 @@
     }
 
     &__default-row {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--g-spacing-1);
-
-        width: 100%;
-        min-width: 0;
-    }
-
-    &__default-row-controls {
-        display: flex;
-        align-items: center;
-        gap: var(--g-spacing-2);
+        display: grid;
+        align-items: start;
+        grid-template-columns: max-content minmax(0, 1fr);
+        gap: var(--g-spacing-1) var(--g-spacing-2);
 
         width: 100%;
         min-width: 0;
     }
 
     &__default-value-input {
+        display: flex;
         flex: 1 1 auto;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--g-spacing-1);
 
         min-width: 0;
     }
