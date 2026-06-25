@@ -455,34 +455,38 @@ function EditableColumnRow({
         } else {
             defaultValueControl = (
                 <div className={b('default-row')}>
-                    <Controller
-                        control={control}
-                        name={`columns.${index}.withDefaultValue`}
-                        render={({field}) => (
-                            <Checkbox
-                                size="l"
-                                checked={Boolean(field.value)}
-                                onUpdate={field.onChange}
+                    <div className={b('default-row-controls')}>
+                        <Controller
+                            control={control}
+                            name={`columns.${index}.withDefaultValue`}
+                            render={({field}) => (
+                                <Checkbox
+                                    size="l"
+                                    checked={Boolean(field.value)}
+                                    onUpdate={field.onChange}
+                                />
+                            )}
+                        />
+                        <div className={b('default-value-input')}>
+                            <Controller
+                                control={control}
+                                name={`columns.${index}.defaultValue`}
+                                render={({field}) => (
+                                    <TextInput
+                                        value={field.value === undefined ? '' : String(field.value)}
+                                        onUpdate={handleDefaultValueUpdate}
+                                        onBlur={() => {
+                                            field.onBlur();
+                                            trigger(defaultValueFieldName).catch(() => undefined);
+                                        }}
+                                        disabled={!column.withDefaultValue}
+                                        validationState={defaultValueError ? 'invalid' : undefined}
+                                    />
+                                )}
                             />
-                        )}
-                    />
-                    <Controller
-                        control={control}
-                        name={`columns.${index}.defaultValue`}
-                        render={({field}) => (
-                            <TextInput
-                                value={field.value === undefined ? '' : String(field.value)}
-                                onUpdate={handleDefaultValueUpdate}
-                                onBlur={() => {
-                                    field.onBlur();
-                                    trigger(defaultValueFieldName).catch(() => undefined);
-                                }}
-                                disabled={!column.withDefaultValue}
-                                validationState={defaultValueError ? 'invalid' : undefined}
-                                errorMessage={defaultValueError}
-                            />
-                        )}
-                    />
+                        </div>
+                    </div>
+                    <FormFieldError message={defaultValueError} />
                 </div>
             );
         }

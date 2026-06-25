@@ -201,10 +201,16 @@
 
     &__columns-cell_key,
     &__columns-cell_not-null,
-    &__columns-cell_default,
     &__columns-cell_action {
         display: flex;
         align-items: center;
+
+        min-height: 28px;
+    }
+
+    &__columns-cell_default {
+        display: flex;
+        align-items: flex-start;
 
         min-height: 28px;
     }
@@ -231,8 +237,32 @@
 
     &__default-row {
         display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--g-spacing-1);
+
+        width: 100%;
+        min-width: 0;
+    }
+
+    &__default-row-controls {
+        display: flex;
         align-items: center;
         gap: var(--g-spacing-2);
+
+        width: 100%;
+        min-width: 0;
+    }
+
+    &__default-value-input {
+        flex: 1 1 auto;
+
+        min-width: 0;
+    }
+
+    &__default-value-input .g-text-input {
+        width: 100%;
+        max-width: 100%;
     }
 
     &__indexes-table {
