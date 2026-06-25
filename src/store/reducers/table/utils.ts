@@ -121,6 +121,30 @@ export function prepareColumnValue(column: Column, value: string | null) {
     }
 }
 
+function prepareDefaultColumnValue(column: Column, value: string) {
+    switch (column.type) {
+        case 'String':
+        case 'Utf8':
+        case 'Json': {
+            return prepareStringLiteralValue(value);
+        }
+        case 'JsonDocument':
+            return `JsonDocument(${prepareStringLiteralValue(value)})`;
+        case 'Date':
+        case 'Date32':
+        case 'Datetime':
+        case 'Datetime64':
+        case 'Timestamp':
+        case 'Timestamp64':
+            return `${column.type}("${value}")`;
+        case 'Uuid': {
+            return `CAST("${value}" AS ${column.type})`;
+        }
+        default:
+            return value;
+    }
+}
+
 const buildName = (name: string) => `\`${name.replace(/`/g, '\\`')}\``;
 
 const buildType = (column: Column) => {
@@ -139,7 +163,7 @@ const buildDefaultValue = (column: Column) => {
         return '';
     }
 
-    return `DEFAULT ${prepareColumnValue(column, String(column.defaultValue))}`;
+    return `DEFAULT ${prepareDefaultColumnValue(column, String(column.defaultValue))}`;
 };
 
 const buildFamily = (column: Column) => {

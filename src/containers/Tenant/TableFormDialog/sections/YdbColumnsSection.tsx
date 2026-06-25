@@ -405,10 +405,15 @@ function EditableColumnRow({
     }, [trigger]);
 
     const columnErrors = formState.errors.columns?.[index] as
-        | {name?: {message?: string}; type?: {message?: string}}
+        | {
+              name?: {message?: string};
+              type?: {message?: string};
+              defaultValue?: {message?: string};
+          }
         | undefined;
     const nameError = columnErrors?.name?.message;
     const typeError = columnErrors?.type?.message;
+    const defaultValueError = columnErrors?.defaultValue?.message;
     const notNullDisabledMessage = getNotNullDisabledMessage(column, keyNullable);
     const autoincrementDisabledMessage = getAutoincrementDisabledMessage(column);
     const keyDisabled = !pkTypes.has(column.type);
@@ -458,6 +463,8 @@ function EditableColumnRow({
                                 value={field.value === undefined ? '' : String(field.value)}
                                 onUpdate={field.onChange}
                                 disabled={!column.withDefaultValue}
+                                validationState={defaultValueError ? 'invalid' : undefined}
+                                errorMessage={defaultValueError}
                             />
                         )}
                     />

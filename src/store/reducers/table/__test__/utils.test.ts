@@ -51,6 +51,12 @@ describe('table utils', () => {
                     notNull: false,
                     defaultValue: '{"hello":"world"}',
                 },
+                {
+                    name: 'template',
+                    type: 'Utf8',
+                    notNull: false,
+                    defaultValue: '$schema',
+                },
             ],
             secondaryIndexes: [{name: 'by_payload', key: ['payload']}],
             settings: {
@@ -69,6 +75,7 @@ describe('table utils', () => {
         expect(query).toContain('CREATE TABLE `folder/orders`');
         expect(query).toContain('`id` BigSerial NOT NULL');
         expect(query).toContain('DEFAULT "{\\"hello\\":\\"world\\"}"');
+        expect(query).toContain('DEFAULT "$schema"');
         expect(query).toContain('INDEX `by_payload` GLOBAL ON (`payload`)');
         expect(query).toContain('PRIMARY KEY (`id`)');
         expect(query).toContain('AUTO_PARTITIONING_PARTITION_SIZE_MB = 2048');

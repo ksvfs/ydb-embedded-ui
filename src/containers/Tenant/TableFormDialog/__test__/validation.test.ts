@@ -91,6 +91,61 @@ describe('TableFormDialog validation', () => {
         );
     });
 
+    test.each([
+        ['Bool', 'maybe'],
+        ['Int64', 'abc'],
+        ['Int64', ''],
+        ['Date', '2025-13-40'],
+        ['Json', ''],
+    ])('rejects invalid default value %s=%s before submit', (type, defaultValue) => {
+        const schema = buildTableValidationSchema({mode: 'create'});
+
+        const result = schema.safeParse(
+            createValues({
+                columns: [
+                    createColumn({
+                        type,
+                        key: false,
+                        withDefaultValue: true,
+                        defaultValue,
+                    }),
+                ],
+            }),
+        );
+
+        expect(result.success).toBe(false);
+        expect(getIssuePaths(result)).toContain('columns.0.defaultValue');
+    });
+
+    test.each([
+        ['Int64', '42'],
+        ['Bool', 'true'],
+        ['Date', '2025-01-02'],
+        ['Utf8', ''],
+        ['Utf8', '$value'],
+        ['Json', '{"ok":true}'],
+    ])('accepts valid default value %s=%s', (type, defaultValue) => {
+        const schema = buildTableValidationSchema({mode: 'create'});
+
+        const result = schema.safeParse(
+            createValues({
+                columns: [
+                    createColumn(),
+                    createColumn({
+                        _id: 'with-default',
+                        name: 'value_with_default',
+                        type,
+                        key: false,
+                        withDefaultValue: true,
+                        defaultValue,
+                    }),
+                ],
+            }),
+        );
+
+        expect(result.success).toBe(true);
+    });
+
     test('create mode accepts slash-separated table names for column tables', () => {
         const schema = buildTableValidationSchema({mode: 'create'});
 

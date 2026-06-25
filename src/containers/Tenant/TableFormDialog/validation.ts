@@ -2,6 +2,7 @@ import {z} from 'zod';
 
 import {isValidEntityPath, isValidEntityPathSegment} from '../utils/pathSegmentValidation';
 
+import {isValueForTypeValid} from './columnValueValidation';
 import {
     COLUMN_NAME_REG_EXP,
     ENTITY_NAME_REG_EXP,
@@ -81,6 +82,28 @@ function validateColumns(data: FormValues, ctx: z.RefinementCtx, mode: FormMode)
     if (mode === 'create' && data.columns.length === 0) {
         addIssue(ctx, ['columns'], i18n('error_columns-empty'));
     }
+}
+
+function isDefaultValueValid(value: string, type: string) {
+    return isValueForTypeValid(value, type);
+}
+
+function validateColumnDefaults(data: FormValues, ctx: z.RefinementCtx, mode: FormMode) {
+    if (mode !== 'create') {
+        return;
+    }
+
+    data.columns.forEach((column, index) => {
+        if (!column.withDefaultValue || !column.type) {
+            return;
+        }
+
+        const value = column.defaultValue === undefined ? '' : String(column.defaultValue);
+
+        if (!isDefaultValueValid(value, column.type)) {
+            addIssue(ctx, ['columns', index, 'defaultValue'], i18n('error_value-invalid'));
+        }
+    });
 }
 
 function validateDuplicateColumns(
@@ -327,6 +350,7 @@ export function buildTableValidationSchema({
         const data = raw as FormValues;
         validateName(data, ctx, mode);
         validateColumns(data, ctx, mode);
+        validateColumnDefaults(data, ctx, mode);
         validateDuplicateColumns(data, ctx, originalInfo);
         validatePrimaryKey(data, ctx, mode);
         validateSecondaryIndexes(data, ctx, originalInfo);
