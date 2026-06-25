@@ -82,12 +82,12 @@
         align-items: flex-start;
 
         .g-menu__item-icon-end {
-            margin-top: var(--g-spacing-half);
+            margin-top: calc(var(--g-spacing-1) + var(--g-spacing-1) + 1px);
         }
     }
 
     &__context-menu-item-icon-with-description {
-        margin-top: var(--g-spacing-half);
+        margin-top: calc(var(--g-spacing-1) + var(--g-spacing-half));
     }
 
     &__sticky-top {
