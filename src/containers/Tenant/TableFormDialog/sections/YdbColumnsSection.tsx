@@ -433,24 +433,26 @@ function EditableColumnRow({
     if (mode === 'create') {
         if (column.key) {
             defaultValueControl = (
-                <Controller
-                    control={control}
-                    name={`columns.${index}.autoincrement`}
-                    render={({field}) => (
-                        <Checkbox
-                            size="l"
-                            checked={Boolean(field.value)}
-                            disabled={Boolean(autoincrementDisabledMessage)}
-                            title={autoincrementDisabledMessage}
-                            onUpdate={(value) => {
-                                field.onChange(value);
-                                onAutoincrementChange(value);
-                            }}
-                        >
-                            <Text variant="body-1">{i18n('label_autoincrement')}</Text>
-                        </Checkbox>
-                    )}
-                />
+                <div className={b('checkbox-control')}>
+                    <Controller
+                        control={control}
+                        name={`columns.${index}.autoincrement`}
+                        render={({field}) => (
+                            <Checkbox
+                                size="l"
+                                checked={Boolean(field.value)}
+                                disabled={Boolean(autoincrementDisabledMessage)}
+                                title={autoincrementDisabledMessage}
+                                onUpdate={(value) => {
+                                    field.onChange(value);
+                                    onAutoincrementChange(value);
+                                }}
+                            >
+                                <Text variant="body-1">{i18n('label_autoincrement')}</Text>
+                            </Checkbox>
+                        )}
+                    />
+                </div>
             );
         } else {
             defaultValueControl = (
