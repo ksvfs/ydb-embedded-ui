@@ -137,6 +137,30 @@ describe('TableFormDialog validation', () => {
         expect(getIssuePaths(result)).toContain('secondaryIndexes.0.key');
     });
 
+    test('existing secondary index columns cannot be deleted', () => {
+        const originalInfo: OriginalTableInfo = {
+            name: 'orders',
+            type: 'row',
+            columns: [{name: 'status', type: 'Utf8', notNull: false}] as Column[],
+            partitionKey: [],
+            indexes: [{name: 'by_status', columns: ['status']}],
+            hasTtl: false,
+            hasMinPartitions: false,
+            hasMaxPartitions: false,
+        };
+        const schema = buildTableValidationSchema({mode: 'update', originalInfo});
+
+        const result = schema.safeParse(
+            createValues({
+                name: 'orders',
+                deletedColumns: [{name: 'status', type: 'Utf8', notNull: false}],
+            }),
+        );
+
+        expect(result.success).toBe(false);
+        expect(getIssuePaths(result)).toContain('columns');
+    });
+
     test('column table creation requires partition key and partition count in range', () => {
         const schema = buildTableValidationSchema({mode: 'create'});
 

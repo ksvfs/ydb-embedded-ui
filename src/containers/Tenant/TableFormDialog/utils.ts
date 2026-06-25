@@ -194,7 +194,7 @@ export function describeOriginalTable(
 
     const indexes = (desc?.TableIndexes ?? []).map((idx) => ({
         name: idx.Name ?? '',
-        columns: idx.KeyColumnNames ?? [],
+        columns: [...(idx.KeyColumnNames ?? []), ...(idx.DataColumnNames ?? [])],
     }));
 
     return {

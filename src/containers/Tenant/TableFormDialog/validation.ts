@@ -119,6 +119,14 @@ function validateSecondaryIndexes(
             addIssue(ctx, ['secondaryIndexes', i, 'key'], i18n('error_indexes-key'));
         }
     });
+
+    const originalIndexedColumns = new Set(
+        originalInfo?.indexes.flatMap((index) => index.columns) ?? [],
+    );
+
+    if (data.deletedColumns.some((column) => originalIndexedColumns.has(column.name))) {
+        addIssue(ctx, ['columns'], i18n('error_indexes-delete-column'));
+    }
 }
 
 function validatePartitioning(data: FormValues, ctx: z.RefinementCtx, mode: FormMode) {

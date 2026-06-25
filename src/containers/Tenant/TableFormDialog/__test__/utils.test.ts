@@ -2,13 +2,20 @@ import {EPathType} from '../../../../types/api/schema/schema';
 import {describeOriginalTable} from '../utils';
 
 describe('TableFormDialog utils', () => {
-    test('describeOriginalTable exposes the current backend ttl column', () => {
+    test('describeOriginalTable exposes the current backend ttl column and index columns', () => {
         const rowTable = describeOriginalTable({
             PathDescription: {
                 Self: {Name: 'orders', PathType: EPathType.EPathTypeTable},
                 Table: {
                     Columns: [],
                     KeyColumnNames: [],
+                    TableIndexes: [
+                        {
+                            Name: 'by_status',
+                            KeyColumnNames: ['status'],
+                            DataColumnNames: ['createdAt'],
+                        },
+                    ],
                     TTLSettings: {Enabled: {ColumnName: 'createdAt'}},
                 },
             },
@@ -27,6 +34,7 @@ describe('TableFormDialog utils', () => {
         expect(rowTable).toMatchObject({
             hasTtl: true,
             ttlColumn: 'createdAt',
+            indexes: [{name: 'by_status', columns: ['status', 'createdAt']}],
         });
         expect(columnTable).toMatchObject({
             hasTtl: true,

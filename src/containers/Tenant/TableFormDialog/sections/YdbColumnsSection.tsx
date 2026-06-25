@@ -133,6 +133,17 @@ export function YdbColumnsSection({
         nonPrimaryOriginalColumns.length > 0;
 
     const currentTtlColumn = originalInfo?.ttlColumn;
+    const indexedColumns = React.useMemo(() => {
+        const columns = new Set<string>();
+
+        originalInfo?.indexes.forEach((index) => {
+            index.columns.forEach((column) => {
+                columns.add(column);
+            });
+        });
+
+        return columns;
+    }, [originalInfo?.indexes]);
     const primaryKeyColumnNames = primaryOriginalColumns.map((column) => column.name);
     const partitionKeyColumnNames = originalInfo?.partitionKey ?? [];
 
@@ -201,11 +212,11 @@ export function YdbColumnsSection({
                                     key={`existing-${column.name}`}
                                     column={column}
                                     isDeleting={isDeleting}
-                                    deleteDisabledMessage={
-                                        currentTtlColumn === column.name
-                                            ? i18n('tooltip_ttl-delete-disabled')
-                                            : undefined
-                                    }
+                                    deleteDisabledMessage={getDeleteDisabledMessage({
+                                        columnName: column.name,
+                                        currentTtlColumn,
+                                        indexedColumns,
+                                    })}
                                     onDelete={() => handleDeleteOriginalColumn(column)}
                                     onUndo={() => removeDeleted(deletedIndex)}
                                 />
@@ -259,6 +270,28 @@ function ActionButtonWithPopover({
             <span className={b('columns-action-popover-target')}>{children}</span>
         </Popover>
     );
+}
+
+function getDeleteDisabledMessage({
+    columnName,
+    currentTtlColumn,
+    indexedColumns,
+}: {
+    columnName: string;
+    currentTtlColumn?: string;
+    indexedColumns: Set<string>;
+}) {
+    const messages: string[] = [];
+
+    if (currentTtlColumn === columnName) {
+        messages.push(i18n('tooltip_ttl-delete-disabled'));
+    }
+
+    if (indexedColumns.has(columnName)) {
+        messages.push(i18n('tooltip_index-delete-disabled'));
+    }
+
+    return messages.join(' ');
 }
 
 function SpecialColumnLabel({label, columns}: {label: string; columns: string[]}) {
