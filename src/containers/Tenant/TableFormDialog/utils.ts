@@ -180,6 +180,7 @@ export function describeOriginalTable(
             partitionKey: desc.Sharding?.HashSharding?.Columns ?? [],
             indexes: [],
             hasTtl: Boolean(desc.TtlSettings?.Enabled),
+            ttlColumn: desc.TtlSettings?.Enabled?.ColumnName,
             hasMinPartitions: false,
             hasMaxPartitions: false,
         };
@@ -203,6 +204,7 @@ export function describeOriginalTable(
         partitionKey: [],
         indexes,
         hasTtl: Boolean(desc?.TTLSettings?.Enabled),
+        ttlColumn: desc?.TTLSettings?.Enabled?.ColumnName,
         hasMinPartitions:
             typeof desc?.PartitionConfig?.PartitioningPolicy?.MinPartitionsCount !== 'undefined',
         hasMaxPartitions:

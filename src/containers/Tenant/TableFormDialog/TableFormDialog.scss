@@ -213,6 +213,14 @@
         justify-content: center;
     }
 
+    &__columns-action-popover-target {
+        display: inline-flex;
+    }
+
+    &__ttl-delete-popover {
+        max-width: 280px;
+    }
+
     &__columns-separator {
         margin: 0;
 

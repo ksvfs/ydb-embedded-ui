@@ -6,7 +6,6 @@ import {zodResolver} from '@hookform/resolvers/zod';
 import {skipToken} from '@reduxjs/toolkit/query';
 import {FormProvider, useForm, useWatch} from 'react-hook-form';
 
-import {CONFIRMATION_DIALOG} from '../../../components/ConfirmationDialog/ConfirmationDialog';
 import {ResponseError} from '../../../components/Errors/ResponseError';
 import {Loader} from '../../../components/Loader';
 import {tableApi} from '../../../store/reducers/table/table';
@@ -125,16 +124,6 @@ function buildTablePath(parentPath: string, name: string) {
     return `${trimmedParentPath}/${trimmedName}`;
 }
 
-function confirmTtlColumnDeletion() {
-    return NiceModal.show(CONFIRMATION_DIALOG, {
-        id: CONFIRMATION_DIALOG,
-        caption: i18n('label_ttl-remove-column-warning'),
-        message: i18n('label_ttl-remove-column-text'),
-        textButtonApply: i18n('action_delete'),
-        buttonApplyView: 'action',
-    }) as Promise<boolean>;
-}
-
 function TableForm({
     mode,
     database,
@@ -228,13 +217,6 @@ function TableForm({
         }
     }, [clearErrors, errors.name?.message, hasNameConflict, renameConflictMessage, setError]);
 
-    const handleTtlColumnDeletionRequest = React.useCallback(async (onConfirm: () => void) => {
-        const confirmed = await confirmTtlColumnDeletion();
-        if (confirmed) {
-            onConfirm();
-        }
-    }, []);
-
     const handleFormSubmit = handleSubmit(async (formValues) => {
         if (hasNameConflict) {
             setError('name', {type: 'manual', message: renameConflictMessage});
@@ -313,7 +295,6 @@ function TableForm({
                                 pkTypes={pkTypes}
                                 keyNullable={keyNullable}
                                 originalInfo={originalInfo}
-                                onRequestTtlColumnDeletion={handleTtlColumnDeletionRequest}
                             />
                             {showIndexes ? <YdbIndexesSection /> : null}
                             <TTLSection originalInfo={originalInfo} />

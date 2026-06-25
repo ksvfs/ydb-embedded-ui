@@ -2,7 +2,16 @@ import React from 'react';
 
 import {ArrowUturnCcwLeft, Plus, TrashBin} from '@gravity-ui/icons';
 import type {SelectOption} from '@gravity-ui/uikit';
-import {Button, Checkbox, HelpMark, Icon, Select, Text, TextInput} from '@gravity-ui/uikit';
+import {
+    Button,
+    Checkbox,
+    HelpMark,
+    Icon,
+    Popover,
+    Select,
+    Text,
+    TextInput,
+} from '@gravity-ui/uikit';
 import {Controller, useFieldArray, useFormContext, useWatch} from 'react-hook-form';
 
 import {cn} from '../../../../utils/cn';
@@ -24,7 +33,6 @@ interface YdbColumnsSectionProps {
     pkTypes: Set<string>;
     keyNullable: boolean;
     originalInfo?: OriginalTableInfo;
-    onRequestTtlColumnDeletion: (onConfirm: () => void) => void;
 }
 
 export function YdbColumnsSection({
@@ -33,9 +41,8 @@ export function YdbColumnsSection({
     pkTypes,
     keyNullable,
     originalInfo,
-    onRequestTtlColumnDeletion,
 }: YdbColumnsSectionProps) {
-    const {control, setValue, getValues, formState} = useFormContext<FormValues>();
+    const {control, setValue, formState} = useFormContext<FormValues>();
     const {fields, append, remove} = useFieldArray({control, name: 'columns'});
     const {
         fields: deletedFields,
@@ -115,28 +122,9 @@ export function YdbColumnsSection({
 
     const handleDeleteOriginalColumn = React.useCallback(
         (column: Column) => {
-            const ttlColumnName = getValues('settings.ttl.column');
-            const isTtlColumn =
-                getValues('settings.ttl.status') === 'enabled' && ttlColumnName === column.name;
-            const doDelete = () => appendDeleted(column);
-
-            if (isTtlColumn) {
-                onRequestTtlColumnDeletion(() => {
-                    setValue('settings.ttl.status', 'disabled', {
-                        shouldDirty: true,
-                        shouldValidate: true,
-                    });
-                    setValue('settings.ttl.column', undefined, {
-                        shouldDirty: true,
-                        shouldValidate: false,
-                    });
-                    doDelete();
-                });
-            } else {
-                doDelete();
-            }
+            appendDeleted(column);
         },
-        [appendDeleted, getValues, onRequestTtlColumnDeletion, setValue],
+        [appendDeleted],
     );
 
     const showHeader =
@@ -144,6 +132,7 @@ export function YdbColumnsSection({
         primaryOriginalColumns.length > 0 ||
         nonPrimaryOriginalColumns.length > 0;
 
+    const currentTtlColumn = originalInfo?.ttlColumn;
     const primaryKeyColumnNames = primaryOriginalColumns.map((column) => column.name);
     const partitionKeyColumnNames = originalInfo?.partitionKey ?? [];
 
@@ -212,6 +201,11 @@ export function YdbColumnsSection({
                                     key={`existing-${column.name}`}
                                     column={column}
                                     isDeleting={isDeleting}
+                                    deleteDisabledMessage={
+                                        currentTtlColumn === column.name
+                                            ? i18n('tooltip_ttl-delete-disabled')
+                                            : undefined
+                                    }
                                     onDelete={() => handleDeleteOriginalColumn(column)}
                                     onUndo={() => removeDeleted(deletedIndex)}
                                 />
@@ -246,6 +240,24 @@ export function YdbColumnsSection({
                 </div>
             </div>
         </FormSection>
+    );
+}
+
+function ActionButtonWithPopover({
+    content,
+    children,
+}: {
+    content?: string;
+    children: React.ReactElement;
+}) {
+    if (!content) {
+        return children;
+    }
+
+    return (
+        <Popover content={content} placement="top" hasArrow className={b('ttl-delete-popover')}>
+            <span className={b('columns-action-popover-target')}>{children}</span>
+        </Popover>
     );
 }
 
@@ -289,11 +301,13 @@ function PrimaryColumnRow({column}: {column: Column}) {
 function NonPrimaryColumnRow({
     column,
     isDeleting,
+    deleteDisabledMessage,
     onDelete,
     onUndo,
 }: {
     column: Column;
     isDeleting: boolean;
+    deleteDisabledMessage?: string;
     onDelete: () => void;
     onUndo: () => void;
 }) {
@@ -311,9 +325,17 @@ function NonPrimaryColumnRow({
                         <Icon data={ArrowUturnCcwLeft} size={16} />
                     </Button>
                 ) : (
-                    <Button view="flat" size="m" onClick={onDelete} title={i18n('action_delete')}>
-                        <Icon data={TrashBin} size={16} />
-                    </Button>
+                    <ActionButtonWithPopover content={deleteDisabledMessage}>
+                        <Button
+                            view="flat"
+                            size="m"
+                            onClick={onDelete}
+                            disabled={Boolean(deleteDisabledMessage)}
+                            title={deleteDisabledMessage ?? i18n('action_delete')}
+                        >
+                            <Icon data={TrashBin} size={16} />
+                        </Button>
+                    </ActionButtonWithPopover>
                 )}
             </div>
         </div>

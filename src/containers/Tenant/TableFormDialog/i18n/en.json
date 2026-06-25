@@ -87,8 +87,6 @@
   "label_selected": "Selected",
   "label_selected-count": "Selected: {{count}}",
   "label_non-null": "NonNull",
-  "label_ttl-remove-column-text": "Your table will stop clearing.",
-  "label_ttl-remove-column-warning": "This is a TTL-column. Do you really want to delete it?",
   "label_ttl-warning": "You don't have columns with the right type",
 
   "title_split-point": "Split point",
@@ -126,6 +124,7 @@
   "tooltip_primary-key": "A YDB table always has one or more columns that make up a primary key. Table rows are unique by key, meaning there can only be one row for a single key value. YDB tables are always ordered by key. The sequence of columns in a key matters. Tables only consisting of key columns are allowed. You can't create tables without a primary key.",
   "tooltip_section-autopartition": "Automatically split shards when the size or load increases and merge them when the size or load decreases",
   "tooltip_section-ttl": "Automatically delete expired rows from a table.",
+  "tooltip_ttl-delete-disabled": "This column is currently used for TTL on the backend. Apply a separate update to disable or move TTL before deleting it.",
   "tooltip_ttl-column": "Date, Datetime, Timestamp, Uint32, Uint64 columns are supported.",
   "tooltip_ttl-lifetime": "The row will be considered expired when the value stored in the column is less than or equal to the current time and the lifetime has passed.",
   "tooltip_ttl-unit": "The numbers in the column are interpreted as values from the Unix epoch with a given unit.",
