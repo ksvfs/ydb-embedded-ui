@@ -57,6 +57,29 @@
         padding: 23px 12px 17px 20px;
     }
 
+    &__context-menu-item-content-wrapper {
+        padding: var(--g-spacing-1) 0;
+    }
+
+    &__context-menu-item-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__context-menu-item-description {
+        line-height: var(--g-text-body-1-line-height);
+
+        color: var(--g-color-text-secondary);
+    }
+
+    &__context-menu-item_with-description {
+        align-items: flex-start;
+    }
+
+    &__context-menu-item-icon-with-description {
+        margin-top: calc(var(--g-spacing-1) + var(--g-spacing-half));
+    }
+
     &__sticky-top {
         z-index: 5;
         @include mixins.sticky-top();
