@@ -336,7 +336,7 @@ function renderMenuItemText(title: string, description?: string) {
 
     return (
         <div className={b('context-menu-item-content')}>
-            <div>{title}</div>
+            <div className={b('context-menu-item-title')}>{title}</div>
             <div className={b('context-menu-item-description')}>{description}</div>
         </div>
     );
