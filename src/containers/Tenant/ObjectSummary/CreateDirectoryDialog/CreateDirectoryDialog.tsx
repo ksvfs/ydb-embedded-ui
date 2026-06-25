@@ -104,7 +104,7 @@ export function CreateDirectoryDialog({
             >
                 <Dialog.Body>
                     <div className={b('label')}>
-                        <Breadcrumbs>
+                        <Breadcrumbs className={b('breadcrumbs')}>
                             <Breadcrumbs.Item disabled>
                                 <span className={b('breadcrumb-content')}>
                                     <DatabaseFill className={b('breadcrumb-icon')} />
@@ -123,22 +123,20 @@ export function CreateDirectoryDialog({
                             )}
                         </Breadcrumbs>
                     </div>
-                    <div className={b('input-wrapper')}>
-                        <TextInput
-                            controlRef={inputRef}
-                            placeholder={i18n('schema.tree.dialog.placeholder')}
-                            aria-label={i18n('schema.tree.dialog.placeholder')}
-                            value={relativePath}
-                            onUpdate={handleUpdate}
-                            autoFocus
-                            hasClear
-                            autoComplete={false}
-                            disabled={response.isLoading}
-                            validationState={validationError ? 'invalid' : undefined}
-                            id={relativePathInputId}
-                            errorMessage={validationError}
-                        />
-                    </div>
+                    <TextInput
+                        controlRef={inputRef}
+                        placeholder={i18n('schema.tree.dialog.placeholder')}
+                        aria-label={i18n('schema.tree.dialog.placeholder')}
+                        value={relativePath}
+                        onUpdate={handleUpdate}
+                        autoFocus
+                        hasClear
+                        autoComplete={false}
+                        disabled={response.isLoading}
+                        validationState={validationError ? 'invalid' : undefined}
+                        id={relativePathInputId}
+                        errorMessage={validationError}
+                    />
                     {response.isError && (
                         <ResponseError
                             error={response.error}
