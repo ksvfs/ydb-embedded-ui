@@ -455,17 +455,19 @@ function EditableColumnRow({
         } else {
             defaultValueControl = (
                 <div className={b('default-row')}>
-                    <Controller
-                        control={control}
-                        name={`columns.${index}.withDefaultValue`}
-                        render={({field}) => (
-                            <Checkbox
-                                size="l"
-                                checked={Boolean(field.value)}
-                                onUpdate={field.onChange}
-                            />
-                        )}
-                    />
+                    <div className={b('default-value-toggle')}>
+                        <Controller
+                            control={control}
+                            name={`columns.${index}.withDefaultValue`}
+                            render={({field}) => (
+                                <Checkbox
+                                    size="l"
+                                    checked={Boolean(field.value)}
+                                    onUpdate={field.onChange}
+                                />
+                            )}
+                        />
+                    </div>
                     <div className={b('default-value-input')}>
                         <Controller
                             control={control}
@@ -483,8 +485,12 @@ function EditableColumnRow({
                                 />
                             )}
                         />
-                        <FormFieldError message={defaultValueError} />
                     </div>
+                    {defaultValueError ? (
+                        <div className={b('default-value-error')}>
+                            <FormFieldError message={defaultValueError} />
+                        </div>
+                    ) : null}
                 </div>
             );
         }
