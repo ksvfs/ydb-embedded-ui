@@ -69,7 +69,7 @@
   "actions.alterStreamingQuerySettings": "Alter query settings...",
   "actions.alterStreamingQueryText": "Alter query text...",
   "actions.createDirectory": "Create directory",
-  "schema.tree.dialog.placeholder": "Relative path",
+  "schema.tree.dialog.placeholder": "Name",
   "schema.tree.dialog.invalid": "Invalid path",
   "schema.tree.dialog.whitespace": "Whitespace is not allowed",
   "schema.tree.dialog.empty": "Path is empty",
