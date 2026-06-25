@@ -83,6 +83,43 @@ function validateColumns(data: FormValues, ctx: z.RefinementCtx, mode: FormMode)
     }
 }
 
+function validateDuplicateColumns(
+    data: FormValues,
+    ctx: z.RefinementCtx,
+    originalInfo?: OriginalTableInfo,
+) {
+    const existingColumns = new Set(originalInfo?.columns.map(({name}) => name) ?? []);
+
+    data.deletedColumns.forEach(({name}) => existingColumns.delete(name));
+
+    const duplicatedIndexes = new Set<number>();
+    const newColumnsByName = new Map<string, number[]>();
+
+    data.columns.forEach(({name}, index) => {
+        if (!name) {
+            return;
+        }
+
+        if (existingColumns.has(name)) {
+            duplicatedIndexes.add(index);
+        }
+
+        const indexes = newColumnsByName.get(name);
+        if (indexes) {
+            indexes.push(index);
+            duplicatedIndexes.add(index);
+            indexes.forEach((duplicateIndex) => duplicatedIndexes.add(duplicateIndex));
+            return;
+        }
+
+        newColumnsByName.set(name, [index]);
+    });
+
+    duplicatedIndexes.forEach((index) => {
+        addIssue(ctx, ['columns', index, 'name'], i18n('error_column-name-duplicate'));
+    });
+}
+
 function validatePrimaryKey(data: FormValues, ctx: z.RefinementCtx, mode: FormMode) {
     if (mode !== 'create' || data.columns.length === 0) {
         return;
@@ -290,6 +327,7 @@ export function buildTableValidationSchema({
         const data = raw as FormValues;
         validateName(data, ctx, mode);
         validateColumns(data, ctx, mode);
+        validateDuplicateColumns(data, ctx, originalInfo);
         validatePrimaryKey(data, ctx, mode);
         validateSecondaryIndexes(data, ctx, originalInfo);
         validatePartitioning(data, ctx, mode);

@@ -76,6 +76,21 @@ describe('TableFormDialog validation', () => {
         expect(getIssuePaths(result)).toContain('columns');
     });
 
+    test('rejects duplicate column names in create mode before submit', () => {
+        const schema = buildTableValidationSchema({mode: 'create'});
+
+        const result = schema.safeParse(
+            createValues({
+                columns: [createColumn(), createColumn({_id: 'second', key: false})],
+            }),
+        );
+
+        expect(result.success).toBe(false);
+        expect(getIssuePaths(result)).toEqual(
+            expect.arrayContaining(['columns.0.name', 'columns.1.name']),
+        );
+    });
+
     test('create mode accepts slash-separated table names for column tables', () => {
         const schema = buildTableValidationSchema({mode: 'create'});
 
@@ -159,6 +174,30 @@ describe('TableFormDialog validation', () => {
 
         expect(result.success).toBe(false);
         expect(getIssuePaths(result)).toContain('columns');
+    });
+
+    test('rejects new columns that duplicate existing non-deleted columns in update mode', () => {
+        const originalInfo: OriginalTableInfo = {
+            name: 'orders',
+            type: 'row',
+            columns: [{name: 'status', type: 'Utf8', notNull: false}] as Column[],
+            partitionKey: [],
+            indexes: [],
+            hasTtl: false,
+            hasMinPartitions: false,
+            hasMaxPartitions: false,
+        };
+        const schema = buildTableValidationSchema({mode: 'update', originalInfo});
+
+        const result = schema.safeParse(
+            createValues({
+                name: 'orders',
+                columns: [createColumn({name: 'status', key: false})],
+            }),
+        );
+
+        expect(result.success).toBe(false);
+        expect(getIssuePaths(result)).toContain('columns.0.name');
     });
 
     test('column table creation requires partition key and partition count in range', () => {

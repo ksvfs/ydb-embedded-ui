@@ -3,11 +3,11 @@ import React from 'react';
 import * as NiceModal from '@ebay/nice-modal-react';
 import {Dialog, Text} from '@gravity-ui/uikit';
 import {zodResolver} from '@hookform/resolvers/zod';
-import {skipToken} from '@reduxjs/toolkit/query';
 import {FormProvider, useForm, useWatch} from 'react-hook-form';
 
 import {ResponseError} from '../../../components/Errors/ResponseError';
 import {Loader} from '../../../components/Loader';
+import {useClusterWithProxy} from '../../../store/reducers/cluster/cluster';
 import {tableApi} from '../../../store/reducers/table/table';
 import {
     getTablePathInfoForUpdate,
@@ -34,7 +34,12 @@ import {TTLSection} from './sections/TTLSection';
 import {YdbColumnsSection} from './sections/YdbColumnsSection';
 import {YdbIndexesSection} from './sections/YdbIndexesSection';
 import type {FormMode, FormValues, OriginalTableInfo, TableType} from './types';
-import {describeOriginalTable, getCreateInitialValues, getUpdateInitialValues} from './utils';
+import {
+    describeOriginalTable,
+    getCreateInitialValues,
+    getTableQueryArgs,
+    getUpdateInitialValues,
+} from './utils';
 import {buildTableValidationSchema} from './validation';
 
 import './TableFormDialog.scss';
@@ -332,8 +337,9 @@ function TableFormDialog({
     onSuccess,
 }: TableFormDialogInnerProps) {
     const nameInputRef = React.useRef<HTMLInputElement>(null);
+    const useMetaProxy = useClusterWithProxy();
     const tableQuery = tableApi.useGetTableQuery(
-        mode === 'update' && path ? {database, path: {path, databaseFullPath}} : skipToken,
+        getTableQueryArgs({mode, path, database, databaseFullPath, useMetaProxy}),
         {refetchOnMountOrArgChange: true},
     );
 

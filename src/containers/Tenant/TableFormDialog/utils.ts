@@ -1,14 +1,23 @@
 import type {SelectOption} from '@gravity-ui/uikit';
+import {skipToken} from '@reduxjs/toolkit/query';
 
 import {SERIAL_TYPES_MAP} from '../../../store/reducers/table/constants';
 import {prepareFormValues} from '../../../store/reducers/table/utils';
+import type {SchemaPathParam} from '../../../types/api/common';
 import type {TEvDescribeSchemeResult} from '../../../types/api/schema/schema';
 import {EPathType} from '../../../types/api/schema/schema';
 import type {TColumnDescription} from '../../../types/api/schema/shared';
 
 import {MAX_PARTITION_SIZE_MB} from './constants';
 import i18n from './i18n';
-import type {Column, ColumnField, FormValues, OriginalTableInfo, TableType} from './types';
+import type {
+    Column,
+    ColumnField,
+    FormMode,
+    FormValues,
+    OriginalTableInfo,
+    TableType,
+} from './types';
 import {PartitionsType} from './types';
 
 const TTL_VALID_TYPES = new Set([
@@ -104,6 +113,29 @@ export function getCreateInitialValues(initialType: TableType = 'row'): FormValu
 
 export function getUpdateInitialValues(table: TEvDescribeSchemeResult): FormValues {
     return prepareFormValues(table);
+}
+
+export function getTableQueryArgs({
+    mode,
+    path,
+    database,
+    databaseFullPath,
+    useMetaProxy,
+}: {
+    mode: FormMode;
+    path?: string;
+    database: string;
+    databaseFullPath: string;
+    useMetaProxy: boolean;
+}): {database: string; path: SchemaPathParam} | typeof skipToken {
+    if (mode !== 'update' || !path) {
+        return skipToken;
+    }
+
+    return {
+        database,
+        path: {path, databaseFullPath, useMetaProxy},
+    };
 }
 
 type DescribedColumn = Pick<
