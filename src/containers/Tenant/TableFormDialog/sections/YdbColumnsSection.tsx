@@ -398,11 +398,22 @@ function EditableColumnRow({
     onAutoincrementChange,
     onRemove,
 }: EditableColumnRowProps) {
-    const {control, formState, trigger} = useFormContext<FormValues>();
+    const {control, clearErrors, formState, setValue, trigger} = useFormContext<FormValues>();
     const column = useWatch({control, name: `columns.${index}`});
+    const defaultValueFieldName = `columns.${index}.defaultValue` as const;
     const revalidateColumns = React.useCallback(() => {
         trigger('columns').catch(() => undefined);
     }, [trigger]);
+    const handleDefaultValueUpdate = React.useCallback(
+        (value: string) => {
+            setValue(defaultValueFieldName, value, {
+                shouldDirty: true,
+                shouldValidate: false,
+            });
+            clearErrors(defaultValueFieldName);
+        },
+        [clearErrors, defaultValueFieldName, setValue],
+    );
 
     const columnErrors = formState.errors.columns?.[index] as
         | {
@@ -461,7 +472,11 @@ function EditableColumnRow({
                         render={({field}) => (
                             <TextInput
                                 value={field.value === undefined ? '' : String(field.value)}
-                                onUpdate={field.onChange}
+                                onUpdate={handleDefaultValueUpdate}
+                                onBlur={() => {
+                                    field.onBlur();
+                                    trigger(defaultValueFieldName).catch(() => undefined);
+                                }}
                                 disabled={!column.withDefaultValue}
                                 validationState={defaultValueError ? 'invalid' : undefined}
                                 errorMessage={defaultValueError}
