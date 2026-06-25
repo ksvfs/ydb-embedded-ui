@@ -71,8 +71,6 @@
     }
 
     &__context-menu-item-description {
-        margin-top: -2px;
-
         line-height: 18px;
 
         color: var(--g-color-text-secondary);
@@ -82,12 +80,12 @@
         align-items: flex-start;
 
         .g-menu__item-icon-end {
-            margin-top: calc(var(--g-spacing-1) + var(--g-spacing-1) + 1px);
+            margin-top: calc(var(--g-spacing-2));
         }
     }
 
     &__context-menu-item-icon-with-description {
-        margin-top: calc(var(--g-spacing-1) + var(--g-spacing-half));
+        margin-top: calc(var(--g-spacing-1));
     }
 
     &__sticky-top {
