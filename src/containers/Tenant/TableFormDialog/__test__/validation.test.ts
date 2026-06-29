@@ -336,7 +336,7 @@ describe('TableFormDialog validation', () => {
         expect(getIssuePaths(result)).toContain('settings.partitionsAtKeys');
     });
 
-    test('ttl validation requires column, lifetime and epoch mode when needed', () => {
+    test('ttl validation requires column and lifetime when ttl is enabled', () => {
         const schema = buildTableValidationSchema({mode: 'create'});
 
         const result = schema.safeParse(
@@ -354,11 +354,101 @@ describe('TableFormDialog validation', () => {
 
         expect(result.success).toBe(false);
         expect(getIssuePaths(result)).toEqual(
-            expect.arrayContaining([
-                'settings.ttl.column',
-                'settings.ttl.epochMode',
-                'settings.ttl.lifetime',
-            ]),
+            expect.arrayContaining(['settings.ttl.column', 'settings.ttl.lifetime']),
         );
+    });
+
+    test('ttl validation requires epoch mode for numeric ttl columns', () => {
+        const schema = buildTableValidationSchema({mode: 'create'});
+
+        const result = schema.safeParse(
+            createValues({
+                columns: [
+                    createColumn(),
+                    createColumn({
+                        _id: 'ttl-column',
+                        name: 'expireAt',
+                        type: 'Uint64',
+                        key: false,
+                    }),
+                ],
+                settings: {
+                    partitionsType: PartitionsType.None,
+                    ttl: {
+                        status: 'enabled',
+                        column: 'expireAt',
+                        columnWithEpochMode: true,
+                        lifetime: 1,
+                    },
+                },
+            }),
+        );
+
+        expect(result.success).toBe(false);
+        expect(getIssuePaths(result)).toContain('settings.ttl.epochMode');
+    });
+
+    test('ttl validation rejects stale selected columns after type changes', () => {
+        const schema = buildTableValidationSchema({mode: 'create'});
+
+        const result = schema.safeParse(
+            createValues({
+                columns: [
+                    createColumn(),
+                    createColumn({
+                        _id: 'ttl-column',
+                        name: 'expiresAt',
+                        type: 'Utf8',
+                        key: false,
+                    }),
+                ],
+                settings: {
+                    partitionsType: PartitionsType.None,
+                    ttl: {
+                        status: 'enabled',
+                        column: 'expiresAt',
+                        columnWithEpochMode: true,
+                        lifetime: 1,
+                    },
+                },
+            }),
+        );
+
+        expect(result.success).toBe(false);
+        expect(getIssuePaths(result)).toContain('settings.ttl.column');
+        expect(getIssuePaths(result)).not.toContain('settings.ttl.epochMode');
+    });
+
+    test('ttl validation rejects deleted original ttl columns in update mode', () => {
+        const originalInfo: OriginalTableInfo = {
+            name: 'orders',
+            type: 'row',
+            columns: [{name: 'createdAt', type: 'Date', notNull: false}] as Column[],
+            partitionKey: [],
+            indexes: [],
+            hasTtl: true,
+            ttlColumn: 'createdAt',
+            hasMinPartitions: false,
+            hasMaxPartitions: false,
+        };
+        const schema = buildTableValidationSchema({mode: 'update', originalInfo});
+
+        const result = schema.safeParse(
+            createValues({
+                name: 'orders',
+                deletedColumns: [{name: 'createdAt', type: 'Date', notNull: false}],
+                settings: {
+                    partitionsType: PartitionsType.None,
+                    ttl: {
+                        status: 'enabled',
+                        column: 'createdAt',
+                        lifetime: 1,
+                    },
+                },
+            }),
+        );
+
+        expect(result.success).toBe(false);
+        expect(getIssuePaths(result)).toContain('settings.ttl.column');
     });
 });
