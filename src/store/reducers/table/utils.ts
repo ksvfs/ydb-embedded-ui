@@ -524,7 +524,7 @@ function prepareRowTableSettings(table: TTableDescription): TableSettings {
         autoPartitionBySize,
         autoPartitionBySizeMb:
             autoPartitionBySize && sizeToSplit
-                ? Math.round(parseInt(sizeToSplit, 10) / (1024 * 1024))
+                ? Math.round(parseInt(sizeToSplit, 10) / (1000 * 1000))
                 : undefined,
         autoPartitionByLoad: partitioningPolicy?.SplitByLoadSettings?.Enabled ?? false,
         autoPartitionMinPartitions: partitioningPolicy?.MinPartitionsCount,

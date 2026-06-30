@@ -323,7 +323,7 @@ describe('table utils', () => {
                     UniformPartitionsCount: 4,
                     PartitionConfig: {
                         PartitioningPolicy: {
-                            SizeToSplit: String(512 * 1024 * 1024),
+                            SizeToSplit: String(512 * 1000 * 1000),
                             SplitByLoadSettings: {Enabled: true},
                             MinPartitionsCount: 2,
                             MaxPartitionsCount: 8,
