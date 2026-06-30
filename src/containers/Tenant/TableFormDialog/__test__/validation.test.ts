@@ -483,6 +483,25 @@ describe('TableFormDialog validation', () => {
         expect(getIssuePaths(result)).not.toContain('settings.ttl.epochMode');
     });
 
+    test('does not block submit on autopartition size field validation', () => {
+        const schema = buildTableValidationSchema({mode: 'create'});
+
+        const result = schema.safeParse(
+            createValues({
+                settings: {
+                    partitionsType: PartitionsType.None,
+                    autoPartitionBySize: true,
+                    autoPartitionByLoad: false,
+                    autoPartitionBySizeMb: undefined,
+                    keyBloomFilter: false,
+                    ttl: {status: 'disabled'},
+                },
+            }),
+        );
+
+        expect(result.success).toBe(true);
+    });
+
     test('rejects inverted auto-partition min and max values before submit', () => {
         const schema = buildTableValidationSchema({mode: 'create'});
 
