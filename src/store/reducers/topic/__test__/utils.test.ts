@@ -29,13 +29,11 @@ describe('topic utils', () => {
         expect(query).toMatch(/\n\);$/);
     });
 
-    test('buildAlterTopicQuery preserves partition limit without retention clauses', () => {
+    test('buildAlterTopicQuery leaves max partitions unset for fixed partitioned topics', () => {
         const query = buildAlterTopicQuery({
             name: 'topic',
             shards: 3,
-            partitionCountLimit: 10,
             writeQuotaBytes: 1024 * 1024,
-            preservePartitionCountLimit: true,
             autoPartitioning: {
                 enabled: false,
                 mode: AutoPartitioningStrategy.ScaleUpAndDown,
@@ -44,27 +42,10 @@ describe('topic utils', () => {
 
         expect(query).toContain('ALTER TOPIC topic SET (');
         expect(query).toContain('MIN_ACTIVE_PARTITIONS = 3');
-        expect(query).toContain('PARTITION_COUNT_LIMIT = 10');
         expect(query).not.toContain('RETENTION_PERIOD =');
         expect(query).not.toContain('RETENTION_STORAGE_MB =');
         expect(query).not.toContain('AUTO_PARTITIONING_STRATEGY =');
         expect(query).not.toContain('MAX_ACTIVE_PARTITIONS =');
-    });
-
-    test('buildAlterTopicQuery omits partition limit when preserved value is missing', () => {
-        const query = buildAlterTopicQuery({
-            name: 'topic',
-            shards: 3,
-            writeQuotaBytes: 1024 * 1024,
-            preservePartitionCountLimit: true,
-            autoPartitioning: {
-                enabled: false,
-                mode: AutoPartitioningStrategy.Disabled,
-            },
-        });
-
-        expect(query).toContain('ALTER TOPIC topic SET (');
-        expect(query).toContain('MIN_ACTIVE_PARTITIONS = 3');
         expect(query).toContain('PARTITION_WRITE_SPEED_BYTES_PER_SECOND = 1048576');
         expect(query).not.toContain('PARTITION_COUNT_LIMIT =');
     });
