@@ -745,11 +745,11 @@ function TopicForm({
                                                         if (
                                                             value !== undefined &&
                                                             maxPartitions !== undefined &&
-                                                            maxPartitions <= value
+                                                            maxPartitions < value
                                                         ) {
                                                             setValue(
                                                                 'autoPartitioning.maxPartitions',
-                                                                value + 1,
+                                                                value,
                                                             );
                                                         }
                                                         trigger('autoPartitioning.maxPartitions');
