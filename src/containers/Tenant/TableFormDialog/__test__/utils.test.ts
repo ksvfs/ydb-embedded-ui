@@ -1,9 +1,14 @@
 import {skipToken} from '@reduxjs/toolkit/query';
 
 import {EPathType} from '../../../../types/api/schema/schema';
-import {describeOriginalTable, getTableQueryArgs} from '../utils';
+import {MAX_PARTITION_SIZE_MB} from '../constants';
+import {describeOriginalTable, getCreateInitialValues, getTableQueryArgs} from '../utils';
 
 describe('TableFormDialog utils', () => {
+    test('getCreateInitialValues uses the binary autopartition size limit', () => {
+        expect(getCreateInitialValues().settings.autoPartitionBySizeMb).toBe(MAX_PARTITION_SIZE_MB);
+    });
+
     test('describeOriginalTable exposes the current backend ttl column and index columns', () => {
         const rowTable = describeOriginalTable({
             PathDescription: {
